@@ -49,7 +49,6 @@ io.on('connection', (socket) => {
     console.log('user connected');
     socket.on('user_register', (registration_info) => {
         console.log(registration_info);
-        socket.emit('user_register');
         User.findOne({email: registration_info.email})
             .then(user => {
                 // User exists

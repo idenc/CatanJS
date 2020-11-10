@@ -86,10 +86,10 @@ export default {
   },
   data() {
     return {
-      name: 'iden',
-      email: 'iden.craven@gmail.com',
-      password: '1234',
-      password2: '1234',
+      name: '',
+      email: '',
+      password: '',
+      password2: '',
       errors: Array(),
     }
   },

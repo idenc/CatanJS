@@ -67,8 +67,8 @@ export default {
   },
   data() {
     return {
-      email: 'iden.craven@gmail.com',
-      password: '1235451',
+      email: '',
+      password: '',
       myStatusMessage: String(''),
       myAlertType: String(''),
     }
