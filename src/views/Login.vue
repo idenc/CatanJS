@@ -9,6 +9,10 @@
           action="#"
           @submit.prevent="login"
         >
+          <AuthenticationMessage
+            :messages="successMsg ? [ successMsg ] : []"
+            alert-type="alert-success"
+          />
           <div class="form-group">
             <label for="email">Email</label>
             <input
@@ -52,8 +56,13 @@
 <script>
 "use strict";
 
+import AuthenticationMessage from "@/components/AuthenticationMessage";
 export default {
   name: "Login",
+  components: {AuthenticationMessage},
+  props: {
+    successMsg: String('')
+  },
   data() {
     return {
       email: '',

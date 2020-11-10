@@ -9,30 +9,10 @@
           action="#"
           @submit.prevent="register"
         >
-          <p v-if="errors.length">
-            <b>Please correct the following error(s):</b>
-            <ul>
-              <li
-                v-for="(error, index) in errors"
-                :key="index"
-              >
-                <div
-                  class="alert alert-warning alert-dismissible fade show"
-                  role="alert"
-                >
-                  {{ error.msg }}
-                  <button
-                    type="button"
-                    class="close"
-                    data-dismiss="alert"
-                    aria-label="Close"
-                  >
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-              </li>
-            </ul>
-          </p>
+          <AuthenticationMessage
+            :messages="errors"
+            alert-type="alert-warning"
+          />
           <div class="form-group">
             <label for="name">Name</label>
             <input
@@ -97,22 +77,27 @@
 
 <script>
 "use strict";
+import AuthenticationMessage from "@/components/AuthenticationMessage";
 
 export default {
   name: "Register",
+  components: {
+    AuthenticationMessage
+  },
   data() {
     return {
       name: '',
       email: '',
       password: '',
       password2: '',
-      errors: [],
+      errors: Array(),
     }
   },
   sockets: {
     user_register() {
       // When user is successfully registered, redirect to login page.
-      this.$router.push('/login');
+      this.$router.push({name: 'Login',
+        params: {successMsg: 'Registration successful. You can now log in'}});
     }
   },
   methods: {
@@ -145,12 +130,5 @@ export default {
 </script>
 
 <style scoped>
-ul {
-  padding: 0;
-}
-
-li {
-  list-style-type: none;
-}
 
 </style>
