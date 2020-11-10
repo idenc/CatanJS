@@ -1,6 +1,5 @@
 <template>
   <p v-if="messages.length">
-    <b>Please correct the following error(s):</b>
     <ul>
       <li
         v-for="(message, index) in messages"

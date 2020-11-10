@@ -10,8 +10,8 @@
           @submit.prevent="login"
         >
           <AuthenticationMessage
-            :messages="successMsg ? [ successMsg ] : []"
-            alert-type="alert-success"
+            :messages="status.msg ? [ status.msg ] : []"
+            :alert-type="status.alertType"
           />
           <div class="form-group">
             <label for="email">Email</label>
@@ -55,13 +55,19 @@
 
 <script>
 "use strict";
-
 import AuthenticationMessage from "@/components/AuthenticationMessage";
+import axios from 'axios';
+
 export default {
   name: "Login",
   components: {AuthenticationMessage},
   props: {
-    successMsg: String('')
+    status: {
+      type: Object,
+      default() {
+        return {msg: '', alertType: ''}
+      }
+    }
   },
   data() {
     return {
@@ -71,9 +77,19 @@ export default {
   },
   methods: {
     login() {
-      // axios.post('/login', {email: this.email, password: this.password})
-      //     .then(response => console.log(response))
-      //     .catch(err => console.log(err));
+      axios.post('/login',
+          {email: this.email, password: this.password},
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(() => this.$router.push('/dashboard'))
+          .catch(err => {
+            console.log(err.response);
+            this.status.msg = err.response.data.info.message;
+            this.status.alertType = 'alert-warning';
+          });
     },
   }
 }

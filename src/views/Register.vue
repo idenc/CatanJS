@@ -96,8 +96,10 @@ export default {
   sockets: {
     user_register() {
       // When user is successfully registered, redirect to login page.
-      this.$router.push({name: 'Login',
-        params: {successMsg: 'Registration successful. You can now log in'}});
+      this.$router.push({
+        name: 'Login',
+        params: {status: {msg: 'Registration successful. You can now log in', alertType: 'alert-success'}}
+      });
     }
   },
   methods: {
