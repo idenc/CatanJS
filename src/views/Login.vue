@@ -3,16 +3,17 @@
     <div class="col-md-6 m-auto">
       <div class="card card-body">
         <h1 class="text-center mb-3">
-          <i class="fas fa-sign-in-alt" />  Login
+          <i class="fas fa-sign-in-alt" /> Login
         </h1>
         <form
-          action="/users/login"
-          method="POST"
+          action="#"
+          @submit.prevent="login"
         >
           <div class="form-group">
             <label for="email">Email</label>
             <input
               id="email"
+              v-model="email"
               type="email"
               name="email"
               class="form-control"
@@ -23,6 +24,7 @@
             <label for="password">Password</label>
             <input
               id="password"
+              v-model="password"
               type="password"
               name="password"
               class="form-control"
@@ -37,7 +39,8 @@
           </button>
         </form>
         <p class="lead mt-4">
-          No Account? <router-link to="/register">
+          No Account?
+          <router-link to="/register">
             Register
           </router-link>
         </p>
@@ -47,8 +50,24 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
-name: "Login"
+
+  name: "Login",
+  data() {
+    return {
+      email: '',
+      password: '',
+    }
+  },
+  methods: {
+    login() {
+      axios.post('/login', {email: this.email, password: this.password})
+          .then(response => console.log(response))
+          .catch(err => console.log(err));
+    },
+  }
 }
 </script>
 

@@ -10,6 +10,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.1",
     "@vue/cli": "^4.5.8",
+    "axios": "^0.21.0",
     "bootstrap": "^4.5.3",
     "core-js": "^3.6.5",
     "express": "^4.17.1",

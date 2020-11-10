@@ -6,9 +6,33 @@
           <i class="fas fa-user-plus" /> Register
         </h1>
         <form
-          action="/users/register"
-          method="POST"
+          action="#"
+          @submit.prevent="register"
         >
+          <p v-if="errors.length">
+            <b>Please correct the following error(s):</b>
+            <ul>
+              <li
+                v-for="(error, index) in errors"
+                :key="index"
+              >
+                <div
+                  class="alert alert-warning alert-dismissible fade show"
+                  role="alert"
+                >
+                  {{ error.msg }}
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="alert"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </p>
           <div class="form-group">
             <label for="name">Name</label>
             <input
@@ -61,7 +85,8 @@
           </button>
         </form>
         <p class="lead mt-4">
-          Have An Account? <router-link to="/login">
+          Have An Account?
+          <router-link to="/login">
             Login
           </router-link>
         </p>
@@ -78,12 +103,36 @@ export default {
       name: '',
       email: '',
       password: '',
-      password2: ''
+      password2: '',
+      errors: [],
+    }
+  },
+  methods: {
+    register() {
+      this.errors = [];
+
+      // Validate form
+      // Check required fields
+      if (!this.name || !this.email || !this.password || !this.password2) {
+        this.errors.push({msg: 'Please fill in all fields'});
+      }
+
+      // Check passwords match
+      if (this.password !== this.password2) {
+        this.errors.push({msg: 'Passwords do not match'});
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+ul {
+  padding: 0;
+}
+
+li {
+  list-style-type: none;
+}
 
 </style>
