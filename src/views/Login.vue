@@ -50,10 +50,9 @@
 </template>
 
 <script>
-import axios from 'axios'
+"use strict";
 
 export default {
-
   name: "Login",
   data() {
     return {
@@ -63,9 +62,9 @@ export default {
   },
   methods: {
     login() {
-      axios.post('/login', {email: this.email, password: this.password})
-          .then(response => console.log(response))
-          .catch(err => console.log(err));
+      // axios.post('/login', {email: this.email, password: this.password})
+      //     .then(response => console.log(response))
+      //     .catch(err => console.log(err));
     },
   }
 }

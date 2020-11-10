@@ -96,6 +96,8 @@
 </template>
 
 <script>
+"use strict";
+
 export default {
   name: "Register",
   data() {
@@ -105,6 +107,12 @@ export default {
       password: '',
       password2: '',
       errors: [],
+    }
+  },
+  sockets: {
+    user_register() {
+      // When user is successfully registered, redirect to login page.
+      this.$router.push('/login');
     }
   },
   methods: {
@@ -120,6 +128,16 @@ export default {
       // Check passwords match
       if (this.password !== this.password2) {
         this.errors.push({msg: 'Passwords do not match'});
+      }
+
+      if (this.errors.length === 0) { // Validation passed
+        console.log("emitting registration");
+        // Send registration request to server
+        this.$socket.emit('user_register', {
+          name: this.name,
+          email: this.email,
+          password: this.password
+        });
       }
     }
   }
