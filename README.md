@@ -1,4 +1,4 @@
-# passport
+# CatanJS
 
 ## Project setup
 ```
