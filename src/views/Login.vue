@@ -10,8 +10,8 @@
           @submit.prevent="login"
         >
           <AuthenticationMessage
-            :messages="status.msg ? [ status.msg ] : []"
-            :alert-type="status.alertType"
+            :messages="myStatusMessage ? [ myStatusMessage ] : []"
+            :alert-type="myAlertType"
           />
           <div class="form-group">
             <label for="email">Email</label>
@@ -62,17 +62,31 @@ export default {
   name: "Login",
   components: {AuthenticationMessage},
   props: {
-    status: {
-      type: Object,
-      default() {
-        return {msg: '', alertType: ''}
-      }
-    }
+    statusMessage: String(''),
+    alertType: String(''),
   },
   data() {
     return {
-      email: '',
-      password: '',
+      email: 'iden.craven@gmail.com',
+      password: '1235451',
+      myStatusMessage: String(''),
+      myAlertType: String(''),
+    }
+  },
+  watch: {
+    statusMessage: {
+      immediate: true,
+      handler(newVal) {
+        console.log('status changed: ', newVal);
+        this.myStatusMessage = newVal;
+      },
+    },
+    alertType: {
+      immediate: true,
+      handler(newVal) {
+        console.log('alert changed: ', newVal);
+        this.myAlertType = newVal
+      }
     }
   },
   methods: {
@@ -87,8 +101,8 @@ export default {
           .then(() => this.$router.push('/dashboard'))
           .catch(err => {
             console.log(err.response);
-            this.status.msg = err.response.data.info.message;
-            this.status.alertType = 'alert-warning';
+            this.myStatusMessage = err.response.data.info.message;
+            this.myAlertType = 'alert-warning';
           });
     },
   }

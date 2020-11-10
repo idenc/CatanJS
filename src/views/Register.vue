@@ -86,10 +86,10 @@ export default {
   },
   data() {
     return {
-      name: '',
-      email: '',
-      password: '',
-      password2: '',
+      name: 'iden',
+      email: 'iden.craven@gmail.com',
+      password: '1234',
+      password2: '1234',
       errors: Array(),
     }
   },
@@ -98,7 +98,7 @@ export default {
       // When user is successfully registered, redirect to login page.
       this.$router.push({
         name: 'Login',
-        params: {status: {msg: 'Registration successful. You can now log in', alertType: 'alert-success'}}
+        params: {statusMessage: 'Registration successful. You can now log in', alertType: 'alert-success'}
       });
     }
   },
