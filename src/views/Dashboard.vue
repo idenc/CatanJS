@@ -4,20 +4,58 @@
       Dashboard
     </h1>
     <p class="lead mb-3">
-      Welcome
+      Welcome {{ user.name }}
     </p>
-    <router-link
-      to="/logout"
+    <a
       class="btn btn-secondary"
+      href="#"
+      @click="logout"
     >
       Logout
-    </router-link>
+    </a>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
-name: "Dashboard"
+  name: "Dashboard",
+  data() {
+    return {
+      user: {
+        name: "test"
+      }
+    }
+  },
+  mounted() {
+    this.getUserData()
+  },
+  methods: {
+    getUserData() {
+      axios.get("/user")
+          .then((response) => {
+            console.log(response)
+            this.user = response.data.user;
+          })
+          .catch((error) => {
+            console.log(error.response);
+            this.$router.push({
+              name: 'Login',
+              params: {statusMessage: error.response.data, alertType: 'alert-danger'}
+            });
+          })
+    },
+    logout() {
+      axios.get("/logout")
+          .then(() => {
+            this.$router.push({
+              name: 'Login',
+              params: {statusMessage: 'You are now logged out', alertType: 'alert-success'}
+            });
+          });
+    }
+  },
 }
 </script>
 

@@ -8,7 +8,7 @@ const io = require('socket.io')(http);
 const User = require('./models/User');
 const passport = require('passport');
 const session = require('express-session');
-
+const {ensureAuthenticated} = require('./config/auth');
 
 // Passport config
 require('./config/passport')(passport);
@@ -18,7 +18,7 @@ const db = require('./config/keys').MongoURI;
 
 // Express body parser
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 // Express session
 app.use(
@@ -44,6 +44,8 @@ app.use(express.static(path.join(__dirname + '/../dist')));
 const PORT = process.env.PORT || 3000;
 
 io.on('connection', (socket) => {
+    // Using socket io to handle registration,
+    // Should probably change to just using a post request
     console.log('user connected');
     socket.on('user_register', (registration_info) => {
         console.log(registration_info);
@@ -77,25 +79,42 @@ io.on('connection', (socket) => {
     });
 });
 
-app.post("/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+// Post request will handle login with passport js
+app.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
         if (err) {
-            console.log("error: " + err);
+            console.log('error: ' + err);
             return next(err);
         }
 
         if (!user) {
-            console.log("no user");
+            console.log('no user');
             return res.status(401).send({info: info});
         }
 
         req.login(user, () => {
-            res.send("Logged in");
+            res.send('Logged in');
         });
     })(req, res, next);
+});
+
+app.get('/user', ensureAuthenticated, (req, res) => {
+    console.log([req.user, req.session])
+
+    res.send({user: req.user})
+})
+
+
+app.get('/logout', (req, res) => {
+    req.logout();
+
+    console.log('logged out');
+
+    return res.send();
 });
 
 
 http.listen(PORT, () => {
     console.log('listening on *:3000');
+
 });
