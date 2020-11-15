@@ -16,6 +16,12 @@
         >
           Login
         </router-link>
+        <router-link
+          to="/board"
+          class="btn btn-secondary btn-block"
+        >
+          Skip
+        </router-link>
       </div>
     </div>
   </div>
