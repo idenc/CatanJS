@@ -17,6 +17,7 @@ export default {
 
     const draw = SVG().addTo('#board').size('100%', '100%')
 
+    // Hex object
     const Hex = Honeycomb.extendHex({
       size: 80,
 
@@ -75,12 +76,14 @@ export default {
       } 
     })
 
+    // Draw a settlement at each hex corner
     grid.forEach(hex => {
       console.log(hex)
       console.log(hex.corners())
       hex.renderSettlements(draw)
     })
 
+    // Add click listener to hexes
     document.addEventListener('click', ({ offsetX, offsetY }) => {
       const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
       const hex = grid.get(hexCoordinates)
@@ -90,6 +93,7 @@ export default {
       }
     })
 
+    // Add a hover listener to hexes
     document.addEventListener('mousemove', ({ offsetX, offsetY }) => {
       const hexCoordinates = Grid.pointToHex([offsetX, offsetY]);
       const hoveredHex = grid.get(hexCoordinates);
