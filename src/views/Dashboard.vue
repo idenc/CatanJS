@@ -3,7 +3,10 @@
     <h1 class="mt-4">
       Dashboard
     </h1>
-    <p class="lead mb-3">
+    <p
+      v-if="user.isLoaded"
+      class="lead mb-3"
+    >
       Welcome {{ user.name }}
     </p>
     <a
@@ -24,7 +27,8 @@ export default {
   data() {
     return {
       user: {
-        name: "test"
+        name: "",
+        isLoaded: false
       }
     }
   },
@@ -37,6 +41,7 @@ export default {
           .then((response) => {
             console.log(response)
             this.user = response.data.user;
+            this.user.isLoaded = true;
           })
           .catch((error) => {
             console.log(error.response);

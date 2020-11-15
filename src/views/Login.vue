@@ -42,6 +42,16 @@
             Login
           </button>
         </form>
+        <a
+          href="/google"
+        >Sign in with Google</a>
+        <!--        <g-signin-button-->
+        <!--          :params="googleSignInParams"-->
+        <!--          @success="onGoogleSuccess"-->
+        <!--          @error="onGoogleError"-->
+        <!--        >-->
+        <!--          Sign in with Google-->
+        <!--        </g-signin-button>-->
         <p class="lead mt-4">
           No Account?
           <router-link to="/register">
@@ -71,6 +81,9 @@ export default {
       password: '',
       myStatusMessage: String(''),
       myAlertType: String(''),
+      googleSignInParams: {
+        client_id: "971116751555-6dopoc75cpi3drbc9bsfdtb2o10spjfr.apps.googleusercontent.com",
+      }
     }
   },
   watch: {
@@ -105,10 +118,35 @@ export default {
             this.myAlertType = 'alert-warning';
           });
     },
+    onGoogleSuccess(googleUser) {
+      const profile = googleUser.getBasicProfile();
+      console.log(profile);
+      axios.post('/google', {profile})
+          .then(() => this.$router.push('/dashboard'))
+          .catch(err => {
+            console.log(err.response);
+            this.myStatusMessage = err.response.data.info.message;
+            this.myAlertType = 'alert-warning';
+          });
+    },
+    onGoogleError(error) {
+      console.log(error);
+    }
   }
 }
 </script>
 
 <style scoped>
+
+.g-signin-button {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background-color: #3c82f7;
+  color: #fff;
+  box-shadow: 0 3px 0 #0f69ff;
+  cursor: pointer;
+  margin-top: 10px;
+}
 
 </style>

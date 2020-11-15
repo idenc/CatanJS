@@ -10,8 +10,36 @@ const passport = require('passport');
 const session = require('express-session');
 const {ensureAuthenticated} = require('./config/auth');
 
+// const webpack = require('webpack');
+// const webpackDevMiddleware = require('webpack-dev-middleware');
+// const webpackHotMiddleware = require('webpack-hot-middleware');
+//
+// const config =
+
+// const config = {
+//     mode: 'development',
+//     devServer: {
+//         contentBase: '/src/',
+//         port: 9999,
+//         host: 'localhost',
+//         hot: true
+//     },
+//     entry: {
+//         app: [
+//             './src/main.js'
+//         ]
+//     }
+// }
+
+// const compiler = webpack(config);
+//
+// app.use(webpackDevMiddleware(compiler, {}));
+//
+// app.use(webpackHotMiddleware(compiler));
+
 // Passport config
-require('./config/passport')(passport);
+require('./config/passport').localAuth(passport);
+require('./config/passport').googleAuth(passport);
 
 // DB Config
 const db = require('./config/keys').MongoURI;
@@ -39,7 +67,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Serve production
-app.use(express.static(path.join(__dirname + '/../dist')));
+//app.use(express.static(path.join(__dirname + '/../dist')));
 
 const PORT = process.env.PORT || 3000;
 
@@ -112,8 +140,22 @@ app.get('/logout', (req, res) => {
     return res.send();
 });
 
+app.get('/google',
+    passport.authenticate('google', {scope: ['profile', 'email']}));
 
-http.listen(PORT, () => {
-    console.log('listening on *:3000');
+// GET /auth/google/callback
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request.  If authentication fails, the user will be redirected back to the
+//   login page.  Otherwise, the primary route function function will be called,
+//   which, in this example, will redirect the user to the home page.
+app.get('/google/callback',
+    passport.authenticate('google', {failureRedirect: '/login'}),
+    function (req, res) {
+        res.redirect('http://localhost:9999/#/dashboard');
+    });
 
+app.get('/failed', (req, res) => res.send(""))
+
+app.listen(PORT, () => {
+    console.log('listening on *:' + PORT);
 });
