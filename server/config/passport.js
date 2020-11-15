@@ -53,7 +53,6 @@ module.exports = {
                 callbackURL: `http://localhost:${process.env.PORT || 3000}/google/callback`
             },
             function (token, tokenSecret, profile, done) {
-                console.log(profile);
                 // Use the profile info (mainly profile id) to check if the user is registered in db
                 User.findOne({email: profile.emails[0].value})
                     .then(user => {
@@ -64,8 +63,10 @@ module.exports = {
                                 email: profile.emails[0].value,
                             });
                             newUser.save()
+                                .then(() => {
+                                    done(null, newUser)
+                                })
                                 .catch(err => console.log(err));
-                            return done(null, newUser);
                         }
 
                         // User found

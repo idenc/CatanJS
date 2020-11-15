@@ -5,10 +5,17 @@
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### Compiles and hot-reloads for development 
+### (Only serves frontend use below command for frontend/backend)
 ```
 npm run serve
 ```
+
+
+### Run express dev server and hot-reload
+```
+npm run start
+``` 
 
 ### Compiles and minifies for production
 ```

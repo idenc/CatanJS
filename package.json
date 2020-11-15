@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "start": "nodemon ./server/server.js"
+    "start": "nodemon --exec vue-cli-service serve"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.1",
@@ -21,7 +21,6 @@
     "socket.io": "^3.0.1",
     "socket.io-client": "^3.0.1",
     "vue": "^2.6.12",
-    "vue-google-signin-button": "^1.0.4",
     "vue-router": "^3.2.0",
     "vue-socket.io": "^3.0.10"
   },
@@ -38,11 +37,8 @@
     "express-session": "^1.17.1",
     "mongoose": "^5.10.13",
     "vue-template-compiler": "^2.6.11",
-    "webpack": "^5.4.0",
-    "webpack-cli": "^4.2.0",
-    "webpack-dev-middleware": "^4.0.2",
-    "webpack-dev-server": "^3.11.0",
-    "webpack-hot-middleware": "^2.25.0"
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.2.0"
   },
   "eslintConfig": {
     "root": true,

@@ -44,14 +44,10 @@
         </form>
         <a
           href="/google"
-        >Sign in with Google</a>
-        <!--        <g-signin-button-->
-        <!--          :params="googleSignInParams"-->
-        <!--          @success="onGoogleSuccess"-->
-        <!--          @error="onGoogleError"-->
-        <!--        >-->
-        <!--          Sign in with Google-->
-        <!--        </g-signin-button>-->
+          class="g-signin-button"
+        >
+          Sign in with Google
+        </a>
         <p class="lead mt-4">
           No Account?
           <router-link to="/register">
@@ -81,9 +77,6 @@ export default {
       password: '',
       myStatusMessage: String(''),
       myAlertType: String(''),
-      googleSignInParams: {
-        client_id: "971116751555-6dopoc75cpi3drbc9bsfdtb2o10spjfr.apps.googleusercontent.com",
-      }
     }
   },
   watch: {
@@ -118,20 +111,6 @@ export default {
             this.myAlertType = 'alert-warning';
           });
     },
-    onGoogleSuccess(googleUser) {
-      const profile = googleUser.getBasicProfile();
-      console.log(profile);
-      axios.post('/google', {profile})
-          .then(() => this.$router.push('/dashboard'))
-          .catch(err => {
-            console.log(err.response);
-            this.myStatusMessage = err.response.data.info.message;
-            this.myAlertType = 'alert-warning';
-          });
-    },
-    onGoogleError(error) {
-      console.log(error);
-    }
   }
 }
 </script>
