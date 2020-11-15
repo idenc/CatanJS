@@ -46,7 +46,12 @@
           href="/google"
           class="g-signin-button"
         >
-          Sign in with Google
+          <img
+            id="google-logo"
+            alt="Google login"
+            src="@/assets/btn_google_light_normal_ios.svg"
+          >
+          <span id="google-signin">Sign in with Google</span>
         </a>
         <p class="lead mt-4">
           No Account?
@@ -117,15 +122,23 @@ export default {
 
 <style scoped>
 
+#google-logo {
+  padding: 0;
+}
+
+#google-signin {
+  padding: 10px;
+}
+
 .g-signin-button {
   display: inline-block;
-  padding: 4px 8px;
+  width: fit-content;
   border-radius: 3px;
   background-color: #3c82f7;
   color: #fff;
   box-shadow: 0 3px 0 #0f69ff;
   cursor: pointer;
-  margin-top: 10px;
+  margin: 10px auto auto;
 }
 
 </style>
