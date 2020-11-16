@@ -6,7 +6,15 @@ import io from 'socket.io-client';
 
 Vue.use(new VueSocketIO({
     debug: true,
-    connection: io(),
+    connection: io('http://localhost:9999', {
+        reconnectionDelay: 1000,
+        reconnection: true,
+        reconnectionAttemps: 10,
+        transports: ['websocket'],
+        agent: false,
+        upgrade: false,
+        rejectUnauthorized: false
+    })
 }));
 
 Vue.config.productionTip = false

@@ -100,6 +100,9 @@ export default {
         name: 'Login',
         params: {statusMessage: 'Registration successful. You can now log in', alertType: 'alert-success'}
       });
+    },
+    registration_error(msg) {
+      this.errors.push(msg);
     }
   },
   methods: {

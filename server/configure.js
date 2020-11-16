@@ -50,7 +50,7 @@ module.exports = app => {
                 .then(user => {
                     // User exists
                     if (user) {
-                        socket.emit('registration error', {msg: 'Email is already registered'});
+                        socket.emit('registration_error', {msg: 'Email is already registered'});
                     } else {
                         // Register new user
                         const newUser = new User({
@@ -129,4 +129,8 @@ module.exports = app => {
             res.redirect('/#/dashboard');
         }
     );
+
+    http.listen(process.env.PORT || 9999, () => {
+        console.log(`listening on *:${process.env.port || 9999}`);
+    });
 }
