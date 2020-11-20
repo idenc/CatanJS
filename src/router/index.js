@@ -4,7 +4,7 @@ import Home from '../views/Home.vue'
 import Register from "@/views/Register";
 import Login from "@/views/Login";
 import Dashboard from "@/views/Dashboard";
-import Board from "@/views/Board";
+import Game from "@/views/Game";
 
 Vue.use(VueRouter)
 
@@ -33,7 +33,7 @@ const routes = [
     {
         path: '/game',
         name: 'Game',
-        component: Board,
+        component: Game,
         props: true
     },
 ]

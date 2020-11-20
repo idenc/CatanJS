@@ -1,5 +1,5 @@
 <template>
-  <div id="board">
+  <div id="board" ref="boardSvgContainer">
 
   </div>
 </template>
@@ -10,12 +10,22 @@ import * as Honeycomb from 'honeycomb-grid'
 import { SVG } from '@svgdotjs/svg.js'
 
 export default {
-  name: "Board",
+  name: "GameBoard",
   components: {},
   mounted: function() {
+    const gameboardRadius = 3;
+    let gameboardContainer = this.$refs.boardSvgContainer;
+    const hexWidth = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1);
+    console.log(gameboardContainer)
+    console.log(hexWidth)
 
 
     const draw = SVG().addTo('#board').size('100%', '100%');
+    console.log(draw.node)
+    console.log(draw.node.getBBox())
+    // const svgWidth = draw.node.getAttribute('width')
+    // draw.node.setAttribute('height', `${svgWidth}`)
+
 
     // Draw the settlements
     const renderSettlements = (settlement) => {
@@ -30,7 +40,7 @@ export default {
 
     // Hex object
     const Hex = Honeycomb.extendHex({
-      size: 80,
+      size: hexWidth / 2,
 
       render(draw) {
         const { x, y } = this.toPoint()
@@ -78,7 +88,7 @@ export default {
 
     // render hexes
     const grid = Grid.spiral({ 
-      radius: 2, 
+      radius: gameboardRadius - 1, 
       center: Hex(3,3),
 
       // render each hex, passing the draw instance
@@ -89,7 +99,7 @@ export default {
     console.log(grid)
 
     const oceanGrid = Grid.ring({ 
-      radius: 3, 
+      radius: gameboardRadius, 
       center: Hex(3,3),
       // render each hex, passing the draw instance
       onCreate(hex) {
@@ -142,7 +152,7 @@ export default {
     })
 
     // Add click listener to hexes
-    document.addEventListener('click', ({ offsetX, offsetY }) => {
+    this.$el.addEventListener('click', ({ offsetX, offsetY }) => {
       const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
       console.log(hexCoordinates)
       console.log(offsetX, offsetY)
@@ -154,7 +164,7 @@ export default {
     })
 
     // Add a hover listener to hexes
-    document.addEventListener('mousemove', ({ offsetX, offsetY }) => {
+    this.$el.addEventListener('mousemove', ({ offsetX, offsetY }) => {
       const hexCoordinates = Grid.pointToHex([offsetX, offsetY]);
       const hoveredHex = grid.get(hexCoordinates);
 
@@ -172,7 +182,9 @@ export default {
 
 <style scoped>
   #board {
-    height: 100vh;
+    /* padding: 100px 0; */
+    width: 100%;
+    height: 100%;
   }
 
 </style>
