@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "start": "nodemon --exec vue-cli-service serve"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.1",
@@ -15,7 +16,9 @@
     "bootstrap": "^4.5.3",
     "core-js": "^3.6.5",
     "honeycomb-grid": "^3.1.7",
+    "nodemon": "^2.0.6",
     "passport": "^0.4.1",
+    "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "socket.io": "^3.0.1",
     "socket.io-client": "^3.0.1",
@@ -35,7 +38,9 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "mongoose": "^5.10.13",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.2.0"
   },
   "eslintConfig": {
     "root": true,
