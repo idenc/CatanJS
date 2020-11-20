@@ -17,7 +17,7 @@
           Login
         </router-link>
         <router-link
-          to="/board"
+          to="/game"
           class="btn btn-secondary btn-block"
         >
           Skip

@@ -31,8 +31,8 @@ const routes = [
         component: Dashboard
     },
     {
-        path: '/board',
-        name: 'Board',
+        path: '/game',
+        name: 'Game',
         component: Board,
         props: true
     },
