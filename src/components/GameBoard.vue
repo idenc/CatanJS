@@ -31,11 +31,22 @@ export default {
     const renderSettlements = (settlement) => {
       const { x, y } = settlement.point;
       const r = 15;
-      draw
+      const settlementCircle = draw
         .circle(r * 2)
         .stroke({ width: 5, color: '#000' })
-        .fill('none')
+        .fill('transparent')
         .translate(x - r, y - r)
+
+      const settlementSVG = settlementCircle.node;
+      settlementSVG.classList.add('settlement-svg')
+      // settlementSVG.setAttribute('class', 'settlement-svg')
+      settlementSVG.setAttribute('state', 'empty')
+
+
+      settlementSVG.addEventListener('click', () => {
+        // settlementSVG.setAttribute('fill', 'red')
+        settlementSVG.setAttribute('state', 'settlement')
+      })
     };
 
     // Hex object
@@ -185,6 +196,14 @@ export default {
     /* padding: 100px 0; */
     width: 100%;
     height: 100%;
+  }
+
+  ::v-deep .settlement-svg[state="empty"] {
+    fill: transparent;
+  }
+
+  ::v-deep .settlement-svg[state="settlement"] {
+    fill: purple;
   }
 
 </style>
