@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import Register from "@/views/Register";
 import Login from "@/views/Login";
 import Dashboard from "@/views/Dashboard";
+import Game from "@/views/Game";
 
 Vue.use(VueRouter)
 
@@ -28,7 +29,13 @@ const routes = [
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard
-    }
+    },
+    {
+        path: '/game',
+        name: 'Game',
+        component: Game,
+        props: true
+    },
 ]
 
 const router = new VueRouter({
