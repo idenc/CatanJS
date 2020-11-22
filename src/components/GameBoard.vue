@@ -1,6 +1,31 @@
 <template>
   <div id="board" ref="boardSvgContainer">
-
+    <defs ref="defRef">
+      <pattern id="pattern1" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+        <image xlink:href="../assets/img/tiles/test.jpg" height="1" width="1" preserveAspectRatio="none" />
+      </pattern>
+      <pattern id="brick-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+        <image xlink:href="../assets/img/tiles/brick.png" height="1" width="1" preserveAspectRatio="none" />
+      </pattern>
+      <pattern id="desert-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+        <image xlink:href="../assets/img/tiles/desert.png" height="1" width="1" preserveAspectRatio="none" />
+      </pattern>
+      <pattern id="grain-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+        <image xlink:href="../assets/img/tiles/grain.png" height="1" width="1" preserveAspectRatio="none" />
+      </pattern>
+      <pattern id="lumber-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+        <image xlink:href="../assets/img/tiles/lumber.png" height="1" width="1" preserveAspectRatio="none" />
+      </pattern>
+      <pattern id="ocean-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+        <image xlink:href="../assets/img/tiles/ocean.png" height="1" width="1" preserveAspectRatio="none" />
+      </pattern>
+      <pattern id="ore-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+        <image xlink:href="../assets/img/tiles/ore.png" height="1" width="1" preserveAspectRatio="none" />
+      </pattern>
+      <pattern id="wool-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%" patternTransform="rotate(90)">
+        <image xlink:href="../assets/img/tiles/wool.png" height="1" width="1" rotate="90" preserveAspectRatio="none" />
+      </pattern>
+    </defs>
   </div>
 </template>
 
@@ -19,12 +44,18 @@ export default {
     console.log(gameboardContainer)
     console.log(hexWidth)
 
+    const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
+    let resourceIndex = 0;
+
 
     const draw = SVG().addTo('#board').size('100%', '100%');
-    console.log(draw.node)
-    console.log(draw.node.getBBox())
-    // const svgWidth = draw.node.getAttribute('width')
-    // draw.node.setAttribute('height', `${svgWidth}`)
+    // const use = draw.use('pattern1', require('../assets/img/tiles/tilepatterns.svg'))
+
+
+    // Copy the defs into the dynamically created svg. 
+    // There should be a smarter way to do this but I was having trouble with scope or something.
+    const defR = this.$refs.defRef
+    draw.node.appendChild(defR)
 
 
     // Draw the settlements
@@ -34,17 +65,14 @@ export default {
       const settlementCircle = draw
         .circle(r * 2)
         .stroke({ width: 5, color: '#000' })
-        .fill('transparent')
         .translate(x - r, y - r)
 
       const settlementSVG = settlementCircle.node;
       settlementSVG.classList.add('settlement-svg')
-      // settlementSVG.setAttribute('class', 'settlement-svg')
       settlementSVG.setAttribute('state', 'empty')
 
 
       settlementSVG.addEventListener('click', () => {
-        // settlementSVG.setAttribute('fill', 'red')
         settlementSVG.setAttribute('state', 'settlement')
       })
     };
@@ -59,9 +87,15 @@ export default {
 
         this.draw = draw
           .polygon(corners.map(({ x, y }) => `${x},${y}`))
+          .stroke({ width: 5, color: '#f7eac3' })
           .fill('none')
-          .stroke({ width: 5, color: '#999' })
           .translate(x, y)
+
+        this.draw.node.classList.add('hex')
+
+        console.log(resources[resourceIndex % 6])
+        this.draw.node.setAttribute('resource', resources[resourceIndex % 6]);
+        resourceIndex += 1;
       },
 
       renderOcean(draw) {
@@ -70,29 +104,32 @@ export default {
 
         this.draw = draw
           .polygon(corners.map(({ x, y }) => `${x},${y}`))
-          .fill('blue')
-          .stroke({ width: 5, color: '#999' })
+          .stroke({ width: 5, color: '#f7eac3' })
+          .fill('none')
           .translate(x, y)
+
+        this.draw.node.classList.add('ocean-hex')
+        this.draw.node.setAttribute('resource', 'ocean');
       },
 
-      highlight() {
-        // stop running animation
-        this.draw.timeline().stop()
-        // run animation
-        this.draw
-          .fill({ opacity: 1, color: 'aquamarine' })
-          .animate(1000)
-          .fill({ opacity: 0, color: 'none' })
-      },
+      // highlight() {
+      //   // stop running animation
+      //   this.draw.timeline().stop()
+      //   // run animation
+      //   this.draw
+      //     .fill({ opacity: 1, color: 'aquamarine' })
+      //     .animate(1000)
+      //     .fill({ opacity: 0, color: 'none' })
+      // },
 
       handleMouseOver() {
-        this.draw
-          .fill({ opacity: 1, color: 'aquamarine' })
+        this.draw.node.classList.add('hex-hovered')
+        draw.node.appendChild(this.draw.node)
       },
 
       handleMouseOut() {
-        this.draw
-          .fill({ opacity: 0, color: 'none' })
+        this.draw.node.classList.remove('hex-hovered')
+        draw.node.prepend(this.draw.node)
       }
     });
     const Grid = Honeycomb.defineGrid(Hex)
@@ -168,10 +205,11 @@ export default {
       console.log(hexCoordinates)
       console.log(offsetX, offsetY)
       const hex = grid.get(hexCoordinates)
+      console.log(hex)
 
-      if (hex) {
-        hex.highlight()
-      }
+      // if (hex) {
+      //   hex.highlight()
+      // }
     })
 
     // Add a hover listener to hexes
@@ -198,12 +236,43 @@ export default {
     height: 100%;
   }
 
+  #drawSVG {
+    display: none;
+  }
+
   ::v-deep .settlement-svg[state="empty"] {
     fill: transparent;
   }
 
   ::v-deep .settlement-svg[state="settlement"] {
-    fill: purple;
+    fill: url('#pattern1');
+  }
+
+  ::v-deep .hex[resource="brick"] {
+    fill: url('#brick-pattern');
+  }
+  ::v-deep .hex[resource="desert"] {
+    fill: url('#desert-pattern');
+  }
+    ::v-deep .hex[resource="grain"] {
+    fill: url('#grain-pattern');
+  }
+  ::v-deep .hex[resource="lumber"] {
+    fill: url('#lumber-pattern');
+  }
+  ::v-deep .hex[resource="ore"] {
+    fill: url('#ore-pattern');
+  }
+  ::v-deep .hex[resource="wool"] {
+    fill: url('#wool-pattern');
+  }
+  ::v-deep .ocean-hex[resource="ocean"] {
+    fill: url('#ocean-pattern');
+  }
+
+  ::v-deep .hex.hex-hovered {
+    stroke: #11efdd;
+    z-index: 10;
   }
 
 </style>

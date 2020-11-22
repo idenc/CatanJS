@@ -1,0 +1,12 @@
+<svg style="position: absolute; width: 100%; height: 100%; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <pattern id="pattern1" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+      <image xlink:href="test.jpg" height="1" width="1" preserveAspectRatio="none" />
+    </pattern>
+    <g id="fire" transform="translate(0,10)">
+      <path d="M101.138,160.949 C94.916,154.464 53.538,110.17 95.277,71.802 C130.054,39.868 135.137,13.003 123.434,-0 C123.434,-0 211.959,33.692 159.877,111.877 C150.998,125.163 128.702,140.843 140.369,173.129 L101.138,160.949 z" />
+      <path d="M155.503,171.572 C153.624,165.019 145.142,150.746 171.021,122.303 C184.873,107.172 190.104,84.742 191.308,76.301 C191.308,76.301 237.167,100.662 191.576,160.215 L155.503,171.572 z" />
+    </g>
+  </defs>
+
+</svg>
