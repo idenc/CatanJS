@@ -22,7 +22,7 @@
       <pattern id="ore-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
         <image xlink:href="../assets/img/tiles/ore.png" height="1" width="1" preserveAspectRatio="none" />
       </pattern>
-      <pattern id="wool-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%" patternTransform="rotate(90)">
+      <pattern id="wool-pattern" patternContentUnits="objectBoundingBox" height="100%" width="100%">
         <image xlink:href="../assets/img/tiles/wool.png" height="1" width="1" rotate="90" preserveAspectRatio="none" />
       </pattern>
     </defs>
