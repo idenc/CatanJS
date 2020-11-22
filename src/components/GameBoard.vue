@@ -39,8 +39,16 @@ export default {
   components: {},
   mounted: function() {
     const gameboardRadius = 3;
+
     let gameboardContainer = this.$refs.boardSvgContainer;
-    const hexWidth = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1);
+    let offsetWidth = gameboardContainer.offsetWidth;
+    let offsetHeight = gameboardContainer.offsetHeight;
+    let hexWidth;
+    if (offsetWidth < offsetHeight) {
+      hexWidth = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1);
+    } else {
+      hexWidth = gameboardContainer.offsetHeight / (2 * gameboardRadius + 1) * 1.25;
+    }
     console.log(gameboardContainer)
     console.log(hexWidth)
 
