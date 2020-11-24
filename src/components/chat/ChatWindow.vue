@@ -63,6 +63,7 @@ export default {
         const user = {username: this.username, color: this.color}
         this.$socket.emit('user info', user);
       } else {
+        console.log("emitting user")
         this.$socket.emit('user info', null);
       }
     });
