@@ -56,17 +56,15 @@ export default {
     }
   },
   mounted: function () {
-    this.sockets.subscribe('connect', () => {
-      if (localStorage.username && localStorage.color) {
-        this.username = localStorage.username;
-        this.color = localStorage.color;
-        const user = {username: this.username, color: this.color}
-        this.$socket.emit('user info', user);
-      } else {
-        console.log("emitting user")
-        this.$socket.emit('user info', null);
-      }
-    });
+    if (localStorage.username && localStorage.color) {
+      this.username = localStorage.username;
+      this.color = localStorage.color;
+      const user = {username: this.username, color: this.color}
+      this.$socket.emit('user info', user);
+    } else {
+      console.log("emitting user")
+      this.$socket.emit('user info', null);
+    }
 
     this.sockets.subscribe('chat message', (msg) => {
       const messageBox = this.$refs.message_box;
