@@ -4,8 +4,15 @@
       <GameBoard />
     </div>
     <div id="sidebar-container">
-      <div id="sidebar-players-container" />
-      <div id="sidebar-chat-container" />
+      <div id="sidebar-players-container">
+        <UserList
+          id="user-list"
+          :username="'test'"
+        />
+      </div>
+      <div id="sidebar-chat-container">
+        <ChatWindow id="chat" />
+      </div>
       <div id="sidebar-buttons-container">
         <button class="btn btn-primary btn-block">
           Build
@@ -25,11 +32,13 @@
 <script>
 "use strict";
 import GameBoard from "@/components/GameBoard";
+import UserList from "@/components/chat/UserList";
+import ChatWindow from "@/components/chat/ChatWindow";
 
 export default {
 
   name: "Game",
-  components: {GameBoard},
+  components: {ChatWindow, UserList, GameBoard},
   mounted: function () {
   }
 }
@@ -85,6 +94,11 @@ export default {
 #sidebar-resources-container {
   background: rgb(44, 44, 44);
   flex-grow: 1;
+}
+
+#user-list, #chat {
+  height: 100%;
+  width: 100%;
 }
 
 </style>
