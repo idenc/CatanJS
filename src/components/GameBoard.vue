@@ -156,7 +156,7 @@ export default {
       const r = 15;
       const settlementCircle = draw
           .circle(r * 2)
-          .stroke({width: 5, color: '#000'})
+          .stroke({ width: 4, color: '#aaa' })
           .translate(x - r, y - r)
 
       const settlementSVG = settlementCircle.node;
@@ -333,7 +333,7 @@ export default {
 }
 
 ::v-deep .settlement-svg[state="empty"] {
-  fill: transparent;
+  fill: #fff;
 }
 
 ::v-deep .settlement-svg[state="settlement"] {
