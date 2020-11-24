@@ -6,7 +6,7 @@
     <defs ref="defRef">
       <pattern
         id="pattern1"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -14,12 +14,12 @@
           xlink:href="../assets/img/tiles/test.jpg"
           height="1"
           width="1"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
       <pattern
         id="brick-pattern"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -27,12 +27,12 @@
           xlink:href="../assets/img/tiles/brick.png"
           height="1"
           width="1"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
       <pattern
         id="desert-pattern"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -40,12 +40,12 @@
           xlink:href="../assets/img/tiles/desert.png"
           height="1"
           width="1"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
       <pattern
         id="grain-pattern"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -53,12 +53,12 @@
           xlink:href="../assets/img/tiles/grain.png"
           height="1"
           width="1"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
       <pattern
         id="lumber-pattern"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -66,12 +66,12 @@
           xlink:href="../assets/img/tiles/lumber.png"
           height="1"
           width="1"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
       <pattern
         id="ocean-pattern"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -79,12 +79,12 @@
           xlink:href="../assets/img/tiles/ocean.png"
           height="1"
           width="1"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
       <pattern
         id="ore-pattern"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -92,12 +92,12 @@
           xlink:href="../assets/img/tiles/ore.png"
           height="1"
           width="1"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
       <pattern
         id="wool-pattern"
-        pattern-content-units="objectBoundingBox"
+        patternContentUnits="objectBoundingBox"
         height="100%"
         width="100%"
       >
@@ -106,7 +106,7 @@
           height="1"
           width="1"
           rotate="90"
-          preserve-aspect-ratio="none"
+          preserveAspectRatio="none"
         />
       </pattern>
     </defs>
