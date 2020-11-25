@@ -138,11 +138,10 @@ export default {
     console.log(gameboardContainer)
     console.log(hexWidth)
 
-    const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
-    const resourceCount = [3, 1, 4, 4, 3, 4];
+    //const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
     let resourceIndex = 0;
-    let randomTileArray = [];
-
+    let tiles = ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber', 
+                  'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'];
 
     const draw = SVG().addTo('#board').size('100%', '100%');
     // const use = draw.use('pattern1', require('../assets/img/tiles/tilepatterns.svg'))
@@ -153,17 +152,7 @@ export default {
     const defR = this.$refs.defRef
     draw.node.appendChild(defR)
     
-    const populateResourceArray = () => {
-      let tempArray = []
-      for(let i = 0; i < resourceCount.length; i++){
-        for(let j = 0; j < resourceCount[i]; j++){
-          tempArray.push(resources[i]);
-        }
-      }
-      return tempArray;
-    };
-
-    //Generate a random array to render teh gameboard with
+    //shuffle the elements of an inputted array
     const shuffleArray = (array) => {
       let tempArray = array;
       let remainingElements = tempArray.length, temp, index;
@@ -217,9 +206,9 @@ export default {
         this.draw.node.classList.add('hex')
 
         //console.log(resources[resourceIndex % 6])
-        console.log(randomTileArray[resourceIndex])
+        console.log(tiles[resourceIndex])
         //this.draw.node.setAttribute('resource', resources[resourceIndex % 6]);
-        this.draw.node.setAttribute('resource', randomTileArray[resourceIndex]);
+        this.draw.node.setAttribute('resource', tiles[resourceIndex]);
         resourceIndex += 1;
       },
 
@@ -259,8 +248,7 @@ export default {
     });
     const Grid = Honeycomb.defineGrid(Hex)
 
-    randomTileArray = populateResourceArray();
-    randomTileArray = shuffleArray(randomTileArray);
+    tiles = shuffleArray(tiles);
 
     // render hexes
     const grid = Grid.spiral({
