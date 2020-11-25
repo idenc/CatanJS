@@ -153,15 +153,19 @@ export default {
     const defR = this.$refs.defRef
     draw.node.appendChild(defR)
     
-    //Generate a random array to render teh gameboard with
-    const generateRandomBoard = () => {
-      let tempArray = [];
+    const populateResourceArray = () => {
+      let tempArray = []
       for(let i = 0; i < resourceCount.length; i++){
         for(let j = 0; j < resourceCount[i]; j++){
           tempArray.push(resources[i]);
         }
       }
+      return tempArray;
+    };
 
+    //Generate a random array to render teh gameboard with
+    const shuffleArray = (array) => {
+      let tempArray = array;
       let remainingElements = tempArray.length, temp, index;
 
       while(remainingElements){
@@ -255,7 +259,8 @@ export default {
     });
     const Grid = Honeycomb.defineGrid(Hex)
 
-    randomTileArray = generateRandomBoard();
+    randomTileArray = populateResourceArray();
+    randomTileArray = shuffleArray(randomTileArray);
 
     // render hexes
     const grid = Grid.spiral({
