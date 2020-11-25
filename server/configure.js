@@ -8,6 +8,7 @@ const session = require('express-session');
 const {ensureAuthenticated} = require('./config/auth');
 const configureUserRegistration = require('./registration');
 const configureChat = require('./chat');
+const configureLobby = require('./lobby');
 
 // All active games
 let games = {};
@@ -47,35 +48,10 @@ module.exports = app => {
         // Using socket io to handle registration,
         // Should probably change to just using a post request
         console.log('user connected');
-
-
-        socket.on("create_game", (gameRequest) => {
-            const key = gameRequest.name;
-            gameRequest["players"] = [socket];
-            games[key] = gameRequest;
-            console.log(games);
-        });
-
-        socket.on("get_games", (query) => {
-            let result = {};
-
-            const queryName = query.toLowerCase();
-            for (let gameName in games) {
-                const searchName = gameName.toLowerCase();
-                if (searchName.startsWith(queryName)) {
-                    result[gameName] = {
-                        name : gameName,
-                        type : games[gameName]["type"],
-                        numPlayers : games[gameName]["numPlayers"],
-                        playerCap : games[gameName]["playerCap"]
-                    };
-                }
-            }
-            socket.emit("get_games", result);
-        });
         
         configureUserRegistration(socket);
-        configureChat(socket)
+        configureChat(socket);
+        configureLobby(socket);
     });
 
     // Post request will handle login with passport js
