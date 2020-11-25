@@ -1,3 +1,6 @@
+// All active games
+let games = {};
+
 module.exports = socket => {
     socket.on("create_game", (gameRequest) => {
         const key = gameRequest.name;
@@ -24,4 +27,3 @@ module.exports = socket => {
         socket.emit("get_games", result);
     });
 }
-
