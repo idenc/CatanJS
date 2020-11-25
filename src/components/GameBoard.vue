@@ -139,7 +139,9 @@ export default {
     console.log(hexWidth)
 
     const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
+    const resourceCount = [3, 1, 4, 4, 3, 4];
     let resourceIndex = 0;
+    let randomTileArray = [];
 
 
     const draw = SVG().addTo('#board').size('100%', '100%');
@@ -150,7 +152,30 @@ export default {
     // There should be a smarter way to do this but I was having trouble with scope or something.
     const defR = this.$refs.defRef
     draw.node.appendChild(defR)
+    
+    //Generate a random array to render teh gameboard with
+    const generateRandomBoard = () => {
+      let tempArray = [];
+      for(let i = 0; i < resourceCount.length; i++){
+        for(let j = 0; j < resourceCount[i]; j++){
+          tempArray.push(resources[i]);
+        }
+      }
 
+      let remainingElements = tempArray.length, temp, index;
+
+      while(remainingElements){
+        //pick a random remaining unshuffeled element from the array
+        index = Math.floor(Math.random()* remainingElements--)
+        //move that random element to the back of the array then decrease array size by 1
+        //elements in the back of the array are shuffled 
+        temp = tempArray[remainingElements];
+        tempArray[remainingElements] = tempArray[index];
+        tempArray[index] = temp;
+      }
+
+      return tempArray;
+    };
 
     // Draw the settlements
     const renderSettlements = (settlement) => {
@@ -187,8 +212,10 @@ export default {
 
         this.draw.node.classList.add('hex')
 
-        console.log(resources[resourceIndex % 6])
-        this.draw.node.setAttribute('resource', resources[resourceIndex % 6]);
+        //console.log(resources[resourceIndex % 6])
+        console.log(randomTileArray[resourceIndex])
+        //this.draw.node.setAttribute('resource', resources[resourceIndex % 6]);
+        this.draw.node.setAttribute('resource', randomTileArray[resourceIndex]);
         resourceIndex += 1;
       },
 
@@ -227,6 +254,8 @@ export default {
       }
     });
     const Grid = Honeycomb.defineGrid(Hex)
+
+    randomTileArray = generateRandomBoard();
 
     // render hexes
     const grid = Grid.spiral({
