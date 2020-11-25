@@ -10,9 +10,6 @@ const configureUserRegistration = require('./registration');
 const configureChat = require('./chat');
 const configureLobby = require('./lobby');
 
-// All active games
-let games = {};
-
 module.exports = app => {
     // Passport config
     require('./config/passport').localAuth(passport);

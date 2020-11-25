@@ -124,18 +124,32 @@ export default {
       const playerType = document.getElementById("3PlayerRadio").checked ? 3 : 4;
       const gamePassword = document.getElementById("gamePassword").value;
 
-      // Need to add user id in here (from websocket)
-      const gameRequest = {
-        name : gameName,
-        type : gameType,
-        numPlayers : 0,
-        playerCap : playerType,
-        players : [],
-        password : gamePassword
-      };
-      //console.log(gameRequest);
 
-      this.$socket.emit("create_game", gameRequest);
+      if (gameName.length > 0 && (gameType == "public" || gamePassword.length > 0)) {
+        const gameRequest = {
+          name : gameName,
+          type : gameType,
+          numPlayers : 0,
+          playerCap : playerType,
+          players : [], // Server adds owner's socket (other sockets to be added by joining)
+          password : gamePassword
+        };
+        //console.log(gameRequest);
+
+        this.$socket.emit("create_game", gameRequest);
+      } else {
+        alert("Fill in all fields");
+      }
+    }
+  },
+  sockets: {
+    create_game: function(response) {
+      if (response == "failed") {
+        alert("That Game Name already exists.");
+        return;
+      }
+
+      this.$router.push({name: 'Game'});
     }
   }
 }
