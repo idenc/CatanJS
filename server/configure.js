@@ -1,13 +1,13 @@
-const bcrypt = require('bcrypt');
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const mongoose = require('mongoose');
-const io = require('socket.io')(http);
-const User = require('./models/User');
+const io = require('./socket').init(http);
 const passport = require('passport');
 const session = require('express-session');
 const {ensureAuthenticated} = require('./config/auth');
+const configureUserRegistration = require('./registration');
+const configureChat = require('./chat');
 
 // All active games
 let games = {};
@@ -47,35 +47,6 @@ module.exports = app => {
         // Using socket io to handle registration,
         // Should probably change to just using a post request
         console.log('user connected');
-        socket.on('user_register', (registration_info) => {
-            console.log(registration_info);
-            User.findOne({email: registration_info.email})
-                .then(user => {
-                    // User exists
-                    if (user) {
-                        socket.emit('registration_error', {msg: 'Email is already registered'});
-                    } else {
-                        // Register new user
-                        const newUser = new User({
-                            name: registration_info.name,
-                            email: registration_info.email,
-                            password: registration_info.password
-                        });
-                        // Hash password
-                        bcrypt.genSalt(10, (err, salt) => {
-                            bcrypt.hash(newUser.password, salt, (err, hash) => {
-                                if (err) throw err;
-                                newUser.password = hash;
-                                console.log(newUser);
-                                // Save user
-                                newUser.save()
-                                    .then(() => socket.emit('user_register'))
-                                    .catch(err => console.log(err));
-                            });
-                        });
-                    }
-                })
-        });
 
 
         socket.on("create_game", (gameRequest) => {
@@ -102,6 +73,9 @@ module.exports = app => {
             }
             socket.emit("get_games", result);
         });
+        
+        configureUserRegistration(socket);
+        configureChat(socket)
     });
 
     // Post request will handle login with passport js

@@ -3,113 +3,115 @@
     id="board"
     ref="boardSvgContainer"
   >
-    <defs ref="defRef">
-      <pattern
-        id="pattern1"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/test.jpg"
-          height="1"
-          width="1"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-      <pattern
-        id="brick-pattern"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/brick.png"
-          height="1"
-          width="1"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-      <pattern
-        id="desert-pattern"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/desert.png"
-          height="1"
-          width="1"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-      <pattern
-        id="grain-pattern"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/grain.png"
-          height="1"
-          width="1"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-      <pattern
-        id="lumber-pattern"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/lumber.png"
-          height="1"
-          width="1"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-      <pattern
-        id="ocean-pattern"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/ocean.png"
-          height="1"
-          width="1"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-      <pattern
-        id="ore-pattern"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/ore.png"
-          height="1"
-          width="1"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-      <pattern
-        id="wool-pattern"
-        pattern-content-units="objectBoundingBox"
-        height="100%"
-        width="100%"
-      >
-        <image
-          xlink:href="../assets/img/tiles/wool.png"
-          height="1"
-          width="1"
-          rotate="90"
-          preserve-aspect-ratio="none"
-        />
-      </pattern>
-    </defs>
+    <svg>
+      <defs ref="defRef">
+        <pattern
+          id="pattern1"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/test.jpg"
+            height="1"
+            width="1"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+        <pattern
+          id="brick-pattern"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/brick.png"
+            height="1"
+            width="1"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+        <pattern
+          id="desert-pattern"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/desert.png"
+            height="1"
+            width="1"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+        <pattern
+          id="grain-pattern"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/grain.png"
+            height="1"
+            width="1"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+        <pattern
+          id="lumber-pattern"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/lumber.png"
+            height="1"
+            width="1"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+        <pattern
+          id="ocean-pattern"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/ocean.png"
+            height="1"
+            width="1"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+        <pattern
+          id="ore-pattern"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/ore.png"
+            height="1"
+            width="1"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+        <pattern
+          id="wool-pattern"
+          patternContentUnits="objectBoundingBox"
+          height="100%"
+          width="100%"
+        >
+          <image
+            xlink:href="../assets/img/tiles/wool.png"
+            height="1"
+            width="1"
+            rotate="90"
+            preserveAspectRatio="none"
+          />
+        </pattern>
+      </defs>
+    </svg>
   </div>
 </template>
 
@@ -156,7 +158,7 @@ export default {
       const r = 15;
       const settlementCircle = draw
           .circle(r * 2)
-          .stroke({width: 5, color: '#000'})
+          .stroke({ width: 4, color: '#aaa' })
           .translate(x - r, y - r)
 
       const settlementSVG = settlementCircle.node;
@@ -333,7 +335,7 @@ export default {
 }
 
 ::v-deep .settlement-svg[state="empty"] {
-  fill: transparent;
+  fill: #fff;
 }
 
 ::v-deep .settlement-svg[state="settlement"] {
