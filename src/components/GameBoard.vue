@@ -142,6 +142,7 @@ export default {
     let resourceIndex = 0;
     let tiles = ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber', 
                   'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'];
+    let numberTokens = ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'];
 
     const draw = SVG().addTo('#board').size('100%', '100%');
     // const use = draw.use('pattern1', require('../assets/img/tiles/tilepatterns.svg'))
