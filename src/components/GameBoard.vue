@@ -172,6 +172,10 @@ export default {
       return tempArray;
     };
 
+    //Shuffle terrain tiles and number tokens
+    tiles = shuffleArray(tiles);
+    numberTokens = shuffleArray(numberTokens);
+
     // Draw the settlements
     const renderSettlements = (settlement) => {
       const {x, y} = settlement.point;
@@ -256,10 +260,6 @@ export default {
       }
     });
     const Grid = Honeycomb.defineGrid(Hex)
-
-    //Shuffle terrain tiles and number tokens
-    tiles = shuffleArray(tiles);
-    numberTokens = shuffleArray(numberTokens);
 
     // render hexes
     const grid = Grid.spiral({
