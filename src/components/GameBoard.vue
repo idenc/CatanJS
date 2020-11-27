@@ -140,6 +140,7 @@ export default {
 
     //const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
     let resourceIndex = 0;
+    let tokenIndex = 0;
     let tiles = ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber', 
                   'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'];
     let numberTokens = ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'];
@@ -210,6 +211,10 @@ export default {
         console.log(tiles[resourceIndex])
         //this.draw.node.setAttribute('resource', resources[resourceIndex % 6]);
         this.draw.node.setAttribute('resource', tiles[resourceIndex]);
+        if(tiles[resourceIndex] !== 'desert'){
+          this.draw.node.setAttribute('numberToken', numberTokens[tokenIndex]);
+          tokenIndex += 1;
+        }
         resourceIndex += 1;
       },
 
@@ -249,7 +254,9 @@ export default {
     });
     const Grid = Honeycomb.defineGrid(Hex)
 
+    //Shuffle terrain tiles and number tokens
     tiles = shuffleArray(tiles);
+    numberTokens = shuffleArray(numberTokens);
 
     // render hexes
     const grid = Grid.spiral({
