@@ -211,6 +211,9 @@ export default {
         console.log(tiles[resourceIndex])
         //this.draw.node.setAttribute('resource', resources[resourceIndex % 6]);
         this.draw.node.setAttribute('resource', tiles[resourceIndex]);
+
+        //If the current resource is not a desert assign it a number
+        //Store the assigned number in 'numberToken' attribute
         if(tiles[resourceIndex] !== 'desert'){
           this.draw.node.setAttribute('numberToken', numberTokens[tokenIndex]);
           tokenIndex += 1;
