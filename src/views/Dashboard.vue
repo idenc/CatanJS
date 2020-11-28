@@ -1,10 +1,9 @@
 <template>
-  <div>
+  <div v-if="user.isLoaded">
     <h1 class="mt-4">
       Dashboard
     </h1>
     <p
-      v-if="user.isLoaded"
       class="lead mb-3"
     >
       Welcome {{ user.name }}

@@ -62,15 +62,11 @@ module.exports = {
                                 name: profile.displayName,
                                 email: profile.emails[0].value,
                             });
-                            newUser.save()
-                                .then(() => {
-                                    done(null, newUser)
-                                })
-                                .catch(err => console.log(err));
+                            return done(null, newUser, { created: true });
                         }
 
                         // User found
-                        return done(null, user);
+                        return done(null, user, { created: false });
                     })
                     .catch(err => console.log(err));
             }
