@@ -183,14 +183,8 @@ module.exports = socket => {
 
     socket.on('user info', (user) => {
         // If user has connected before and someone has not taken their name
-        if (user && !users.some(u => u.username === user.username)) {
-            socket.username = user.username;
-            socket.color = user.color;
-        } else { // New user or username has been taken
-            socket.username = pickUsername();
-            socket.color = Colors.random();
-            user = {username: socket.username, color: socket.color};
-        }
+        socket.username = user.username;
+        socket.color = user.color;
         socket.emit('user info', user);
         users.push(user);
         console.log('a user connected with username ' + socket.username);
