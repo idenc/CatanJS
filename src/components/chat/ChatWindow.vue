@@ -56,13 +56,12 @@ export default {
     }
   },
   mounted: function () {
-    if (localStorage.username && localStorage.color) {
-      this.username = localStorage.username;
+    // When page loads we emit to server socket
+    if (localStorage.color) {
       this.color = localStorage.color;
-      const user = {username: this.username, color: this.color}
+      const user = {color: this.color}
       this.$socket.emit('user info', user);
     } else {
-      console.log("emitting user")
       this.$socket.emit('user info', null);
     }
 
@@ -76,7 +75,6 @@ export default {
     });
 
     this.sockets.subscribe('user info', (user) => {
-      localStorage.username = user.username;
       localStorage.color = user.color;
       this.username = user.username;
       this.color = user.color;

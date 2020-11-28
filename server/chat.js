@@ -1,5 +1,8 @@
+"use strict";
+
 const {v4: uuidv4} = require('uuid');
 const io = require('./socket').getio();
+const User = require('./models/User');
 
 const usernameGen = {
     adjectives: ['small', 'ugly', 'big', 'beautiful', 'angry', 'sad', 'happy'],
@@ -70,15 +73,6 @@ Colors.random = function () {
     return result;
 };
 
-function pickUsername() {
-    // Picks a random username from a set of adjectives and nouns
-    // This username is then removed from being able to be chosen by removing that index pair from available choices
-    const roll = Math.floor(Math.random() * usernameGen.indexes.length);
-    const indices = usernameGen.indexes.splice(roll, 1)[0];
-
-    return usernameGen.adjectives[indices[0]] + '_' + usernameGen.nouns[indices[1]];
-}
-
 /**
  * Checks whether a color string is a valid hex color
  * source: https://stackoverflow.com/questions/8027423/how-to-check-if-a-string-is-a-valid-hex-color-representation
@@ -99,27 +93,7 @@ module.exports = socket => {
 
     function handleCommand(socket, command) {
         try {
-            if (command.startsWith('/name')) {
-                let name = command.split(" ");
-                if (name.length !== 2) {
-                    commandError(socket, 'Incorrect number of arguments for changing name. Command should be in the form /name <new username>')
-                    return;
-                }
-                name = name[1];
-                if (users.some(u => u.username === name)) {
-                    commandError(socket, `User with username ${name} already exists`);
-                    return;
-                }
-                for (let i = 0; i < users.length; i++) {
-                    if (users[i].username === socket.username) {
-                        io.emit('user changed', {old_name: socket.username, new_name: name});
-                        socket.username = name;
-                        users[i].username = name;
-                        socket.emit('user info', {username: socket.username, color: socket.color});
-                        return;
-                    }
-                }
-            } else if (command.startsWith('/color')) {
+            if (command.startsWith('/color')) {
                 let color = command.split(" ");
                 if (color.length !== 2) {
                     commandError(socket, 'Incorrect number of arguments for changing color. Command should be in the form /color RRGGBB')
@@ -181,15 +155,28 @@ module.exports = socket => {
         }
     });
 
-    socket.on('user info', (user) => {
-        // If user has connected before and someone has not taken their name
-        socket.username = user.username;
-        socket.color = user.color;
-        socket.emit('user info', user);
-        users.push(user);
-        console.log('a user connected with username ' + socket.username);
-        socket.broadcast.emit('user joined', user);
-        socket.emit('chat info', {current_users: users, messages: messages});
-        console.log(users);
+    socket.on('user info', (userInfo) => {
+        if (!userInfo) {
+            // Assign a new color if the client does not have one stored
+            userInfo = {color: Colors.random()};
+        }
+        // User should be logged in
+        if (socket.request.session.passport && socket.request.session.passport.user) {
+            // Search for user by their id in the DB
+            User.findById(socket.request.session.passport.user)
+                .then((user) => {
+                    // Let client know what their username/color is
+                    socket.username = user.name;
+                    userInfo.username = user.name;
+                    socket.color = userInfo.color;
+                    socket.emit('user info', userInfo);
+                    users.push(userInfo);
+                    console.log('a user connected with username ' + socket.username);
+                    socket.broadcast.emit('user joined', userInfo);
+                    socket.emit('chat info', {current_users: users, messages: messages});
+                    console.log(users);
+                })
+                .catch((e) => console.log(e))
+        }
     });
 }
