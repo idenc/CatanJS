@@ -55,10 +55,11 @@ module.exports = app => {
         if (socket.request.session.passport && socket.request.session.passport.user) {
             console.log('user connected with id ' + socket.request.session.passport.user);
         }
-        configureUserRegistration(socket);
         console.log('user connected');
         configureChat(socket)
     });
+
+    configureUserRegistration(app);
 
     // Post request will handle login with passport js
     app.post('/login', (req, res, next) => {
