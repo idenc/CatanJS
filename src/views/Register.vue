@@ -6,6 +6,7 @@
           <i class="fas fa-user-plus" /> Register
         </h1>
         <form
+          v-if="getFinished"
           action="#"
           @submit.prevent="register"
         >
@@ -14,7 +15,7 @@
             alert-type="alert-warning"
           />
           <div class="form-group">
-            <label for="name">Name</label>
+            <label for="name">Username</label>
             <input
               id="name"
               v-model="name"
@@ -24,38 +25,40 @@
               placeholder="Enter Name"
             >
           </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              name="email"
-              class="form-control"
-              placeholder="Enter Email"
-            >
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              name="password"
-              class="form-control"
-              placeholder="Create Password"
-            >
-          </div>
-          <div class="form-group">
-            <label for="password2">Confirm Password</label>
-            <input
-              id="password2"
-              v-model="password2"
-              type="password"
-              name="password2"
-              class="form-control"
-              placeholder="Confirm Password"
-            >
+          <div v-if="!fromGoogle">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
+                name="email"
+                class="form-control"
+                placeholder="Enter Email"
+              >
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input
+                id="password"
+                v-model="password"
+                type="password"
+                name="password"
+                class="form-control"
+                placeholder="Create Password"
+              >
+            </div>
+            <div class="form-group">
+              <label for="password2">Confirm Password</label>
+              <input
+                id="password2"
+                v-model="password2"
+                type="password"
+                name="password2"
+                class="form-control"
+                placeholder="Confirm Password"
+              >
+            </div>
           </div>
           <button
             type="submit"
@@ -78,6 +81,7 @@
 <script>
 "use strict";
 import AuthenticationMessage from "@/components/AuthenticationMessage";
+import axios from 'axios';
 
 export default {
   name: "Register",
@@ -86,6 +90,8 @@ export default {
   },
   data() {
     return {
+      getFinished: false,
+      fromGoogle: false,
       name: '',
       email: '',
       password: '',
@@ -93,20 +99,17 @@ export default {
       errors: Array(),
     }
   },
-  sockets: {
-    user_register() {
-      // When user is successfully registered, redirect to login page.
-      this.$router.push({
-        name: 'Login',
-        params: {statusMessage: 'Registration successful. You can now log in', alertType: 'alert-success'}
-      });
-    },
-    registration_error(msg) {
-      this.errors.push(msg);
-    }
+  mounted() {
+    axios.get('/register')
+        .then(response => {
+          this.fromGoogle = response;
+          this.getFinished = true;
+        })
+        .catch(err => console.log(err));
+
   },
   methods: {
-    register() {
+    regularRegistration() {
       this.errors = [];
 
       // Validate form
@@ -123,11 +126,30 @@ export default {
       if (this.errors.length === 0) { // Validation passed
         console.log("emitting registration");
         // Send registration request to server
-        this.$socket.emit('user_register', {
+        axios.post('/register', {
           name: this.name,
           email: this.email,
           password: this.password
-        });
+        })
+            .then(() => {
+              // When user is successfully registered, redirect to login page.
+              this.$router.push({
+                name: 'Login',
+                params: {statusMessage: 'Registration successful. You can now log in', alertType: 'alert-success'}
+              });
+            }).catch(err => this.errors.push(err.response.data.msg));
+      }
+    },
+    googleRegistration() {
+      axios.post('/register', {name: this.name}, { withCredentials: true})
+          .then(() => this.$router.push('/dashboard'))
+          .catch(err => this.errors.push(err.response.data.msg));
+    },
+    register() {
+      if (this.fromGoogle) {
+        this.googleRegistration();
+      } else {
+        this.regularRegistration();
       }
     }
   }

@@ -56,6 +56,7 @@ module.exports = app => {
             console.log('user connected with id ' + socket.request.session.passport.user);
         }
         configureUserRegistration(socket);
+        console.log('user connected');
         configureChat(socket)
     });
 
@@ -77,6 +78,8 @@ module.exports = app => {
             });
         })(req, res, next);
     });
+
+    configureUserRegistration(app);
 
     app.get('/user', ensureAuthenticated, (req, res) => {
         console.log([req.user, req.session])
@@ -110,9 +113,26 @@ module.exports = app => {
             }
         },
         (req, res) => { // On success, redirect back to '/'
-            res.redirect('/#/dashboard');
+            req.session.save(() => {
+                if (req.authInfo.created) {
+                    console.log("original Id: " + req.user._id);
+                    // Need to make user set username
+                    req.session.user = req.user;
+                    return res.redirect('/#/register');
+                } else {
+                    // User has already registered, redirect
+                    return res.redirect('/#/dashboard');
+                }
+            });
         }
     );
+
+    app.get('/register', (req, res) => {
+        if (req.session.user) {
+            return res.send(true);
+        }
+        return res.send(false);
+    })
 
     http.listen(process.env.PORT || 9999, () => {
         console.log(`listening on *:${process.env.port || 9999}`);
