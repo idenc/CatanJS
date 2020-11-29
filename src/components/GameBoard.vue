@@ -123,63 +123,37 @@ import {SVG} from '@svgdotjs/svg.js'
 export default {
   name: "GameBoard",
   components: {},
-  mounted: function () {
-    const gameboardRadius = 3;
-    // Hexagon ration, height to width
-    const hexagonRatio = 0.866025;
-
-    let gameboardContainer = this.$refs.boardSvgContainer;
-    let offsetWidth = gameboardContainer.offsetWidth;
-    let offsetHeight = gameboardContainer.offsetHeight;
-    let hexWidth;
-    let hexHeight;
-    // Determine maximum size of gameboard that fits play area div
-    if (offsetWidth < offsetHeight) {
-      hexWidth = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1) * hexagonRatio;
-      hexHeight = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1);
-    } else {
-      hexHeight = gameboardContainer.offsetHeight / (2 * 0.75 * gameboardRadius + 2);
-      hexWidth = hexHeight * hexagonRatio;
+  data() {
+    return {
+      hexagonRatio: 0.866025, // Hexagon ration, height to width
+      gameboardRadius: 3,
+      resources: ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'],
     }
-    // Create svg container that fits the maximum gameboard size and store svg in draw variable
-    const draw = SVG().addTo('#board').size(`${(hexWidth) * (2 * gameboardRadius + 2)}px`, `${(hexHeight) + 2 * (gameboardRadius * (hexHeight * 0.75))}px`);
-    const drawHexGroup = draw.group();
+  },
+  mounted: function () {
+    let gameboardContainer = this.$refs.boardSvgContainer;
+    let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
-    const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
+    // Create svg container that fits the maximum gameboard size and store svg in draw variable
+    const draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+    const drawHexGroup = draw.group();
+    const resources = this.resources;
     let resourceIndex = 0;
+    
 
     // Copy the defs into the dynamically created svg.
     // There should be a smarter way to do this but I was having trouble with scope or something.
     const defR = this.$refs.defRef
     draw.node.appendChild(defR)
 
-
-    // Draw the settlements
-    const renderSettlements = (settlement) => {
-      const {x, y} = settlement.point;
-      const r = 15;
-      const settlementCircle = draw
-          .circle(r * 2)
-          .stroke({ width: 4, color: '#aaa' })
-          .translate(x - r, y - r)
-
-      const settlementSVG = settlementCircle.node;
-      settlementSVG.classList.add('settlement-svg')
-      settlementSVG.setAttribute('state', 'empty')
-
-
-      settlementSVG.addEventListener('click', () => {
-        settlementSVG.setAttribute('state', 'settlement')
-      })
-    };
-
     // Hex object
     const Hex = Honeycomb.extendHex({
-      size: (hexWidth) / (2 * hexagonRatio),
+      size: (maxHexSize.width) / (2 * this.hexagonRatio),
 
       render(draw) {
         const {x, y} = this.toPoint()
         const corners = this.corners()
+        
 
         this.hexPolygon = draw
             .polygon(corners.map(({x, y}) => `${x},${y}`))
@@ -229,31 +203,118 @@ export default {
       }
     });
     const Grid = Honeycomb.defineGrid(Hex)
+    console.log(Grid)
 
+    // Render resource tiles
+    const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup);
+    console.log(grid);
+
+    // Render ocean tiles
+    const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
+    console.log(oceanGrid);
+
+    // Render the settlements
+    const settlements = this.locateSettlements(grid);
+    this.renderSettlements(settlements, draw);
+
+    // Add click listener to hexes
+    this.$el.addEventListener('click', ({offsetX, offsetY}) => {
+      const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
+      console.log(hexCoordinates)
+      console.log(offsetX, offsetY)
+      const hex = grid.get(hexCoordinates)
+      console.log(hex)
+
+      // if (hex) {
+      //   hex.highlight()
+      // }
+    })
+
+    // Add a hover listener to hexes
+    this.$el.addEventListener('mousemove', ({offsetX, offsetY}) => {
+      const hexCoordinates = Grid.pointToHex([offsetX, offsetY]);
+      const hoveredHex = grid.get(hexCoordinates);
+
+      grid.forEach(hex => {
+        if (hex === hoveredHex) {
+          hex.handleMouseOver();
+        } else {
+          hex.handleMouseOut();
+        }
+      })
+    })
+
+    // Debounce function for events
+    const debounce = (fn, delay) => {
+      let timeoutID;
+      return function (...args) {
+        if (timeoutID) {
+          clearTimeout(timeoutID);
+        }
+        timeoutID = setTimeout(() => {
+          fn(...args);
+        }, delay);
+      };
+    };
+
+    // Add an event listener that run the function when window dimensions change
+    window.addEventListener('resize', debounce(() => {
+      handleWindowResize();
+    }, 15));
+
+    const handleWindowResize = () => {
+      console.log("here")
+      // grid.forEach(hex => {
+      //   hex.render(drawHexGroup)
+      // })
+      // maxHexSize = determineMaxHexSize(gameboardContainer);
+    }
+  },
+  methods: {
+    // Determine maximum size of gameboard that fits play area div
+    determineMaxHexSize(gameboardContainer) {
+      let offsetWidth = gameboardContainer.offsetWidth;
+      let offsetHeight = gameboardContainer.offsetHeight;
+      let hexWidth;
+      let hexHeight;
+      
+      if (offsetWidth < offsetHeight) {
+        hexWidth = gameboardContainer.offsetWidth / (2 * this.gameboardRadius + 1) * this.hexagonRatio;
+        hexHeight = gameboardContainer.offsetWidth / (2 * this.gameboardRadius + 1);
+      } else {
+        hexHeight = gameboardContainer.offsetHeight / (2 * 0.75 * this.gameboardRadius + 2);
+        hexWidth = hexHeight * this.hexagonRatio;
+      }
+
+      return {width: hexWidth, height: hexHeight}
+    },
     // render hexes
-    const grid = Grid.spiral({
-      radius: gameboardRadius - 1,
-      center: Hex(3, 3),
+    renderResourceHexes(Hex, Grid, drawHexGroup) {
+      const grid = Grid.spiral({
+        radius: this.gameboardRadius - 1,
+        center: Hex(3, 3),
 
-      // render each hex, passing the draw instance
-      onCreate(hex) {
-        hex.render(drawHexGroup)
-      }
-    })
-    console.log(grid)
-
-    const oceanGrid = Grid.ring({
-      radius: gameboardRadius,
-      center: Hex(3, 3),
-      // render each hex, passing the draw instance
-      onCreate(hex) {
-        hex.renderOcean(drawHexGroup)
-      }
-    })
-    console.log(oceanGrid)
-
+        // render each hex, passing the draw instance
+        onCreate(hex) {
+          console.log(hex);
+          hex.render(drawHexGroup);
+        }
+      })
+      return grid;
+    },
+    renderOceanHexes(Hex, Grid, drawHexGroup) {
+      const oceanGrid = Grid.ring({
+        radius: this.gameboardRadius,
+        center: Hex(3, 3),
+        // render each hex, passing the draw instance
+        onCreate(hex) {
+          hex.renderOcean(drawHexGroup);
+        }
+      })
+      return oceanGrid;
+    },
     // Create an array of settlement objects that contain the pixel coordinates of each settlement
-    const locateSettlements = () => {
+    locateSettlements(grid) {
       const settlements = [];
       const rowWidth = grid.radius + 1;
       const maxRowWidth = grid.radius * 2 + 1;
@@ -289,45 +350,36 @@ export default {
       }
       console.log(settlements);
       return settlements;
-    }
-    const settlements = locateSettlements(grid)
-    settlements.forEach(settlement => {
-      renderSettlements(settlement);
-    })
-
-    // Add click listener to hexes
-    this.$el.addEventListener('click', ({offsetX, offsetY}) => {
-      const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
-      console.log(hexCoordinates)
-      console.log(offsetX, offsetY)
-      const hex = grid.get(hexCoordinates)
-      console.log(hex)
-
-      // if (hex) {
-      //   hex.highlight()
-      // }
-    })
-
-    // Add a hover listener to hexes
-    this.$el.addEventListener('mousemove', ({offsetX, offsetY}) => {
-      const hexCoordinates = Grid.pointToHex([offsetX, offsetY]);
-      const hoveredHex = grid.get(hexCoordinates);
-
-      grid.forEach(hex => {
-        if (hex === hoveredHex) {
-          hex.handleMouseOver();
-        } else {
-          hex.handleMouseOut();
-        }
+    },
+    renderSettlements(settlements, drawSVG) {
+      settlements.forEach(settlement => {
+        this.renderSettlement(drawSVG, settlement);
       })
-    })
+    },
+    // Draw the settlements
+    renderSettlement(drawSVG, settlement) {
+      const {x, y} = settlement.point;
+      const r = 15;
+      const settlementCircle = drawSVG
+          .circle(r * 2)
+          .stroke({ width: 4, color: '#aaa' })
+          .translate(x - r, y - r);
+
+      const settlementSVG = settlementCircle.node;
+      settlementSVG.classList.add('settlement-svg');
+      settlementSVG.setAttribute('state', 'empty');
+
+      settlementSVG.addEventListener('click', () => {
+        settlementSVG.setAttribute('state', 'settlement');
+      })
+    },
   }
 }
+
 </script>
 
 <style scoped>
 #board {
-  /* padding: 100px 0; */
   width: 100%;
   height: 100%;
   display: flex;
