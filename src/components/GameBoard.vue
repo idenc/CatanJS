@@ -137,14 +137,38 @@ export default {
     // Create svg container that fits the maximum gameboard size and store svg in draw variable
     const draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
     const drawHexGroup = draw.group();
-    const resources = this.resources;
     let resourceIndex = 0;
-    
+    let tokenIndex = 0;
+    let tiles = ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber', 
+                  'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'];
+    let numberTokens = ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'];
 
     // Copy the defs into the dynamically created svg.
     // There should be a smarter way to do this but I was having trouble with scope or something.
     const defR = this.$refs.defRef
     draw.node.appendChild(defR)
+    
+    //shuffle the elements of an inputted array
+    const shuffleArray = (array) => {
+      let tempArray = array;
+      let remainingElements = tempArray.length, temp, index;
+
+      while(remainingElements){
+        //pick a random remaining unshuffeled element from the array
+        index = Math.floor(Math.random()* remainingElements--)
+        //move that random element to the back of the array then decrease array size by 1
+        //elements in the back of the array are shuffled 
+        temp = tempArray[remainingElements];
+        tempArray[remainingElements] = tempArray[index];
+        tempArray[index] = temp;
+      }
+
+      return tempArray;
+    };
+
+    //Shuffle terrain tiles and number tokens
+    tiles = shuffleArray(tiles);
+    numberTokens = shuffleArray(numberTokens);
 
     // Hex object
     const Hex = Honeycomb.extendHex({
@@ -163,8 +187,15 @@ export default {
 
         this.hexPolygon.node.classList.add('hex')
 
-        console.log(resources[resourceIndex % 6])
-        this.hexPolygon.node.setAttribute('resource', resources[resourceIndex % 6]);
+        console.log(tiles[resourceIndex])
+        this.hexPolygon.node.setAttribute('resource', tiles[resourceIndex]);
+
+        //If the current resource is not a desert assign it a number
+        //Store the assigned number in 'numberToken' attribute
+        if(tiles[resourceIndex] !== 'desert'){
+          this.hexPolygon.node.setAttribute('numberToken', numberTokens[tokenIndex]);
+          tokenIndex += 1;
+        }
         resourceIndex += 1;
       },
 
