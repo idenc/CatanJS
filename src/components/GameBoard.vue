@@ -128,7 +128,16 @@ export default {
       hexagonRatio: 0.866025, // Hexagon ration, height to width
       gameboardRadius: 3,
       resources: ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'],
+      tiles: ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber', 
+                  'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'],
+      numberTokens: ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'],
     }
+  },
+  created: function () {
+    // Add an event listener that run the function when window dimensions change
+    window.addEventListener('resize', this.debounce(() => {
+      this.handleWindowResize();
+    }, 15));
   },
   mounted: function () {
     let gameboardContainer = this.$refs.boardSvgContainer;
@@ -137,107 +146,23 @@ export default {
     // Create svg container that fits the maximum gameboard size and store svg in draw variable
     const draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
     const drawHexGroup = draw.group();
-    let resourceIndex = 0;
-    let tokenIndex = 0;
-    let tiles = ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber', 
-                  'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'];
-    let numberTokens = ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'];
 
     // Copy the defs into the dynamically created svg.
     // There should be a smarter way to do this but I was having trouble with scope or something.
     const defR = this.$refs.defRef
     draw.node.appendChild(defR)
-    
-    //shuffle the elements of an inputted array
-    const shuffleArray = (array) => {
-      let tempArray = array;
-      let remainingElements = tempArray.length, temp, index;
-
-      while(remainingElements){
-        //pick a random remaining unshuffeled element from the array
-        index = Math.floor(Math.random()* remainingElements--)
-        //move that random element to the back of the array then decrease array size by 1
-        //elements in the back of the array are shuffled 
-        temp = tempArray[remainingElements];
-        tempArray[remainingElements] = tempArray[index];
-        tempArray[index] = temp;
-      }
-
-      return tempArray;
-    };
 
     //Shuffle terrain tiles and number tokens
-    tiles = shuffleArray(tiles);
-    numberTokens = shuffleArray(numberTokens);
+    this.tiles = this.shuffleArray(this.tiles);
+    this.numberTokens = this.shuffleArray(this.numberTokens);
 
     // Hex object
-    const Hex = Honeycomb.extendHex({
-      size: (maxHexSize.width) / (2 * this.hexagonRatio),
-
-      render(draw) {
-        const {x, y} = this.toPoint()
-        const corners = this.corners()
-        
-
-        this.hexPolygon = draw
-            .polygon(corners.map(({x, y}) => `${x},${y}`))
-            .stroke({width: 5, color: '#f7eac3'})
-            .fill('none')
-            .translate(x, y)
-
-        this.hexPolygon.node.classList.add('hex')
-
-        console.log(tiles[resourceIndex])
-        this.hexPolygon.node.setAttribute('resource', tiles[resourceIndex]);
-
-        //If the current resource is not a desert assign it a number
-        //Store the assigned number in 'numberToken' attribute
-        if(tiles[resourceIndex] !== 'desert'){
-          this.hexPolygon.node.setAttribute('numberToken', numberTokens[tokenIndex]);
-          tokenIndex += 1;
-        }
-        resourceIndex += 1;
-      },
-
-      renderOcean(draw) {
-        const {x, y} = this.toPoint()
-        const corners = this.corners()
-
-        this.hexPolygon = draw
-            .polygon(corners.map(({x, y}) => `${x},${y}`))
-            .stroke({width: 5, color: '#f7eac3'})
-            .fill('none')
-            .translate(x, y)
-
-        this.hexPolygon.node.classList.add('ocean-hex')
-        this.hexPolygon.node.setAttribute('resource', 'ocean');
-      },
-
-      // highlight() {
-      //   // stop running animation
-      //   this.hexPolygon.timeline().stop()
-      //   // run animation
-      //   this.hexPolygon
-      //     .fill({ opacity: 1, color: 'aquamarine' })
-      //     .animate(1000)
-      //     .fill({ opacity: 0, color: 'none' })
-      // },
-
-      handleMouseOver() {
-        this.hexPolygon.node.classList.add('hex-hovered')
-        drawHexGroup.node.appendChild(this.hexPolygon.node)
-      },
-
-      handleMouseOut() {
-        this.hexPolygon.node.classList.remove('hex-hovered')
-        drawHexGroup.node.prepend(this.hexPolygon.node)
-      }
-    });
+    const Hex = this.defineHexObject(maxHexSize, drawHexGroup);
     const Grid = Honeycomb.defineGrid(Hex)
     console.log(Grid)
 
     // Render resource tiles
-    const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup);
+    const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles, this.numberTokens);
     console.log(grid);
 
     // Render ocean tiles
@@ -248,7 +173,7 @@ export default {
     const settlements = this.locateSettlements(grid);
     this.renderSettlements(settlements, draw);
 
-    // Add click listener to hexes
+    // Add a click listener to hexes
     this.$el.addEventListener('click', ({offsetX, offsetY}) => {
       const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
       console.log(hexCoordinates)
@@ -274,32 +199,6 @@ export default {
         }
       })
     })
-
-    // Debounce function for events
-    const debounce = (fn, delay) => {
-      let timeoutID;
-      return function (...args) {
-        if (timeoutID) {
-          clearTimeout(timeoutID);
-        }
-        timeoutID = setTimeout(() => {
-          fn(...args);
-        }, delay);
-      };
-    };
-
-    // Add an event listener that run the function when window dimensions change
-    window.addEventListener('resize', debounce(() => {
-      handleWindowResize();
-    }, 15));
-
-    const handleWindowResize = () => {
-      console.log("here")
-      // grid.forEach(hex => {
-      //   hex.render(drawHexGroup)
-      // })
-      // maxHexSize = determineMaxHexSize(gameboardContainer);
-    }
   },
   methods: {
     // Determine maximum size of gameboard that fits play area div
@@ -319,8 +218,75 @@ export default {
 
       return {width: hexWidth, height: hexHeight}
     },
-    // render hexes
-    renderResourceHexes(Hex, Grid, drawHexGroup) {
+    defineHexObject(maxHexSize, drawHexGroup) {
+      let resourceIndex = 0;
+      let tokenIndex = 0;
+      const Hex = Honeycomb.extendHex({
+        size: (maxHexSize.width) / (2 * this.hexagonRatio),
+
+        render(draw, tiles, numberTokens) {
+          const {x, y} = this.toPoint()
+          const corners = this.corners()
+          
+
+          this.hexPolygon = draw
+              .polygon(corners.map(({x, y}) => `${x},${y}`))
+              .stroke({width: 5, color: '#f7eac3'})
+              .fill('none')
+              .translate(x, y)
+
+          this.hexPolygon.node.classList.add('hex')
+
+          console.log(tiles[resourceIndex])
+          this.hexPolygon.node.setAttribute('resource', tiles[resourceIndex]);
+
+          //If the current resource is not a desert assign it a number
+          //Store the assigned number in 'numberToken' attribute
+          if(tiles[resourceIndex] !== 'desert'){
+            this.hexPolygon.node.setAttribute('numberToken', numberTokens[tokenIndex]);
+            tokenIndex += 1;
+          }
+          resourceIndex += 1;
+        },
+
+        renderOcean(draw) {
+          const {x, y} = this.toPoint()
+          const corners = this.corners()
+
+          this.hexPolygon = draw
+              .polygon(corners.map(({x, y}) => `${x},${y}`))
+              .stroke({width: 5, color: '#f7eac3'})
+              .fill('none')
+              .translate(x, y)
+
+          this.hexPolygon.node.classList.add('ocean-hex')
+          this.hexPolygon.node.setAttribute('resource', 'ocean');
+        },
+
+        // highlight() {
+        //   // stop running animation
+        //   this.hexPolygon.timeline().stop()
+        //   // run animation
+        //   this.hexPolygon
+        //     .fill({ opacity: 1, color: 'aquamarine' })
+        //     .animate(1000)
+        //     .fill({ opacity: 0, color: 'none' })
+        // },
+
+        handleMouseOver() {
+          this.hexPolygon.node.classList.add('hex-hovered')
+          drawHexGroup.node.appendChild(this.hexPolygon.node)
+        },
+
+        handleMouseOut() {
+          this.hexPolygon.node.classList.remove('hex-hovered')
+          drawHexGroup.node.prepend(this.hexPolygon.node)
+        }
+      });
+      return Hex;
+    },
+    // Render hexes
+    renderResourceHexes(Hex, Grid, drawHexGroup, tiles, numberTokens) {
       const grid = Grid.spiral({
         radius: this.gameboardRadius - 1,
         center: Hex(3, 3),
@@ -328,7 +294,7 @@ export default {
         // render each hex, passing the draw instance
         onCreate(hex) {
           console.log(hex);
-          hex.render(drawHexGroup);
+          hex.render(drawHexGroup, tiles, numberTokens);
         }
       })
       return grid;
@@ -403,6 +369,42 @@ export default {
       settlementSVG.addEventListener('click', () => {
         settlementSVG.setAttribute('state', 'settlement');
       })
+    },
+    // Shuffle the elements of an inputted array
+    shuffleArray(array) {
+      let tempArray = array;
+      let remainingElements = tempArray.length, temp, index;
+
+      while(remainingElements){
+        //pick a random remaining unshuffeled element from the array
+        index = Math.floor(Math.random()* remainingElements--)
+        //move that random element to the back of the array then decrease array size by 1
+        //elements in the back of the array are shuffled 
+        temp = tempArray[remainingElements];
+        tempArray[remainingElements] = tempArray[index];
+        tempArray[index] = temp;
+      }
+
+      return tempArray;
+    },
+    // Debounce function for events
+    debounce(fn, delay) {
+      let timeoutID;
+      return function (...args) {
+        if (timeoutID) {
+          clearTimeout(timeoutID);
+        }
+        timeoutID = setTimeout(() => {
+          fn(...args);
+        }, delay);
+      };
+    },
+    handleWindowResize() {
+      console.log("here")
+      // grid.forEach(hex => {
+      //   hex.render(drawHexGroup)
+      // })
+      // maxHexSize = determineMaxHexSize(gameboardContainer);
     },
   }
 }
