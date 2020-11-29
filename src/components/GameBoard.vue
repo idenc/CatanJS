@@ -3,7 +3,7 @@
     id="board"
     ref="boardSvgContainer"
   >
-    <svg>
+    <svg id="defs-svg">
       <defs ref="defRef">
         <pattern
           id="pattern1"
@@ -125,26 +125,27 @@ export default {
   components: {},
   mounted: function () {
     const gameboardRadius = 3;
+    // Hexagon ration, height to width
+    const hexagonRatio = 0.866025;
 
     let gameboardContainer = this.$refs.boardSvgContainer;
     let offsetWidth = gameboardContainer.offsetWidth;
     let offsetHeight = gameboardContainer.offsetHeight;
     let hexWidth;
+    let hexHeight;
+    // Determine maximum size of gameboard that fits play area div
     if (offsetWidth < offsetHeight) {
-      hexWidth = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1);
+      hexWidth = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1) * hexagonRatio;
+      hexHeight = gameboardContainer.offsetWidth / (2 * gameboardRadius + 1);
     } else {
-      hexWidth = gameboardContainer.offsetHeight / (2 * gameboardRadius + 1) * 1.25;
+      hexHeight = gameboardContainer.offsetHeight / (2 * 0.75 * gameboardRadius + 2);
+      hexWidth = hexHeight * hexagonRatio;
     }
-    console.log(gameboardContainer)
-    console.log(hexWidth)
+    // Create svg container that fits the maximum gameboard size and store svg in draw variable
+    const draw = SVG().addTo('#board').size(`${(hexWidth) * (2 * gameboardRadius + 2)}px`, `${(hexHeight) + 2 * (gameboardRadius * (hexHeight * 0.75))}px`);
 
     const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
     let resourceIndex = 0;
-
-
-    const draw = SVG().addTo('#board').size('100%', '100%');
-    // const use = draw.use('pattern1', require('../assets/img/tiles/tilepatterns.svg'))
-
 
     // Copy the defs into the dynamically created svg.
     // There should be a smarter way to do this but I was having trouble with scope or something.
@@ -173,7 +174,7 @@ export default {
 
     // Hex object
     const Hex = Honeycomb.extendHex({
-      size: hexWidth / 2,
+      size: (hexWidth) / (2 * hexagonRatio),
 
       render(draw) {
         const {x, y} = this.toPoint()
@@ -328,6 +329,13 @@ export default {
   /* padding: 100px 0; */
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#defs-svg {
+  display: none;
 }
 
 #drawSVG {
