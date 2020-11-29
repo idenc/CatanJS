@@ -205,19 +205,21 @@ export default {
     }, 100));
 
     const handleWindowResize = () => {
+      // Recalculate max dimensions, redefine the grid, edit svg container dimensions to max dims
       maxHexSize = this.determineMaxHexSize(gameboardContainer);
       Hex = this.defineHexObject(maxHexSize, drawHexGroup);
       Grid = Honeycomb.defineGrid(Hex);
       draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
       draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`)
-
+      // Update the dimensions of the grid and ocean tiles
       grid.forEach((hex) => {
         hex.redraw(maxHexSize);
       })
+      grid.center.redraw(maxHexSize) // I'm not sure why it doesn't work without this.
       oceanGrid.forEach((hex) => {
         hex.redrawOcean(maxHexSize);
       })
-
+      // Update the dimensions of the settlements
       settlements = this.updateSettlementLocations(grid, settlements);
       this.redrawSettlements(settlements, draw);
     }
