@@ -134,10 +134,7 @@ export default {
     }
   },
   created: function () {
-    // Add an event listener that run the function when window dimensions change
-    window.addEventListener('resize', this.debounce(() => {
-      this.handleWindowResize();
-    }, 15));
+
   },
   mounted: function () {
     let gameboardContainer = this.$refs.boardSvgContainer;
@@ -157,8 +154,9 @@ export default {
     this.numberTokens = this.shuffleArray(this.numberTokens);
 
     // Hex object
-    const Hex = this.defineHexObject(maxHexSize, drawHexGroup);
-    const Grid = Honeycomb.defineGrid(Hex)
+    let Hex = this.defineHexObject(maxHexSize, drawHexGroup);
+    console.log(Hex)
+    let Grid = Honeycomb.defineGrid(Hex)
     console.log(Grid)
 
     // Render resource tiles
@@ -170,8 +168,9 @@ export default {
     console.log(oceanGrid);
 
     // Render the settlements
-    const settlements = this.locateSettlements(grid);
+    let settlements = this.locateSettlements(grid);
     this.renderSettlements(settlements, draw);
+    console.log(settlements)
 
     // Add a click listener to hexes
     this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -199,6 +198,30 @@ export default {
         }
       })
     })
+
+    // Add an event listener that run the function when window dimensions change
+    window.addEventListener('resize', this.debounce(() => {
+      handleWindowResize();
+    }, 100));
+
+    const handleWindowResize = () => {
+      maxHexSize = this.determineMaxHexSize(gameboardContainer);
+      Hex = this.defineHexObject(maxHexSize, drawHexGroup);
+      Grid = Honeycomb.defineGrid(Hex);
+      draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
+      draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`)
+
+      grid.forEach((hex) => {
+        hex.redraw(maxHexSize);
+      })
+      oceanGrid.forEach((hex) => {
+        hex.redrawOcean(maxHexSize);
+      })
+
+      settlements = this.updateSettlementLocations(grid, settlements);
+      this.redrawSettlements(settlements, draw);
+    }
+    console.log((maxHexSize.width) / (2 * this.hexagonRatio))
   },
   methods: {
     // Determine maximum size of gameboard that fits play area div
@@ -221,8 +244,9 @@ export default {
     defineHexObject(maxHexSize, drawHexGroup) {
       let resourceIndex = 0;
       let tokenIndex = 0;
-      const Hex = Honeycomb.extendHex({
-        size: (maxHexSize.width) / (2 * this.hexagonRatio),
+      const hexagonRatio = this.hexagonRatio;
+      let Hex = Honeycomb.extendHex({
+        size: (maxHexSize.width) / (2 * hexagonRatio),
 
         render(draw, tiles, numberTokens) {
           const {x, y} = this.toPoint()
@@ -237,7 +261,6 @@ export default {
 
           this.hexPolygon.node.classList.add('hex')
 
-          console.log(tiles[resourceIndex])
           this.hexPolygon.node.setAttribute('resource', tiles[resourceIndex]);
 
           //If the current resource is not a desert assign it a number
@@ -247,6 +270,20 @@ export default {
             tokenIndex += 1;
           }
           resourceIndex += 1;
+        },
+
+        redraw(maxHexSize) {
+          const {x, y} = this.toPoint()
+          const corners = this.corners()
+
+          this.size.xRadius = (maxHexSize.width) / (2 * hexagonRatio);
+          this.size.yRadius = (maxHexSize.width) / (2 * hexagonRatio);
+          this.hexPolygon.node.points.forEach((point, i) => {
+            point.x = corners[i].x;
+            point.y = corners[i].y;
+          })
+          this.hexPolygon.transform(0)
+          this.hexPolygon.translate(x, y)
         },
 
         renderOcean(draw) {
@@ -261,6 +298,20 @@ export default {
 
           this.hexPolygon.node.classList.add('ocean-hex')
           this.hexPolygon.node.setAttribute('resource', 'ocean');
+        },
+
+        redrawOcean(maxHexSize) {
+          const {x, y} = this.toPoint()
+          const corners = this.corners()
+
+          this.size.xRadius = (maxHexSize.width) / (2 * hexagonRatio);
+          this.size.yRadius = (maxHexSize.width) / (2 * hexagonRatio);
+          this.hexPolygon.node.points.forEach((point, i) => {
+            point.x = corners[i].x;
+            point.y = corners[i].y;
+          })
+          this.hexPolygon.transform(0)
+          this.hexPolygon.translate(x, y)
         },
 
         // highlight() {
@@ -293,7 +344,6 @@ export default {
 
         // render each hex, passing the draw instance
         onCreate(hex) {
-          console.log(hex);
           hex.render(drawHexGroup, tiles, numberTokens);
         }
       })
@@ -345,13 +395,23 @@ export default {
         rowNumTop++;
         rowNumBottom--;
       }
-      console.log(settlements);
+      return settlements;
+    },
+    updateSettlementLocations(grid, settlements) {
+      const newSettlements = this.locateSettlements(grid);
+      settlements.forEach((settlement, i) => {
+        settlement.x = newSettlements[i].x;
+        settlement.y = newSettlements[i].y;
+        settlement.point = newSettlements[i].point;
+      })
       return settlements;
     },
     renderSettlements(settlements, drawSVG) {
       settlements.forEach(settlement => {
-        this.renderSettlement(drawSVG, settlement);
+        let settlementSVG = this.renderSettlement(drawSVG, settlement);
+        Object.assign(settlement, {svg: settlementSVG});
       })
+      console.log(settlements)
     },
     // Draw the settlements
     renderSettlement(drawSVG, settlement) {
@@ -369,6 +429,19 @@ export default {
       settlementSVG.addEventListener('click', () => {
         settlementSVG.setAttribute('state', 'settlement');
       })
+
+      return settlementCircle;
+    },
+    redrawSettlements(settlements, drawSVG) {
+      settlements.forEach(settlement => {
+        this.redrawSettlement(drawSVG, settlement);
+      })
+    },
+    redrawSettlement(drawSVG, settlement) {
+      const {x, y} = settlement.point;
+      const r = 15;
+      settlement.svg.transform(0);
+      settlement.svg.translate(x - r, y - r);
     },
     // Shuffle the elements of an inputted array
     shuffleArray(array) {
@@ -398,13 +471,6 @@ export default {
           fn(...args);
         }, delay);
       };
-    },
-    handleWindowResize() {
-      console.log("here")
-      // grid.forEach(hex => {
-      //   hex.render(drawHexGroup)
-      // })
-      // maxHexSize = determineMaxHexSize(gameboardContainer);
     },
   }
 }
