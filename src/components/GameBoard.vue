@@ -143,6 +143,7 @@ export default {
     }
     // Create svg container that fits the maximum gameboard size and store svg in draw variable
     const draw = SVG().addTo('#board').size(`${(hexWidth) * (2 * gameboardRadius + 2)}px`, `${(hexHeight) + 2 * (gameboardRadius * (hexHeight * 0.75))}px`);
+    const drawHexGroup = draw.group();
 
     const resources = ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'];
     let resourceIndex = 0;
@@ -180,16 +181,16 @@ export default {
         const {x, y} = this.toPoint()
         const corners = this.corners()
 
-        this.draw = draw
+        this.hexPolygon = draw
             .polygon(corners.map(({x, y}) => `${x},${y}`))
             .stroke({width: 5, color: '#f7eac3'})
             .fill('none')
             .translate(x, y)
 
-        this.draw.node.classList.add('hex')
+        this.hexPolygon.node.classList.add('hex')
 
         console.log(resources[resourceIndex % 6])
-        this.draw.node.setAttribute('resource', resources[resourceIndex % 6]);
+        this.hexPolygon.node.setAttribute('resource', resources[resourceIndex % 6]);
         resourceIndex += 1;
       },
 
@@ -197,34 +198,34 @@ export default {
         const {x, y} = this.toPoint()
         const corners = this.corners()
 
-        this.draw = draw
+        this.hexPolygon = draw
             .polygon(corners.map(({x, y}) => `${x},${y}`))
             .stroke({width: 5, color: '#f7eac3'})
             .fill('none')
             .translate(x, y)
 
-        this.draw.node.classList.add('ocean-hex')
-        this.draw.node.setAttribute('resource', 'ocean');
+        this.hexPolygon.node.classList.add('ocean-hex')
+        this.hexPolygon.node.setAttribute('resource', 'ocean');
       },
 
       // highlight() {
       //   // stop running animation
-      //   this.draw.timeline().stop()
+      //   this.hexPolygon.timeline().stop()
       //   // run animation
-      //   this.draw
+      //   this.hexPolygon
       //     .fill({ opacity: 1, color: 'aquamarine' })
       //     .animate(1000)
       //     .fill({ opacity: 0, color: 'none' })
       // },
 
       handleMouseOver() {
-        this.draw.node.classList.add('hex-hovered')
-        draw.node.appendChild(this.draw.node)
+        this.hexPolygon.node.classList.add('hex-hovered')
+        drawHexGroup.node.appendChild(this.hexPolygon.node)
       },
 
       handleMouseOut() {
-        this.draw.node.classList.remove('hex-hovered')
-        draw.node.prepend(this.draw.node)
+        this.hexPolygon.node.classList.remove('hex-hovered')
+        drawHexGroup.node.prepend(this.hexPolygon.node)
       }
     });
     const Grid = Honeycomb.defineGrid(Hex)
@@ -236,7 +237,7 @@ export default {
 
       // render each hex, passing the draw instance
       onCreate(hex) {
-        hex.render(draw)
+        hex.render(drawHexGroup)
       }
     })
     console.log(grid)
@@ -246,7 +247,7 @@ export default {
       center: Hex(3, 3),
       // render each hex, passing the draw instance
       onCreate(hex) {
-        hex.renderOcean(draw)
+        hex.renderOcean(drawHexGroup)
       }
     })
     console.log(oceanGrid)
