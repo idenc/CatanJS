@@ -130,14 +130,14 @@ const assignNeighbours = (settlementArray, maxRowWidth) => {
             if (settlement.x > 0) {
                 // left neighbour
                 neighbours.push({x: settlement.x - 1, y: settlement.y});
-                if (settlement.y > 0
-                    && (settlement.y < halfRow && settlement.x % 2 !== 0 || settlement.y >= halfRow && settlement.x % 2 === 0)) {
-                    // above neighbour
-                    neighbours.push({
-                        x: i < halfRow ? settlement.x - 1 : i > halfRow ? settlement.x + 1 : settlement.x,
-                        y: settlement.y - 1
-                    })
-                }
+            }
+            if (settlement.y > 0
+                && (settlement.y < halfRow && settlement.x % 2 !== 0 || settlement.y >= halfRow && settlement.x % 2 === 0)) {
+                // above neighbour
+                neighbours.push({
+                    x: i < halfRow ? settlement.x - 1 : i > halfRow ? settlement.x + 1 : settlement.x,
+                    y: settlement.y - 1
+                })
             }
             // right neighbour
             if (settlement.x < rowSettlements.length - 1) {
