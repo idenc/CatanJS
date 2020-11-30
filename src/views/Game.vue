@@ -14,9 +14,7 @@
         <ChatWindow id="chat" />
       </div>
       <div id="sidebar-buttons-container">
-        <button class="btn btn-primary btn-block">
-          Build
-        </button>
+        <BuildButton />
         <button class="btn btn-primary btn-block">
           Trade
         </button>
@@ -34,12 +32,16 @@
 import GameBoard from "@/components/GameBoard";
 import UserList from "@/components/chat/UserList";
 import ChatWindow from "@/components/chat/ChatWindow";
+import BuildButton from "@/components/BuildButton";
 
 export default {
 
   name: "Game",
-  components: {ChatWindow, UserList, GameBoard},
+  components: {BuildButton, ChatWindow, UserList, GameBoard},
   mounted: function () {
+  },
+  methods: {
+
   }
 }
 </script>
