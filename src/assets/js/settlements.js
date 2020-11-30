@@ -1,5 +1,7 @@
-const locateSettlements = (grid, rowWidth, maxRowWidth) => {
+const locateSettlements = (grid) => {
     const settlements = [];
+    const rowWidth = grid.radius + 1;
+    const maxRowWidth = grid.radius * 2 + 1;
     let rowNumTop = 0;
     let rowNumBottom = maxRowWidth;
     for (let i = rowWidth; i <= maxRowWidth; i++) {
@@ -77,22 +79,43 @@ const locateSettlements = (grid, rowWidth, maxRowWidth) => {
 }
 
 // Draw the settlements
-const renderSettlements = (settlement, draw, settlementRadius) => {
+const renderSettlements = (settlements, drawSVG, settlementRadius) => {
+    settlements.forEach(settlement => {
+        let settlementSVG = renderSettlement(drawSVG, settlement, settlementRadius);
+        Object.assign(settlement, {svg: settlementSVG});
+    })
+    console.log(settlements)
+}
+
+const renderSettlement = (drawSVG, settlement, settlementRadius) => {
     const {x, y} = settlement.point;
-    const settlementCircle = draw
+    const settlementCircle = drawSVG
         .circle(settlementRadius * 2)
         .stroke({width: 4, color: '#aaa'})
-        .translate(x - settlementRadius, y - settlementRadius)
+        .translate(x - settlementRadius, y - settlementRadius);
 
     const settlementSVG = settlementCircle.node;
-    settlementSVG.classList.add('settlement-svg')
-    settlementSVG.setAttribute('state', 'empty')
-
+    settlementSVG.classList.add('settlement-svg');
+    settlementSVG.setAttribute('state', 'empty');
 
     settlementSVG.addEventListener('click', () => {
-        settlementSVG.setAttribute('state', 'settlement')
+        settlementSVG.setAttribute('state', 'settlement');
     })
-};
+
+    return settlementCircle;
+}
+
+const redrawSettlements = (settlements, drawSVG, settlementRadius) => {
+    settlements.forEach(settlement => {
+        redrawSettlement(drawSVG, settlement, settlementRadius);
+    })
+}
+
+const redrawSettlement = (drawSVG, settlement, settlementRadius) => {
+    const {x, y} = settlement.point;
+    settlement.svg.transform(0);
+    settlement.svg.translate(x - settlementRadius, y - settlementRadius);
+}
 
 const assignNeighbours = (settlementArray, maxRowWidth) => {
     const numRows = maxRowWidth + 1;
@@ -137,6 +160,15 @@ const assignNeighbours = (settlementArray, maxRowWidth) => {
 // const drawRoad = (settlementsMap, fromCoord, toCoord) => {
 //
 // }
+const updateSettlementLocations = (grid, settlements) => {
+    const newSettlements = locateSettlements(grid);
+    settlements.forEach((settlement, i) => {
+        settlement.x = newSettlements[i].x;
+        settlement.y = newSettlements[i].y;
+        settlement.point = newSettlements[i].point;
+    })
+    return settlements;
+}
 
 const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
     const visitedCoords = [];
@@ -170,14 +202,14 @@ const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
 
             // Draw the road
             const road = draw
-                .rect(length, roadGap + 15)
+                .rect(length, roadGap)
                 .fill({color: 'blue'})
                 .cx((settlementPoint.x + neighbourPoint.x) / 2)
                 .cy((settlementPoint.y + neighbourPoint.y) / 2)
                 .rotate(angleDeg);
             road.front();
-            road.click(function() {
-               console.log(`Clicked road (${settlement.x}, ${settlement.y})`);
+            road.click(function () {
+                console.log(`Clicked road (${settlement.x}, ${settlement.y})`);
             });
 
             // Draw coordinate for debugging
@@ -204,8 +236,12 @@ const getSettlementsMap = (settlementsArray) => {
 
 module.exports = {
     locateSettlements,
-    renderSettlements,
     assignNeighbours,
     drawRoadDebug,
-    getSettlementsMap
+    getSettlementsMap,
+    renderSettlements,
+    renderSettlement,
+    updateSettlementLocations,
+    redrawSettlements,
+    redrawSettlement
 }

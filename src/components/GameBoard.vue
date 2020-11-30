@@ -121,10 +121,10 @@ import * as Honeycomb from 'honeycomb-grid'
 import {SVG} from '@svgdotjs/svg.js'
 import {
   assignNeighbours,
-  drawRoadDebug,
-  getSettlementsMap,
   locateSettlements,
-  renderSettlements
+  renderSettlements,
+  drawRoadDebug,
+  getSettlementsMap
 } from "@/assets/js/settlements";
 
 export default {
@@ -136,8 +136,9 @@ export default {
       gameboardRadius: 3,
       resources: ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'],
       tiles: ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber',
-                  'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'],
+        'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'],
       numberTokens: ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'],
+      oceanGap: 5,
       roadGap: 10,
       settlementRadius: 15,
     }
@@ -176,10 +177,15 @@ export default {
     const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
     console.log(oceanGrid);
 
-    // Render the settlements
-    let settlements = this.locateSettlements(grid);
-    this.renderSettlements(settlements, draw);
-    console.log(settlements)
+    // Setup settlements
+    const maxRowWidth = grid.radius * 2 + 1;
+    let settlementsArray = locateSettlements(grid);
+    renderSettlements(settlementsArray, draw, this.settlementRadius);
+    console.log(settlementsArray)
+    assignNeighbours(settlementsArray, maxRowWidth);
+    console.log(settlementsArray);
+    const settlementsMap = getSettlementsMap(settlementsArray);
+    drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
 
     // Add a click listener to hexes
     this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -229,8 +235,8 @@ export default {
         hex.redrawOcean(maxHexSize);
       })
       // Update the dimensions of the settlements
-      settlements = this.updateSettlementLocations(grid, settlements);
-      this.redrawSettlements(settlements, draw);
+      settlementsArray = this.updateSettlementLocations(grid, settlementsArray);
+      this.redrawSettlements(settlementsArray, draw, this.settlementRadius);
     }
     console.log((maxHexSize.width) / (2 * this.hexagonRatio))
   },
@@ -256,7 +262,8 @@ export default {
       let resourceIndex = 0;
       let tokenIndex = 0;
       const hexagonRatio = this.hexagonRatio;
-      let Hex = Honeycomb.extendHex({
+      const self = this;
+      return Honeycomb.extendHex({
         size: (maxHexSize.width) / (2 * hexagonRatio),
 
         render(draw, tiles, numberTokens) {
@@ -266,7 +273,7 @@ export default {
 
           this.hexPolygon = draw
               .polygon(corners.map(({x, y}) => `${x},${y}`))
-              .stroke({width: 5, color: '#f7eac3'})
+              .stroke({width: self.roadGap, color: '#f7eac3'})
               .fill('none')
               .translate(x, y)
 
@@ -276,7 +283,7 @@ export default {
 
           //If the current resource is not a desert assign it a number
           //Store the assigned number in 'numberToken' attribute
-          if(tiles[resourceIndex] !== 'desert'){
+          if (tiles[resourceIndex] !== 'desert') {
             this.hexPolygon.node.setAttribute('numberToken', numberTokens[tokenIndex]);
             tokenIndex += 1;
           }
@@ -303,7 +310,7 @@ export default {
 
           this.hexPolygon = draw
               .polygon(corners.map(({x, y}) => `${x},${y}`))
-              .stroke({width: self.roadGap, color: '#f7eac3'})
+              .stroke({width: self.oceanGap, color: '#f7eac3'})
               .fill('none')
               .translate(x, y)
 
@@ -345,7 +352,6 @@ export default {
           drawHexGroup.node.prepend(this.hexPolygon.node)
         }
       });
-      return Hex;
     },
     // Render hexes
     renderResourceHexes(Hex, Grid, drawHexGroup, tiles, numberTokens) {
@@ -371,97 +377,14 @@ export default {
       })
       return oceanGrid;
     },
-    // Create an array of settlement objects that contain the pixel coordinates of each settlement
-    locateSettlements(grid) {
-      const settlements = [];
-      const rowWidth = grid.radius + 1;
-      const maxRowWidth = grid.radius * 2 + 1;
-      let rowNumTop = 0;
-      let rowNumBottom = maxRowWidth;
-      for (let i = rowWidth; i <= maxRowWidth; i++) {
-        // Create settlements on the top half of the grid
-        const topHexes = grid.filter(hex => hex.y === rowNumTop + 1).sort((a, b) => a.x - b.x);
-        // Loops through each hex in the current row
-        topHexes.forEach((hex, j) => {
-          let corners = hex.corners();
-          const {x, y} = hex.toPoint()
-          if (j === 0) {
-            settlements.push({x: 0, y: rowNumTop, point: {x: corners[4].x + x, y: corners[4].y + y}})
-          }
-          settlements.push({x: (j * 2) + 1, y: rowNumTop, point: {x: corners[5].x + x, y: corners[5].y + y}})
-          settlements.push({x: (j * 2) + 2, y: rowNumTop, point: {x: corners[0].x + x, y: corners[0].y + y}})
-        })
-        // Create settlements on the bottom half of the grid
-        const bottomHexes = grid.filter(hex => hex.y === rowNumBottom).sort((a, b) => a.x - b.x);
-        // Loops through each hex in the current row
-        bottomHexes.forEach((hex, i) => {
-          let corners = hex.corners();
-          const {x, y} = hex.toPoint()
-          if (i === 0) {
-            settlements.push({x: 0, y: rowNumBottom, point: {x: corners[3].x + x, y: corners[3].y + y}})
-          }
-          settlements.push({x: (i * 2) + 1, y: rowNumBottom, point: {x: corners[1].x + x, y: corners[1].y + y}})
-          settlements.push({x: (i * 2) + 2, y: rowNumBottom, point: {x: corners[2].x + x, y: corners[2].y + y}})
-        })
-        rowNumTop++;
-        rowNumBottom--;
-      }
-      return settlements;
-    },
-    updateSettlementLocations(grid, settlements) {
-      const newSettlements = this.locateSettlements(grid);
-      settlements.forEach((settlement, i) => {
-        settlement.x = newSettlements[i].x;
-        settlement.y = newSettlements[i].y;
-        settlement.point = newSettlements[i].point;
-      })
-      return settlements;
-    },
-    renderSettlements(settlements, drawSVG) {
-      settlements.forEach(settlement => {
-        let settlementSVG = this.renderSettlement(drawSVG, settlement);
-        Object.assign(settlement, {svg: settlementSVG});
-      })
-      console.log(settlements)
-    },
-    // Draw the settlements
-    renderSettlement(drawSVG, settlement) {
-      const {x, y} = settlement.point;
-      const r = 15;
-      const settlementCircle = drawSVG
-          .circle(r * 2)
-          .stroke({ width: 4, color: '#aaa' })
-          .translate(x - r, y - r);
-
-      const settlementSVG = settlementCircle.node;
-      settlementSVG.classList.add('settlement-svg');
-      settlementSVG.setAttribute('state', 'empty');
-
-      settlementSVG.addEventListener('click', () => {
-        settlementSVG.setAttribute('state', 'settlement');
-      })
-
-      return settlementCircle;
-    },
-    redrawSettlements(settlements, drawSVG) {
-      settlements.forEach(settlement => {
-        this.redrawSettlement(drawSVG, settlement);
-      })
-    },
-    redrawSettlement(drawSVG, settlement) {
-      const {x, y} = settlement.point;
-      const r = 15;
-      settlement.svg.transform(0);
-      settlement.svg.translate(x - r, y - r);
-    },
     // Shuffle the elements of an inputted array
     shuffleArray(array) {
       let tempArray = array;
       let remainingElements = tempArray.length, temp, index;
 
-      while(remainingElements){
+      while (remainingElements) {
         //pick a random remaining unshuffeled element from the array
-        index = Math.floor(Math.random()* remainingElements--)
+        index = Math.floor(Math.random() * remainingElements--)
         //move that random element to the back of the array then decrease array size by 1
         //elements in the back of the array are shuffled
         temp = tempArray[remainingElements];
