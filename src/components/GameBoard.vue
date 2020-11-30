@@ -124,7 +124,7 @@ import {
   locateSettlements,
   renderSettlements,
   drawRoadDebug,
-  getSettlementsMap
+  getSettlementsMap, updateSettlementLocations, redrawSettlements
 } from "@/assets/js/settlements";
 
 export default {
@@ -181,9 +181,7 @@ export default {
     const maxRowWidth = grid.radius * 2 + 1;
     let settlementsArray = locateSettlements(grid);
     renderSettlements(settlementsArray, draw, this.settlementRadius);
-    console.log(settlementsArray)
     assignNeighbours(settlementsArray, maxRowWidth);
-    console.log(settlementsArray);
     const settlementsMap = getSettlementsMap(settlementsArray);
     drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
 
@@ -235,8 +233,8 @@ export default {
         hex.redrawOcean(maxHexSize);
       })
       // Update the dimensions of the settlements
-      settlementsArray = this.updateSettlementLocations(grid, settlementsArray);
-      this.redrawSettlements(settlementsArray, draw, this.settlementRadius);
+      settlementsArray = updateSettlementLocations(grid, settlementsArray);
+      redrawSettlements(settlementsArray, draw, this.settlementRadius);
     }
     console.log((maxHexSize.width) / (2 * this.hexagonRatio))
   },
