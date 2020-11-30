@@ -123,7 +123,10 @@ const assignNeighbours = (settlementArray, maxRowWidth) => {
             if (settlement.y < maxRowWidth
                 && (settlement.y < halfRow && settlement.x % 2 === 0 || settlement.y >= halfRow && settlement.x % 2 !== 0)) {
                 // below neighbour
-                neighbours.push({x: i < halfRow - 1 ? settlement.x + 1 : i >= halfRow ? settlement.x - 1 : settlement.x, y: settlement.y + 1})
+                neighbours.push({
+                    x: i < halfRow - 1 ? settlement.x + 1 : i >= halfRow ? settlement.x - 1 : settlement.x,
+                    y: settlement.y + 1
+                })
             }
 
             settlement.neighbours = neighbours;
@@ -131,7 +134,11 @@ const assignNeighbours = (settlementArray, maxRowWidth) => {
     }
 }
 
-const drawRoadDebug = (settlementsMap, draw) => {
+// const drawRoad = (settlementsMap, fromCoord, toCoord) => {
+//
+// }
+
+const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
     const visitedCoords = [];
     // For each settlement
     for (const settlement of settlementsMap.values()) {
@@ -155,27 +162,31 @@ const drawRoadDebug = (settlementsMap, draw) => {
                 neighbourPoint.x - settlementPoint.x
             ) * 180 / Math.PI;
 
+            // Calculate distance between the settlements and add a small gap
             const length = Math.hypot(
                 neighbourPoint.x - settlementPoint.x,
                 neighbourPoint.y - settlementPoint.y
-            );
+            ) - (settlementRadius * 2 + 5);
 
             // Draw the road
-            const transform = {
-                rotate: angleDeg,
-                translateX: settlementPoint.x,
-                translateY: settlementPoint.y - 10,
-                origin: 'top left'
-            };
-            draw
-                .rect(length, 10)
+            const road = draw
+                .rect(length, roadGap + 15)
                 .fill({color: 'blue'})
-                .transform(transform);
+                .cx((settlementPoint.x + neighbourPoint.x) / 2)
+                .cy((settlementPoint.y + neighbourPoint.y) / 2)
+                .rotate(angleDeg);
+            road.front();
+            road.click(function() {
+               console.log(`Clicked road (${settlement.x}, ${settlement.y})`);
+            });
+
+            // Draw coordinate for debugging
             draw
                 .text(`${settlement.x}, ${settlement.y}`)
                 .fill('black')
                 .transform({translateX: settlementPoint.x, translateY: settlementPoint.y})
         });
+        // Ensure roads are only drawn once
         visitedCoords.push({x: settlement.x, y: settlement.y});
     }
 }

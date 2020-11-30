@@ -254,7 +254,7 @@ export default {
     assignNeighbours(settlementsArray, maxRowWidth);
     console.log(settlementsArray);
     const settlementsMap = getSettlementsMap(settlementsArray);
-    drawRoadDebug(settlementsMap, draw);
+    drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
 
     // Add click listener to hexes
     this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -337,6 +337,10 @@ export default {
 ::v-deep .hex.hex-hovered {
   stroke: #11efdd;
   z-index: 10;
+}
+
+::v-deep .road {
+  z-index: 100;
 }
 
 </style>
