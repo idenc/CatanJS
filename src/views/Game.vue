@@ -54,15 +54,16 @@ export default {
 
 #board-container {
   flex-grow: 5;
-  flex-basis: 1px;
+  flex-shrink: 1;
   height: 100vh;
+  overflow: hidden;
 }
 
 #sidebar-container {
   display: flex;
   flex-direction: column;
   flex-grow: 2;
-  flex-basis: 1px;
+  flex-shrink: 0;
   height: 100vh;
   background: rgb(133, 133, 133);
   padding: 1rem;
