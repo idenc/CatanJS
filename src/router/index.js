@@ -5,6 +5,7 @@ import Register from "@/views/Register";
 import Login from "@/views/Login";
 import Dashboard from "@/views/Dashboard";
 import Game from "@/views/Game";
+import Lobby from "@/views/Lobby";
 
 Vue.use(VueRouter)
 
@@ -35,6 +36,11 @@ const routes = [
         name: 'Game',
         component: Game,
         props: true
+    },
+    {
+        path: '/lobby',
+        name: 'Lobby',
+        component: Lobby,
     },
 ]
 

@@ -9,6 +9,7 @@ const MongoStore = require('connect-mongo')(session);
 const {ensureAuthenticated} = require('./config/auth');
 const configureUserRegistration = require('./registration');
 const configureChat = require('./chat');
+const configureLobby = require('./lobby');
 
 module.exports = app => {
     // Passport config
@@ -56,7 +57,9 @@ module.exports = app => {
             console.log('user connected with id ' + socket.request.session.passport.user);
         }
         console.log('user connected');
-        configureChat(socket)
+
+        configureChat(socket);
+        configureLobby(socket);
     });
 
     configureUserRegistration(app);
