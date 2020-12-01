@@ -129,7 +129,7 @@ export default {
         const gameRequest = {
           name : gameName,
           type : gameType,
-          numPlayers : 0,
+          numPlayers : 1,
           playerCap : playerType,
           players : [], // Server adds owner's socket (other sockets to be added by joining)
           password : gamePassword
