@@ -78,17 +78,52 @@ const locateSettlements = (grid) => {
     return settlements;
 }
 
+// Will need to determine when a space is available to build a settlement
+const settlementAvailable = (settlement) => {
+    return true;
+}
+
 // Draw the settlements
 const renderSettlements = (settlements, drawSVG, settlementRadius) => {
     settlements.forEach(settlement => {
-        let settlementSVG = renderSettlement(drawSVG, settlement, settlementRadius);
-        Object.assign(settlement, {svg: settlementSVG});
+        if (settlementAvailable(settlement)) {
+            let settlementSVG = renderSettlement(drawSVG, settlement, settlementRadius);
+            Object.assign(settlement, {svg: settlementSVG});
+        }
     })
-    console.log(settlements)
+}
+
+const addSelectSettlementAnimation = (drawSVG, x, y, settlementRadius) => {
+    const animatedCircle = drawSVG
+        .circle(settlementRadius * 2)
+        .fill('none')
+        .stroke({width: 2, color: '#aaa'})
+        .translate(x - settlementRadius, y - settlementRadius);
+    animatedCircle.node.classList.add("settlement-animation");
+    const ringAnimation = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
+    ringAnimation.setAttribute("attributeName", "r");
+    ringAnimation.setAttribute("from", `${settlementRadius - 2}`);
+    ringAnimation.setAttribute("to", `${settlementRadius * 2}`);
+    ringAnimation.setAttribute("dur", "1.5s");
+    ringAnimation.setAttribute("begin", "0s");
+    ringAnimation.setAttribute("repeatCount", "indefinite");
+    animatedCircle.node.appendChild(ringAnimation);
+
+    const fadeAnimation = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+    fadeAnimation.setAttribute("attributeName", "opacity");
+    fadeAnimation.setAttribute("from", "1");
+    fadeAnimation.setAttribute("to", "0");
+    fadeAnimation.setAttribute("dur", "1.5s");
+    fadeAnimation.setAttribute("begin", "0s");
+    fadeAnimation.setAttribute("repeatCount", "indefinite");
+    animatedCircle.node.appendChild(fadeAnimation);
 }
 
 const renderSettlement = (drawSVG, settlement, settlementRadius) => {
     const {x, y} = settlement.point;
+    // Adds a pulsing circle animation
+    addSelectSettlementAnimation(drawSVG, x, y, settlementRadius);
+
     const settlementCircle = drawSVG
         .circle(settlementRadius * 2)
         .stroke({width: 4, color: '#aaa'})
@@ -100,6 +135,12 @@ const renderSettlement = (drawSVG, settlement, settlementRadius) => {
 
     settlementSVG.addEventListener('click', () => {
         settlementSVG.setAttribute('state', 'settlement');
+        // Remove all the settlement selection graphics, keep selected settlement
+        drawSVG.find('.settlement-svg')
+            .forEach((s) => s.node.getAttribute("state") === "settlement" ? null : s.remove());
+        drawSVG.find('.settlement-animation')
+            .forEach((s) => s.node.getAttribute("state") === "settlement" ? null : s.remove());
+        // TODO: call to backend to update settlements
     })
 
     return settlementCircle;
@@ -157,9 +198,6 @@ const assignNeighbours = (settlementArray, maxRowWidth) => {
     }
 }
 
-// const drawRoad = (settlementsMap, fromCoord, toCoord) => {
-//
-// }
 const updateSettlementLocations = (grid, settlements) => {
     const newSettlements = locateSettlements(grid);
     settlements.forEach((settlement, i) => {
@@ -215,7 +253,7 @@ const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
             // Draw coordinate for debugging
             draw
                 .text(`${settlement.x}, ${settlement.y}`)
-                .fill('black')
+                .fill('red')
                 .transform({translateX: settlementPoint.x, translateY: settlementPoint.y})
         });
         // Ensure roads are only drawn once

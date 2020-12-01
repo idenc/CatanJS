@@ -124,7 +124,9 @@ import {
   locateSettlements,
   renderSettlements,
   drawRoadDebug,
-  getSettlementsMap, updateSettlementLocations, redrawSettlements
+  getSettlementsMap,
+  updateSettlementLocations,
+  redrawSettlements
 } from "@/assets/js/settlements";
 
 export default {
@@ -141,6 +143,8 @@ export default {
       oceanGap: 5,
       roadGap: 10,
       settlementRadius: 15,
+      draw: SVG(),
+      settlements: []
     }
   },
   created: function () {
@@ -151,7 +155,8 @@ export default {
     let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
     // Create svg container that fits the maximum gameboard size and store svg in draw variable
-    const draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+    this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+    const draw = this.draw;
     const drawHexGroup = draw.group();
 
     // Copy the defs into the dynamically created svg.
@@ -179,11 +184,11 @@ export default {
 
     // Setup settlements
     const maxRowWidth = grid.radius * 2 + 1;
-    let settlementsArray = locateSettlements(grid);
-    renderSettlements(settlementsArray, draw, this.settlementRadius);
-    assignNeighbours(settlementsArray, maxRowWidth);
-    const settlementsMap = getSettlementsMap(settlementsArray);
-    drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
+    this.settlements = locateSettlements(grid);
+    //renderSettlements(settlementsArray, draw, this.settlementRadius);
+    assignNeighbours(this.settlements, maxRowWidth);
+    //const settlementsMap = getSettlementsMap(settlementsArray);
+    //drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
 
     // Add a click listener to hexes
     this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -233,8 +238,8 @@ export default {
         hex.redrawOcean(maxHexSize);
       })
       // Update the dimensions of the settlements
-      settlementsArray = updateSettlementLocations(grid, settlementsArray);
-      redrawSettlements(settlementsArray, draw, this.settlementRadius);
+      this.settlements = updateSettlementLocations(grid, this.settlements);
+      redrawSettlements(this.settlements, draw, this.settlementRadius);
     }
     console.log((maxHexSize.width) / (2 * this.hexagonRatio))
   },
@@ -404,6 +409,9 @@ export default {
         }, delay);
       };
     },
+    startBuild() {
+      renderSettlements(this.settlements, this.draw, this.settlementRadius);
+    }
   }
 }
 
@@ -469,6 +477,10 @@ export default {
 
 ::v-deep .road {
   z-index: 100;
+}
+
+::v-deep .settlement-svg:hover {
+  fill: red;
 }
 
 </style>

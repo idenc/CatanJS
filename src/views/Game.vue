@@ -1,7 +1,7 @@
 <template>
   <div id="game-container">
     <div id="board-container">
-      <GameBoard />
+      <GameBoard ref="gameBoard" />
     </div>
     <div id="sidebar-container">
       <div id="sidebar-players-container">
@@ -14,7 +14,12 @@
         <ChatWindow id="chat" />
       </div>
       <div id="sidebar-buttons-container">
-        <BuildButton />
+        <button
+          class="btn btn-primary btn-block"
+          @click="startBuild"
+        >
+          Build
+        </button>
         <button class="btn btn-primary btn-block">
           Trade
         </button>
@@ -32,16 +37,17 @@
 import GameBoard from "@/components/GameBoard";
 import UserList from "@/components/chat/UserList";
 import ChatWindow from "@/components/chat/ChatWindow";
-import BuildButton from "@/components/BuildButton";
 
 export default {
 
   name: "Game",
-  components: {BuildButton, ChatWindow, UserList, GameBoard},
+  components: {ChatWindow, UserList, GameBoard},
   mounted: function () {
   },
   methods: {
-
+    startBuild() {
+      this.$refs.gameBoard.startBuild();
+    }
   }
 }
 </script>
