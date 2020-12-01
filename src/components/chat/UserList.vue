@@ -33,7 +33,9 @@ export default {
   mounted: function () {
     this.sockets.subscribe('user joined', (user) => {
       console.log(`user joined: ${user}`)
-      this.users.push(user);
+      if (!this.users.some(u => u.username = user.username)) {
+        this.users.push(user);
+      }
     });
 
     this.sockets.subscribe('user left', (user) => {
