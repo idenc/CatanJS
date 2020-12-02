@@ -1,19 +1,15 @@
-let tiles = {};
-let settlements = {};
-let roads = {};
+let tiles = [];
+let settlements = [];
+let roads = [];
 let longestRod = null;
 let largestArmy = null;
 let curentTurnIndex = 0;
-let players = {}; 
-let availableDevCards = {};
+let players = []; 
+let availableDevCards = [];
 let socketRoom = tempRoom;
 
 function dealOutResources(diceRoll){
-    for(let i = 0; i < tiles.length; i++){
-        if(tiles[i].number === diceRoll && !tiles[i].isRobber){
-            
-        }
-    }
+    
 }
 
 module.exports = socket => {
@@ -36,10 +32,6 @@ module.exports = socket => {
             socket.to(socketRoom).emit('handle_robber_event');
         }
         else{
-            //Option 1: Let client handle the dolling out of resources then send back results
-            socket.to(socketRoom).emit('dice_roll', roll);
-
-            //Option2: server handles this
             let updatedPlayers = dealOutResources(roll);
             socket.to(socketRoom).emit('update_players', {playerData: updatedPlayers, diceRoll: roll});
         }
@@ -79,6 +71,9 @@ module.exports = socket => {
         
     })
 
+    socket.on('update_player_resources', () =>{
+
+    });
 
     socket.on('test_longest_road', ()=>{
 
