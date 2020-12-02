@@ -11,7 +11,7 @@ module.exports = app => {
             newUser.name = registration_info.name;
             newUser.save()
                 .then(() => {
-                    res.redirect('/#/dashboard');
+                    res.redirect('/#/game');
                 })
                 .catch(err => console.log(err));
         } else {
