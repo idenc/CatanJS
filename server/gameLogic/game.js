@@ -24,7 +24,7 @@ function dealOutResources(diceRoll){
                         if(settlement.type === 'settlement'){
                             players[pindex][selectedTiles[i].resource] += 1;
                         }
-                        else if(settlement.type === 'settlement'){
+                        else if(settlement.type === 'city'){
                             players[pindex][selectedTiles[i].resource] += 2;
                         }
                     }
