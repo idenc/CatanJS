@@ -84,14 +84,24 @@ module.exports = socket => {
     });
 
     //Play Development Card
-    socket.on('development_card', (cardPlayed) =>{
+    socket.on('dev_card_played', (cardPlayed) =>{
 
-    })
+    });
 
     //End Turn
     socket.on('end_turn', () => {
+        if(curentTurnIndex === players.length - 1){
+            curentTurnIndex = 0;
+        }
+        else{
+            curentTurnIndex += 1;
+        }
+        socket.to(socketRoom).emit('change_isTurn', players[curentTurnIndex].name);
+    });
+
+    socket.on('robber_moved', (tile) => {
         
-    })
+    });
 
     socket.on('update_player_resources', () =>{
 
