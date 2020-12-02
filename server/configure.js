@@ -125,7 +125,7 @@ module.exports = app => {
                     return res.redirect('/#/register');
                 } else {
                     // User has already registered, redirect
-                    return res.redirect('/#/dashboard');
+                    return res.redirect('/#/game');
                 }
             });
         }
