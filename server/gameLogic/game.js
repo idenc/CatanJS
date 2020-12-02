@@ -8,8 +8,30 @@ let players = [];
 let availableDevCards = [];
 let socketRoom = tempRoom;
 
+//there has to be a more efficient way of doing this
 function dealOutResources(diceRoll){
-    
+    let selectedTiles = tiles.filter(obj => obj.number === diceRoll);
+    //iterate through all selected tiles
+    for(let i = 0; i < selectedTiles; i++){
+        //check every corner of a tile for a settlement
+        for(let j = 0; j < selectedTiles[i].corners.length; j++){
+            let settlement = settlements.filter(obj => obj.point === selectedTiles[i].corcers[j]);
+            //if there is a settlment in that corner figure out who the owner is and 
+            //allocate resources
+            if(settlement){
+                for(let pindex = 0; pindex < players.length; pindex++){
+                    if(settlement.player === players[pindex].name){
+                        if(settlement.type === 'settlement'){
+                            players[pindex][selectedTiles[i].resource] += 1;
+                        }
+                        else if(settlement.type === 'settlement'){
+                            players[pindex][selectedTiles[i].resource] += 2;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 module.exports = socket => {
@@ -32,8 +54,8 @@ module.exports = socket => {
             socket.to(socketRoom).emit('handle_robber_event');
         }
         else{
-            let updatedPlayers = dealOutResources(roll);
-            socket.to(socketRoom).emit('update_players', {playerData: updatedPlayers, diceRoll: roll});
+            dealOutResources(roll);
+            socket.to(socketRoom).emit('update_players', {playerData: players, diceRoll: roll});
         }
     });
 
