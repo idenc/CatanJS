@@ -178,6 +178,8 @@ export default {
     const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles, this.numberTokens);
     console.log(grid);
 
+    this.renderNumberTokens(draw, grid, 20);
+
     // Render ocean tiles
     const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
     console.log(oceanGrid);
@@ -409,6 +411,51 @@ export default {
         }, delay);
       };
     },
+    // Draw the number tiles
+    renderNumberTokens(drawSVG, grid, numberTileRadius) {
+      grid.forEach(hex => {
+        this.renderNumberToken(drawSVG, hex, numberTileRadius);
+        // Object.assign(numberTile, {svg: numberTileSVG});
+      })
+    },
+    renderNumberToken(drawSVG, hex, numberTileRadius) {
+      let number = hex.hexPolygon.node.getAttribute('numberToken')
+      if (!number) {
+        return;
+      }
+      console.log(hex)
+      console.log(hex.center())
+      const center = hex.center();
+      const {x, y} = hex.toPoint();
+      console.log(x,y)
+
+      const numberToken = drawSVG.group()
+
+      const numberTokenCircle = drawSVG
+          .circle(numberTileRadius * 2)
+          .stroke({width: 4, color: '#aaa'})
+          .fill("white")
+          .translate(x + center.x - numberTileRadius, y + center.y - numberTileRadius);
+
+      numberTokenCircle.addTo(numberToken)
+
+      const numberTokenText = drawSVG
+          .text(`${number}`)
+          .translate(x + center.x, y + center.y - numberTileRadius);
+      console.log(numberTokenText)
+
+      numberTokenText.node.classList.add('number-token-text')
+
+      numberTokenText.addTo(numberToken)
+
+      const numberTokenSVG = numberTokenCircle.node;
+      numberTokenSVG.classList.add('number-tile-svg');
+      // numberTokenSVG.setAttribute('state', );
+
+      // return settlementCircle;
+    },
+
+
     startBuild() {
       renderSettlements(this.settlements, this.draw, this.settlementRadius);
     }
@@ -481,6 +528,12 @@ export default {
 
 ::v-deep .settlement-svg[state="empty"]:hover {
   fill: green;
+}
+
+::v-deep .number-token-text {
+  text-anchor: middle;
+  dominant-baseline: mathematical;
+  font-weight: bold;
 }
 
 </style>
