@@ -123,8 +123,6 @@ import {
   assignNeighbours,
   locateSettlements,
   renderSettlements,
-  drawRoadDebug,
-  getSettlementsMap,
   updateSettlementLocations,
   redrawSettlements
 } from "@/assets/js/settlements";
@@ -200,8 +198,8 @@ export default {
     this.settlements = locateSettlements(grid);
     //renderSettlements(settlementsArray, draw, this.settlementRadius);
     assignNeighbours(this.settlements, maxRowWidth);
-    //const settlementsMap = getSettlementsMap(settlementsArray);
-    //drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
+    // const settlementsMap = getSettlementsMap(this.settlements);
+    // drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
 
     // Add a click listener to hexes
     this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -254,7 +252,7 @@ export default {
       // Update the dimensions of the settlements
       this.settlements = updateSettlementLocations(grid, this.settlements);
       this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
-      redrawSettlements(this.settlements, draw, this.graphics.settlementRadius);
+      redrawSettlements(this.settlements, draw);
     }
     console.log((maxHexSize.width) / (2 * this.hexagonRatio))
   },
@@ -541,7 +539,8 @@ export default {
                                 numberTokenSVG.text, hex.toPoint(), hex.center());
     },
     startBuild() {
-      renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius);
+      // TODO: check if the player is able to build a settlement
+      renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius, this.graphics.roadGap);
     }
   }
 }
@@ -563,10 +562,6 @@ export default {
 
 #drawSVG {
   display: none;
-}
-
-::v-deep .settlement-svg[state="empty"] {
-  fill: #fff;
 }
 
 ::v-deep .settlement-svg[state="settlement"] {
@@ -610,7 +605,7 @@ export default {
   z-index: 100;
 }
 
-::v-deep .settlement-svg[state="empty"]:hover {
+::v-deep .build-selector:hover {
   fill: green;
 }
 

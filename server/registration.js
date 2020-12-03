@@ -11,6 +11,7 @@ module.exports = app => {
             newUser.name = registration_info.name;
             newUser.save()
                 .then(() => {
+                    delete req.session.user;
                     res.redirect('/#/game');
                 })
                 .catch(err => console.log(err));
