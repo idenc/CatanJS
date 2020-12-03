@@ -452,9 +452,43 @@ export default {
       numberTokenText.addTo(numberToken);
       // Adjust by text up by its height/2
       numberTokenText.translate(0,-numberTokenText.node.getBBox().height / 2);
+      if (number === '6' || number === '8') {
+        numberTokenText.fill('red');
+      }
+
+      const dotGroup = this.renderNumberTokenDots(number, numberToken, numberTokenText, hex.toPoint(), hex.center());
       
-      const numberTokenSVG = {circle: numberTokenCircle, text: numberTokenText};
+      const numberTokenSVG = {
+        container: numberToken,
+        circle: numberTokenCircle,
+        text: numberTokenText, 
+        dots: dotGroup
+      };
       return numberTokenSVG;
+    },
+    renderNumberTokenDots(number, numberToken, numberTokenText, {x, y}, center) {
+      const dotRadius = 1.5;
+      const dotGroup = numberToken.group();
+      let numDots = 0;
+      let fillColor = 'black'
+      number = parseInt(number);
+      number === 2 || number === 12 ? numDots = 1 : '';
+      number === 3 || number === 11 ? numDots = 2 : '';
+      number === 4 || number === 10 ? numDots = 3 : '';
+      number === 5 || number === 9 ? numDots = 4 : '';
+      number === 6 || number === 8 ? numDots = 5 : '';
+      number === 6 || number === 8 ? fillColor = 'red' : '';
+      for (let i = 0; i < numDots; i++) {
+        const dot = dotGroup
+            .circle(dotRadius)
+            .stroke({width: 1, color: fillColor})
+            .fill(fillColor)
+        dot.node.setAttribute('cx', x + center.x + dotRadius/2)
+        dot.node.setAttribute('cy', y + center.y)
+        dot.translate(dotRadius*2.75*i, numberTokenText.node.getBBox().height/2);
+      }
+      dotGroup.translate(-dotGroup.node.getBBox().width / 2, 0)
+      return dotGroup;
     },
     redrawNumberTokens(drawSVG, grid, numberTokenSVGs) {
       grid.forEach((hex, i) => {
@@ -480,6 +514,10 @@ export default {
           .translate(x + center.x, y + center.y - this.roadGap/2);
       // Adjust by text up by its height/2
       numberTokenSVG.text.translate(0,-numberTokenSVG.text.node.getBBox().height / 2);
+
+      numberTokenSVG.dots.remove();
+      numberTokenSVG.dots = this.renderNumberTokenDots(number, numberTokenSVG.container, 
+                                numberTokenSVG.text, hex.toPoint(), hex.center());
     },
     startBuild() {
       renderSettlements(this.settlements, this.draw, this.settlementRadius);
