@@ -121,10 +121,12 @@ const addSelectSettlementAnimation = (drawSVG, x, y, settlementRadius) => {
 
 const renderSettlement = (drawSVG, settlement, settlementRadius) => {
     const {x, y} = settlement.point;
+    // Create an element to nest settlement graphics in for easier transforming
+    const nested = drawSVG.group();
     // Adds a pulsing circle animation
-    addSelectSettlementAnimation(drawSVG, x, y, settlementRadius);
+    addSelectSettlementAnimation(nested, x, y, settlementRadius);
 
-    const settlementCircle = drawSVG
+    const settlementCircle = nested
         .circle(settlementRadius * 2)
         .stroke({width: 4, color: '#aaa'})
         .translate(x - settlementRadius, y - settlementRadius);
@@ -143,19 +145,22 @@ const renderSettlement = (drawSVG, settlement, settlementRadius) => {
         // TODO: call to backend to update settlements
     })
 
-    return settlementCircle;
+    return nested;
 }
 
-const redrawSettlements = (settlements, drawSVG, settlementRadius) => {
+const redrawSettlements = (settlements, drawSVG) => {
     settlements.forEach(settlement => {
-        redrawSettlement(drawSVG, settlement, settlementRadius);
+        redrawSettlement(drawSVG, settlement);
     })
 }
 
-const redrawSettlement = (drawSVG, settlement, settlementRadius) => {
+const redrawSettlement = (drawSVG, settlement) => {
     const {x, y} = settlement.point;
     settlement.svg.transform(0);
-    settlement.svg.translate(x - settlementRadius, y - settlementRadius);
+    settlement.svg.transform({
+        position: [x, y],
+        origin: 'center'
+    });
 }
 
 const assignNeighbours = (settlementArray, maxRowWidth) => {
@@ -253,7 +258,7 @@ const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
             // Draw coordinate for debugging
             draw
                 .text(`${settlement.x}, ${settlement.y}`)
-                .fill('red')
+                .fill('white')
                 .transform({translateX: settlementPoint.x, translateY: settlementPoint.y})
         });
         // Ensure roads are only drawn once
