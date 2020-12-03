@@ -92,10 +92,14 @@ const settlementAvailable = (settlement) => {
 }
 
 // Draw the settlements
-const renderSettlements = (settlements, drawSVG, settlementRadius) => {
+const renderSettlements = (settlements, drawSVG, settlementRadius, roadGap) => {
     settlements.forEach(settlement => {
         if (settlementAvailable(settlement)) {
-            let settlementSVG = renderSettlement(drawSVG, settlement, settlements, settlementRadius);
+            let settlementSVG = renderSettlement(drawSVG,
+                settlement,
+                settlements,
+                settlementRadius,
+                roadGap);
             Object.assign(settlement, {svg: settlementSVG});
         }
     })
@@ -144,11 +148,10 @@ const renderBuildable = (drawSVG, point, settlementRadius) => {
     return nested;
 }
 
-const renderSettlement = (drawSVG, settlement, settlements, settlementRadius) => {
+const renderSettlement = (drawSVG, settlement, settlements, settlementRadius, roadGap) => {
     const nested = renderBuildable(drawSVG, settlement.point, settlementRadius);
 
     const settlementSVG = nested.children()[1].node;
-    console.log(settlementSVG);
     settlementSVG.classList.add('settlement-svg');
     settlementSVG.setAttribute('state', settlement.state);
 
@@ -161,7 +164,7 @@ const renderSettlement = (drawSVG, settlement, settlements, settlementRadius) =>
             .forEach((s) => s.remove());
         // TODO: call to backend to update settlements
         settlement.state = "settlement";
-        startRoadSelection(drawSVG, settlements, settlementRadius);
+        startRoadSelection(drawSVG, settlements, settlementRadius, roadGap);
     })
 
     return nested;

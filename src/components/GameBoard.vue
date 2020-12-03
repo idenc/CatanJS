@@ -409,7 +409,7 @@ export default {
     },
     startBuild() {
       // TODO: check if the player is able to build a settlement
-      renderSettlements(this.settlements, this.draw, this.settlementRadius);
+      renderSettlements(this.settlements, this.draw, this.settlementRadius, this.roadGap);
     }
   }
 }

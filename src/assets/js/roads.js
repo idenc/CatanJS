@@ -53,6 +53,36 @@ const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
     }
 }
 
+const buildRoad = (drawSVG, settlement, settlementRadius, neighbour, roadGap) => {
+    const settlementPoint = settlement.point;
+    const neighbourPoint = neighbour.point;
+
+    // Calculate angle between each neighbouring settlement
+    const angleDeg = Math.atan2(
+        neighbourPoint.y - settlementPoint.y,
+        neighbourPoint.x - settlementPoint.x
+    ) * 180 / Math.PI;
+
+    // Calculate distance between the settlements and add a small gap
+    const length = Math.hypot(
+        neighbourPoint.x - settlementPoint.x,
+        neighbourPoint.y - settlementPoint.y
+    ) - (settlementRadius * 2 + 5);
+
+    // Draw the road
+    const road = drawSVG
+        .rect(length, roadGap)
+        .fill({color: 'blue'})
+        .cx((settlementPoint.x + neighbourPoint.x) / 2)
+        .cy((settlementPoint.y + neighbourPoint.y) / 2)
+        .rotate(angleDeg);
+    road.front();
+    road.click(function () {
+        console.log(`Clicked road (${settlement.x}, ${settlement.y})`);
+    });
+
+}
+
 const canBuildRoad = () => {
     // Need to check all conditions to build a road
     // This should be done on the backend
@@ -64,7 +94,7 @@ const canBuildRoad = () => {
 
 // This begins either after a user builds a settlement in their first two turns
 // or when they choose to build a road
-const startRoadSelection = (drawSVG, settlements, settlementRadius) => {
+const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => {
     const settlementMap = getSettlementsMap(settlements);
     // Iterate through each settlement (i.e. grid intersection point)
     settlements.forEach((settlement) => {
@@ -78,8 +108,14 @@ const startRoadSelection = (drawSVG, settlements, settlementRadius) => {
                 }
                 const nested = renderBuildable(drawSVG, point, settlementRadius);
 
-                nested.addEventListener('click', () => {
-                   console.log('road');
+                const settlementSVG = nested.children()[1].node;
+                settlementSVG.classList.add('settlement-svg');
+                settlementSVG.setAttribute('state', settlement.state);
+
+                settlementSVG.addEventListener('click', () => {
+                    console.log('road clicked');
+                    drawSVG.find('.buildable').forEach(b => b.remove());
+                    buildRoad(drawSVG, settlement, settlementRadius, neighbour, roadGap)
                 });
             }
         });
