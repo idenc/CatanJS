@@ -8,6 +8,23 @@ let players = [];
 let availableDevCards = [];
 let socketRoom = tempRoom;
 
+
+function shuffleArray(array){
+    let tempArray = array;
+    let remainingElements = tempArray.length, temp, index;
+
+    while (remainingElements) {
+        //pick a random remaining unshuffeled element from the array
+        index = Math.floor(Math.random() * remainingElements--)
+        //move that random element to the back of the array then decrease array size by 1
+        //elements in the back of the array are shuffled
+        temp = tempArray[remainingElements];
+        tempArray[remainingElements] = tempArray[index];
+        tempArray[index] = temp;
+    }
+    return tempArray;
+}
+
 //there has to be a more efficient way of doing this
 function dealOutResources(diceRoll){
     let selectedTiles = tiles.filter(obj => obj.number === diceRoll);
@@ -34,11 +51,26 @@ function dealOutResources(diceRoll){
     }
 }
 
+function shuffleDevCards(){
+    let typesOfCards = ['knight', 'roadBuilding', 'yearOfPlenty', 'monopoly', 'victoryPoint'];
+    let numberOfEach = [14, 2, 2, 2, 5];
+
+    //populate dev card deck
+    for(let i = 0; i < numberOfEach; i++){
+        for(let j = 0; j < numberOfEach[i]; j++){
+            availableDevCards.push(typesOfCards[i]);
+        }
+    }
+
+    //shuffle dev card deck
+    availableDevCards = shuffleArray(availableDevCards);
+}
+
 module.exports = socket => {
     //Prototype for creating game
-    //initialize tiles, players, and socketRoom
+    //initialize tiles, players, dev cards, and socketRoom
     socket.on('new_game', () => {
-
+        shuffleDevCards();
     });
 
     //Turn Flow: roll dice -> trade -> build -> play development card -> end turn
@@ -48,14 +80,18 @@ module.exports = socket => {
         let die1 = Math.floor(Math.random() * 6) + 1;
         let die2 = Math.floor(Math.random() * 6) + 1;
         let roll = die1 + die2;
-
+        socket.to(socketRoom).emit('roll_result', roll);
         if(roll === 7){
             //i think the client side should handle this then send the results back
-            socket.to(socketRoom).emit('handle_robber_event');
+            //this will send back info to the player that rolled a 7 allowing them to move the robber
+            //once the robber has been moved send that data back here to the server
+            //socket.on('robber_moved') will then handle updating server data and 
+            //broadcasting the results back to other players
+            socket.to(socket.id).emit('handle_robber_event');
         }
         else{
             dealOutResources(roll);
-            socket.to(socketRoom).emit('update_players', {playerData: players, diceRoll: roll});
+            socket.to(socketRoom).emit('update_players', players);
         }
     });
 
@@ -80,12 +116,39 @@ module.exports = socket => {
 
     //Build Development Card
     socket.on('build_dev_card', () => {
-
+        let devCard = availableDevCards.shift();
+        if(devCard){
+            players[curentTurnIndex].devCards.push(devCard);
+            socket.to(socket.id).emit('draw_result', devCard);
+        }
+        else{
+            socket.to(socket.id).emit('draw_result', 'No More Dev Cards left in Deck');
+        }
+        
     });
 
     //Play Development Card
+    //cardPlayed = string indicating what type of dev card was played
     socket.on('dev_card_played', (cardPlayed) =>{
-
+        //['knight', 'roadBuilding', 'yearOfPlenty', 'monopoly', 'victoryPoint']
+        let toBeRemoved = players[curentTurnIndex].devCards.indexOf(cardPlayed);
+        players[curentTurnIndex].devCards.splice(toBeRemoved, 1);
+        if(cardPlayed === 'knight'){
+            socket.to(socket.id).emit('handle_robber_event');
+        }
+        else if(cardPlayed === 'roadBuilding'){
+            socket.to(socket.id).emit('build_road');
+        }
+        else if(cardPlayed === 'yearOfPlenty'){
+            socket.to(socket.id).emit('draw_resource_cards');
+        }
+        else if(cardPlayed === 'monopoly'){
+            socket.to(socket.id).emit('pick_a_monopoly');
+        }
+        else if(cardPlayed === 'victoryPoint'){
+            players[curentTurnIndex].victoryPoints += 1;
+            socket.to(socketRoom).emit('update_players', players);
+        }
     });
 
     //End Turn
@@ -96,9 +159,14 @@ module.exports = socket => {
         else{
             curentTurnIndex += 1;
         }
+        //emitting the name of the player who is up next. 
         socket.to(socketRoom).emit('change_isTurn', players[curentTurnIndex].name);
     });
 
+    socket.on('monopoly_claimed', () =>{
+
+    });
+    
     socket.on('robber_moved', (tile) => {
         
     });
