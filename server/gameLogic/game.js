@@ -66,11 +66,61 @@ function shuffleDevCards(){
     availableDevCards = shuffleArray(availableDevCards);
 }
 
+/////////////////Testing///////////////////////
+function generateTestTiles(){
+    let resources = ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber',
+        'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool']
+    let numberTokens = ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12']
+
+    resources = shuffleArray(resources);
+    numberTokens = shuffleArray(numberTokens);
+    let numberIndex = 0;
+    for(let i = 0; i < resources.length; i++){
+        if(resources[i] !== 'desert'){
+            let tempTile = {resource: resources[i], number: numberTokens[numberIndex]};
+            tiles.push(tempTile);
+            numberIndex += 1;
+        }
+        else{
+            tiles.push(tempTile);
+            let tempTile = {resource: resources[i], number: 0};
+        }
+    }
+}
+
+function generateTestPlayers(){
+    for(let i = 0; i < 4; i++){
+        let tempName = 'player' + i;
+        let tempPlayer = {name: tempName, victoryPoints: 0, clay: 0, ore: 0, sheep: 0, 
+                            wheat: 0, lumber: 0, isTurn: false, devCards: [], knights: 0, harbourBonuses: [], color: blue};
+        players.push(tempPlayer);
+    }
+    players[0].isTurn = true;
+}
+
+function generateTestSettlements(){
+    let tempSettlement = {tiles:[1, 12], player: 'player0', type: 'settlement', harbour: {ratio: 2, type: 'lumber'}};
+    settlements.push(tempSettlement);
+    tempSettlement = {tiles:[3, 4, 15], player: 'player1', type: 'city', harbour: {}};
+    settlements.push(tempSettlement);
+    tempSettlement = {tiles:[1, 13, 14], player: 'player2', type: 'settlement', harbour: {}};
+    settlements.push(tempSettlement);
+    tempSettlement = {tiles:[8, 9, 17], player: 'player3', type: 'settlement', harbour: {}};
+    settlements.push(tempSettlement);
+}
+/////////////////Testing///////////////////////
+
 module.exports = socket => {
     //Prototype for creating game
     //initialize tiles, players, dev cards, and socketRoom
     socket.on('new_game', () => {
         shuffleDevCards();
+
+        /////////Testing/////////
+        generateTestTiles();
+        generateTestPlayers();
+        generateTestSettlements();
+        /////////Testing/////////
     });
 
     //Turn Flow: roll dice -> trade -> build -> play development card -> end turn
@@ -166,7 +216,7 @@ module.exports = socket => {
     socket.on('monopoly_claimed', () =>{
 
     });
-    
+
     socket.on('robber_moved', (tile) => {
         
     });
