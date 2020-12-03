@@ -1,4 +1,4 @@
-import {renderBuildable, getSettlementsMap} from "@/assets/js/settlements";
+import {renderBuildable, getSettlementsMap, removeBuildSelectors} from "@/assets/js/settlements";
 
 const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
     const visitedCoords = [];
@@ -92,6 +92,7 @@ const canBuildRoad = () => {
     return true;
 }
 
+
 // This begins either after a user builds a settlement in their first two turns
 // or when they choose to build a road
 const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => {
@@ -108,13 +109,12 @@ const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => 
                 }
                 const nested = renderBuildable(drawSVG, point, settlementRadius);
 
-                const settlementSVG = nested.children()[1].node;
-                settlementSVG.classList.add('settlement-svg');
-                settlementSVG.setAttribute('state', settlement.state);
+                const selectorSVG = nested.children()[1].node;
+                selectorSVG.classList.add('build-selector');
 
-                settlementSVG.addEventListener('click', () => {
+                selectorSVG.addEventListener('click', () => {
                     console.log('road clicked');
-                    drawSVG.find('.buildable').forEach(b => b.remove());
+                    removeBuildSelectors(drawSVG);
                     buildRoad(drawSVG, settlement, settlementRadius, neighbour, roadGap)
                 });
             }

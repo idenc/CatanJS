@@ -148,20 +148,26 @@ const renderBuildable = (drawSVG, point, settlementRadius) => {
     return nested;
 }
 
+const removeBuildSelectors = (drawSVG) => {
+    drawSVG.find('.build-selector')
+        .forEach((s) => s.parent().remove());
+    drawSVG.find('.settlement-animation')
+        .forEach((s) => s.remove());
+}
+
 const renderSettlement = (drawSVG, settlement, settlements, settlementRadius, roadGap) => {
     const nested = renderBuildable(drawSVG, settlement.point, settlementRadius);
 
     const settlementSVG = nested.children()[1].node;
-    settlementSVG.classList.add('settlement-svg');
+    settlementSVG.classList.add('build-selector');
     settlementSVG.setAttribute('state', settlement.state);
 
     settlementSVG.addEventListener('click', () => {
+        settlementSVG.classList.remove('build-selector');
+        settlementSVG.classList.add('settlement-svg');
         settlementSVG.setAttribute('state', 'settlement');
         // Remove all the settlement selection graphics, keep selected settlement
-        drawSVG.find('.settlement-svg')
-            .forEach((s) => s.node.getAttribute("state") === "settlement" ? null : s.parent().remove());
-        drawSVG.find('.settlement-animation')
-            .forEach((s) => s.remove());
+        removeBuildSelectors(drawSVG);
         // TODO: call to backend to update settlements
         settlement.state = "settlement";
         startRoadSelection(drawSVG, settlements, settlementRadius, roadGap);
@@ -256,5 +262,6 @@ export {
     updateSettlementLocations,
     redrawSettlements,
     redrawSettlement,
-    renderBuildable
+    renderBuildable,
+    removeBuildSelectors
 }

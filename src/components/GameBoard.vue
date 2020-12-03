@@ -474,7 +474,7 @@ export default {
   z-index: 100;
 }
 
-::v-deep .settlement-svg[state="empty"]:hover {
+::v-deep .build-selector:hover {
   fill: green;
 }
 
