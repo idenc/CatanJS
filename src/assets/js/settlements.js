@@ -1,3 +1,5 @@
+import {startRoadSelection} from "@/assets/js/roads";
+
 const locateSettlements = (grid) => {
     const settlements = [];
     const rowWidth = grid.radius + 1;
@@ -18,7 +20,8 @@ const locateSettlements = (grid) => {
                     point: {
                         x: corners[4].x + x,
                         y: corners[4].y + y
-                    }
+                    },
+                    state: "empty"
                 });
             }
             settlements.push({
@@ -27,7 +30,8 @@ const locateSettlements = (grid) => {
                 point: {
                     x: corners[5].x + x,
                     y: corners[5].y + y
-                }
+                },
+                state: "empty"
             });
             settlements.push({
                 x: (j * 2) + 2,
@@ -35,7 +39,8 @@ const locateSettlements = (grid) => {
                 point: {
                     x: corners[0].x + x,
                     y: corners[0].y + y
-                }
+                },
+                state: "empty"
             });
         })
         // Create settlements on the bottom half of the grid
@@ -51,7 +56,8 @@ const locateSettlements = (grid) => {
                     point: {
                         x: corners[3].x + x,
                         y: corners[3].y + y
-                    }
+                    },
+                    state: "empty"
                 });
             }
             settlements.push({
@@ -60,7 +66,8 @@ const locateSettlements = (grid) => {
                 point: {
                     x: corners[1].x + x,
                     y: corners[1].y + y
-                }
+                },
+                state: "empty"
             });
             settlements.push({
                 x: (j * 2) + 1,
@@ -68,7 +75,8 @@ const locateSettlements = (grid) => {
                 point: {
                     x: corners[2].x + x,
                     y: corners[2].y + y
-                }
+                },
+                state: "empty"
             });
         })
         rowNumTop++;
@@ -78,16 +86,20 @@ const locateSettlements = (grid) => {
     return settlements;
 }
 
-// Will need to determine when a space is available to build a settlement
+// TODO: Will need to determine when a space is available to build a settlement
 const settlementAvailable = (settlement) => {
     return true;
 }
 
 // Draw the settlements
-const renderSettlements = (settlements, drawSVG, settlementRadius) => {
+const renderSettlements = (settlements, drawSVG, settlementRadius, roadGap) => {
     settlements.forEach(settlement => {
         if (settlementAvailable(settlement)) {
-            let settlementSVG = renderSettlement(drawSVG, settlement, settlementRadius);
+            let settlementSVG = renderSettlement(drawSVG,
+                settlement,
+                settlements,
+                settlementRadius,
+                roadGap);
             Object.assign(settlement, {svg: settlementSVG});
         }
     })
@@ -97,12 +109,12 @@ const addSelectSettlementAnimation = (drawSVG, x, y, settlementRadius) => {
     const animatedCircle = drawSVG
         .circle(settlementRadius * 2)
         .fill('none')
-        .stroke({width: 2, color: '#aaa'})
+        .stroke({width: 2, color: 'white'})
         .translate(x - settlementRadius, y - settlementRadius);
     animatedCircle.node.classList.add("settlement-animation");
     const ringAnimation = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
     ringAnimation.setAttribute("attributeName", "r");
-    ringAnimation.setAttribute("from", `${settlementRadius - 2}`);
+    ringAnimation.setAttribute("from", `${settlementRadius}`);
     ringAnimation.setAttribute("to", `${settlementRadius * 2}`);
     ringAnimation.setAttribute("dur", "1.5s");
     ringAnimation.setAttribute("begin", "0s");
@@ -119,43 +131,64 @@ const addSelectSettlementAnimation = (drawSVG, x, y, settlementRadius) => {
     animatedCircle.node.appendChild(fadeAnimation);
 }
 
-const renderSettlement = (drawSVG, settlement, settlementRadius) => {
-    const {x, y} = settlement.point;
+const renderBuildable = (drawSVG, point, settlementRadius) => {
+    const {x, y} = point;
+    // Create an element to nest settlement graphics in for easier transforming
+    const nested = drawSVG.group();
+    nested.node.classList.add('buildable');
     // Adds a pulsing circle animation
-    addSelectSettlementAnimation(drawSVG, x, y, settlementRadius);
+    addSelectSettlementAnimation(nested, x, y, settlementRadius);
 
-    const settlementCircle = drawSVG
+    nested
         .circle(settlementRadius * 2)
-        .stroke({width: 4, color: '#aaa'})
+        .fill('none')
+        .stroke({width: 4, color: 'white'})
         .translate(x - settlementRadius, y - settlementRadius);
 
-    const settlementSVG = settlementCircle.node;
-    settlementSVG.classList.add('settlement-svg');
-    settlementSVG.setAttribute('state', 'empty');
+    return nested;
+}
+
+const removeBuildSelectors = (drawSVG) => {
+    drawSVG.find('.build-selector')
+        .forEach((s) => s.parent().remove());
+    drawSVG.find('.settlement-animation')
+        .forEach((s) => s.remove());
+}
+
+const renderSettlement = (drawSVG, settlement, settlements, settlementRadius, roadGap) => {
+    const nested = renderBuildable(drawSVG, settlement.point, settlementRadius);
+
+    const settlementSVG = nested.children()[1].node;
+    settlementSVG.classList.add('build-selector');
+    settlementSVG.setAttribute('state', settlement.state);
 
     settlementSVG.addEventListener('click', () => {
+        settlementSVG.classList.remove('build-selector');
+        settlementSVG.classList.add('settlement-svg');
         settlementSVG.setAttribute('state', 'settlement');
         // Remove all the settlement selection graphics, keep selected settlement
-        drawSVG.find('.settlement-svg')
-            .forEach((s) => s.node.getAttribute("state") === "settlement" ? null : s.remove());
-        drawSVG.find('.settlement-animation')
-            .forEach((s) => s.node.getAttribute("state") === "settlement" ? null : s.remove());
+        removeBuildSelectors(drawSVG);
         // TODO: call to backend to update settlements
+        settlement.state = "settlement";
+        startRoadSelection(drawSVG, settlements, settlementRadius, roadGap);
     })
 
-    return settlementCircle;
+    return nested;
 }
 
-const redrawSettlements = (settlements, drawSVG, settlementRadius) => {
+const redrawSettlements = (settlements, drawSVG) => {
     settlements.forEach(settlement => {
-        redrawSettlement(drawSVG, settlement, settlementRadius);
+        redrawSettlement(drawSVG, settlement);
     })
 }
 
-const redrawSettlement = (drawSVG, settlement, settlementRadius) => {
+const redrawSettlement = (drawSVG, settlement) => {
     const {x, y} = settlement.point;
     settlement.svg.transform(0);
-    settlement.svg.translate(x - settlementRadius, y - settlementRadius);
+    settlement.svg.transform({
+        position: [x, y],
+        origin: 'center'
+    });
 }
 
 const assignNeighbours = (settlementArray, maxRowWidth) => {
@@ -208,58 +241,6 @@ const updateSettlementLocations = (grid, settlements) => {
     return settlements;
 }
 
-const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
-    const visitedCoords = [];
-    // For each settlement
-    for (const settlement of settlementsMap.values()) {
-        const settlementPoint = settlement.point;
-        // Iterate through all neighbouring settlements
-        settlement.neighbours.forEach((neighbourCoord) => {
-            if (visitedCoords.some((c) => c.x === neighbourCoord.x && c.y === neighbourCoord.y)) {
-                return;
-            }
-            // Retrieve the neighbour's settlement object
-            const neighbour = settlementsMap.get(JSON.stringify({x: neighbourCoord.x, y: neighbourCoord.y}));
-            if (!neighbour) {
-                console.error(`Invalid neighbour (${neighbourCoord.x}, ${neighbourCoord.y}) 
-                at settlement (${settlement.x}, ${settlement.y})`);
-            }
-            const neighbourPoint = neighbour.point;
-
-            // Calculate angle between each neighbouring settlement
-            const angleDeg = Math.atan2(
-                neighbourPoint.y - settlementPoint.y,
-                neighbourPoint.x - settlementPoint.x
-            ) * 180 / Math.PI;
-
-            // Calculate distance between the settlements and add a small gap
-            const length = Math.hypot(
-                neighbourPoint.x - settlementPoint.x,
-                neighbourPoint.y - settlementPoint.y
-            ) - (settlementRadius * 2 + 5);
-
-            // Draw the road
-            const road = draw
-                .rect(length, roadGap)
-                .fill({color: 'blue'})
-                .cx((settlementPoint.x + neighbourPoint.x) / 2)
-                .cy((settlementPoint.y + neighbourPoint.y) / 2)
-                .rotate(angleDeg);
-            road.front();
-            road.click(function () {
-                console.log(`Clicked road (${settlement.x}, ${settlement.y})`);
-            });
-
-            // Draw coordinate for debugging
-            draw
-                .text(`${settlement.x}, ${settlement.y}`)
-                .fill('red')
-                .transform({translateX: settlementPoint.x, translateY: settlementPoint.y})
-        });
-        // Ensure roads are only drawn once
-        visitedCoords.push({x: settlement.x, y: settlement.y});
-    }
-}
 
 const getSettlementsMap = (settlementsArray) => {
     const settlementsMap = new Map();
@@ -272,14 +253,15 @@ const getSettlementsMap = (settlementsArray) => {
     return settlementsMap;
 }
 
-module.exports = {
+export {
     locateSettlements,
     assignNeighbours,
-    drawRoadDebug,
     getSettlementsMap,
     renderSettlements,
     renderSettlement,
     updateSettlementLocations,
     redrawSettlements,
-    redrawSettlement
+    redrawSettlement,
+    renderBuildable,
+    removeBuildSelectors
 }

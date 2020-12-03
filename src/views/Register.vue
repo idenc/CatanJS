@@ -102,7 +102,7 @@ export default {
   mounted() {
     axios.get('/register')
         .then(response => {
-          this.fromGoogle = response;
+          this.fromGoogle = response.data
           this.getFinished = true;
         })
         .catch(err => console.log(err));
