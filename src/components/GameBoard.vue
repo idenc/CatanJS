@@ -123,8 +123,6 @@ import {
   assignNeighbours,
   locateSettlements,
   renderSettlements,
-  drawRoadDebug,
-  getSettlementsMap,
   updateSettlementLocations,
   redrawSettlements
 } from "@/assets/js/settlements";
@@ -410,6 +408,7 @@ export default {
       };
     },
     startBuild() {
+      // TODO: check if the player is able to build a settlement
       renderSettlements(this.settlements, this.draw, this.settlementRadius);
     }
   }
@@ -432,10 +431,6 @@ export default {
 
 #drawSVG {
   display: none;
-}
-
-::v-deep .settlement-svg[state="empty"] {
-  fill: #fff;
 }
 
 ::v-deep .settlement-svg[state="settlement"] {
