@@ -144,7 +144,9 @@ export default {
       roadGap: 10,
       settlementRadius: 15,
       draw: SVG(),
-      settlements: []
+      settlements: [],
+      numberTokenSVGs: [],
+      numberTokenPercentOfHex: 0.16,
     }
   },
   created: function () {
@@ -178,7 +180,8 @@ export default {
     const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles, this.numberTokens);
     console.log(grid);
 
-    this.renderNumberTokens(draw, grid, 20);
+    this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
+    console.log(this.numberTokenSVGs)
 
     // Render ocean tiles
     const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
@@ -222,7 +225,7 @@ export default {
     // Add an event listener that run the function when window dimensions change
     window.addEventListener('resize', this.debounce(() => {
       handleWindowResize();
-    }, 100));
+    }, 150));
 
     const handleWindowResize = () => {
       // Recalculate max dimensions, redefine the grid, edit svg container dimensions to max dims
@@ -241,6 +244,7 @@ export default {
       })
       // Update the dimensions of the settlements
       this.settlements = updateSettlementLocations(grid, this.settlements);
+      this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
       redrawSettlements(this.settlements, draw, this.settlementRadius);
     }
     console.log((maxHexSize.width) / (2 * this.hexagonRatio))
@@ -412,50 +416,71 @@ export default {
       };
     },
     // Draw the number tiles
-    renderNumberTokens(drawSVG, grid, numberTileRadius) {
+    renderNumberTokens(drawSVG, grid) {
+      const numberTokenSVGs = [];
       grid.forEach(hex => {
-        this.renderNumberToken(drawSVG, hex, numberTileRadius);
-        // Object.assign(numberTile, {svg: numberTileSVG});
+        const numberTokenSVG = this.renderNumberToken(drawSVG, hex);
+        numberTokenSVGs.push(numberTokenSVG);
       })
+      return numberTokenSVGs;
     },
-    renderNumberToken(drawSVG, hex, numberTileRadius) {
+    renderNumberToken(drawSVG, hex) {
       let number = hex.hexPolygon.node.getAttribute('numberToken')
       if (!number) {
         return;
       }
-      console.log(hex)
-      console.log(hex.center())
+      const numberTokenRadius = hex.hexPolygon.height() * this.numberTokenPercentOfHex;
       const center = hex.center();
       const {x, y} = hex.toPoint();
-      console.log(x,y)
+      const numberToken = drawSVG.group();
 
-      const numberToken = drawSVG.group()
-
+      // Create Circle and add to group
       const numberTokenCircle = drawSVG
-          .circle(numberTileRadius * 2)
+          .circle(numberTokenRadius * 2)
           .stroke({width: 4, color: '#aaa'})
           .fill("white")
-          .translate(x + center.x - numberTileRadius, y + center.y - numberTileRadius);
+      numberTokenCircle.node.setAttribute('cx', x + center.x)
+      numberTokenCircle.node.setAttribute('cy', y + center.y)
+      numberTokenCircle.node.classList.add('number-token-circle');
+      numberTokenCircle.addTo(numberToken);
 
-      numberTokenCircle.addTo(numberToken)
-
+      // Create text and add to group
       const numberTokenText = drawSVG
           .text(`${number}`)
-          .translate(x + center.x, y + center.y - numberTileRadius);
-      console.log(numberTokenText)
-
-      numberTokenText.node.classList.add('number-token-text')
-
-      numberTokenText.addTo(numberToken)
-
-      const numberTokenSVG = numberTokenCircle.node;
-      numberTokenSVG.classList.add('number-tile-svg');
-      // numberTokenSVG.setAttribute('state', );
-
-      // return settlementCircle;
+          .translate(x + center.x, y + center.y - this.roadGap/2);
+      numberTokenText.node.classList.add('number-token-text');
+      numberTokenText.addTo(numberToken);
+      // Adjust by text up by its height/2
+      numberTokenText.translate(0,-numberTokenText.node.getBBox().height / 2);
+      
+      const numberTokenSVG = {circle: numberTokenCircle, text: numberTokenText};
+      return numberTokenSVG;
     },
+    redrawNumberTokens(drawSVG, grid, numberTokenSVGs) {
+      grid.forEach((hex, i) => {
+        this.redrawNumberToken(drawSVG, hex, numberTokenSVGs[i]);
+      })
+    },
+    redrawNumberToken(drawSVG, hex, numberTokenSVG) {
+      let number = hex.hexPolygon.node.getAttribute('numberToken')
+      if (!number) {
+        return;
+      }
+      const numberTokenRadius = hex.hexPolygon.height() * this.numberTokenPercentOfHex;
+      const center = hex.center();
+      const {x, y} = hex.toPoint();
 
-
+      // Redraw circle
+      numberTokenSVG.circle.node.setAttribute('r', numberTokenRadius)
+      numberTokenSVG.circle.node.setAttribute('cx', x + center.x)
+      numberTokenSVG.circle.node.setAttribute('cy', y + center.y)
+      // redraw text
+      numberTokenSVG.text
+          .transform(0)
+          .translate(x + center.x, y + center.y - this.roadGap/2);
+      // Adjust by text up by its height/2
+      numberTokenSVG.text.translate(0,-numberTokenSVG.text.node.getBBox().height / 2);
+    },
     startBuild() {
       renderSettlements(this.settlements, this.draw, this.settlementRadius);
     }
@@ -532,8 +557,9 @@ export default {
 
 ::v-deep .number-token-text {
   text-anchor: middle;
-  dominant-baseline: mathematical;
+  /* dominant-baseline: text-after-edge; */
   font-weight: bold;
+  pointer-events: none;
 }
 
 </style>
