@@ -6,7 +6,7 @@
         src="..\assets\svg\clay.svg"
       >
       <div>
-        <span class="resource-count">1</span>
+        <span class="resource-count">{{ resourceCount.clay }}</span>
       </div>
     </div>
     <div class="resource" resource="wood">
@@ -15,7 +15,7 @@
         src="..\assets\svg\wood.svg"
       >
       <div>
-        <span class="resource-count">1</span>
+        <span class="resource-count">{{ resourceCount.wood }}</span>
       </div>
     </div>
     <div class="resource" resource="sheep">
@@ -24,7 +24,7 @@
         src="..\assets\svg\sheep.svg"
       >
       <div>
-        <span class="resource-count">1</span>
+        <span class="resource-count">{{ resourceCount.sheep }}</span>
       </div>
     </div>
     <div class="resource" resource="wheat">
@@ -33,7 +33,7 @@
         src="..\assets\svg\wheat.svg"
       >
       <div>
-        <span class="resource-count">1</span>
+        <span class="resource-count">{{ resourceCount.wheat }}</span>
       </div>
     </div>
     <div class="resource" resource="ore">
@@ -42,7 +42,7 @@
         src="..\assets\svg\ore.svg"
       >
       <div>
-        <span class="resource-count">1</span>
+        <span class="resource-count">{{ resourceCount.ore }}</span>
       </div>
     </div>
   </div>
@@ -54,6 +54,17 @@ export default {
 
   name: "Resources",
   components: {},
+  data() {
+    return {
+      resourceCount: {
+        clay: 0,
+        wood: 0,
+        sheep: 0,
+        wheat: 0,
+        ore: 0,
+      }
+    }
+  },
   mounted: function () {
   },
   methods: {
