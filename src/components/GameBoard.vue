@@ -149,6 +149,7 @@ export default {
         tokenBorder: 5,
         tokenDotRadius: 1.5,
         numberTokenPercentOfHex: 0.16,
+        shipTokenPercentOfHex: 0.24,
       }
     }
   },
@@ -332,6 +333,7 @@ export default {
         renderOcean(draw) {
           const {x, y} = this.toPoint()
           const corners = this.corners()
+          const center = this.center()
 
           this.hexPolygon = draw
               .polygon(corners.map(({x, y}) => `${x},${y}`))
@@ -341,12 +343,50 @@ export default {
 
           this.hexPolygon.node.classList.add('ocean-hex')
           this.hexPolygon.node.setAttribute('resource', 'ocean');
+
+          console.log(this)
+          let shipURL = '';
+          this.x === 2 && this.y === 6 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+          this.x === 1 && this.y === 4 ? shipURL = require('../assets/svg/ship-clay.svg') : '';
+          this.x === 1 && this.y === 2 ? shipURL = require('../assets/svg/ship-wood.svg') : '';
+          this.x === 2 && this.y === 0 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+          this.x === 4 && this.y === 0 ? shipURL = require('../assets/svg/ship-wheat.svg') : '';
+          this.x === 5 && this.y === 1 ? shipURL = require('../assets/svg/ship-ore.svg') : '';
+          this.x === 6 && this.y === 3 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+          this.x === 5 && this.y === 5 ? shipURL = require('../assets/svg/ship-sheep.svg') : '';
+          this.x === 4 && this.y === 6 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+
+          if (shipURL !== '') {
+
+            const shipTokenRadius = this.hexPolygon.height() * self.graphics.shipTokenPercentOfHex;
+            const shipToken = draw.group()
+
+            const shipTokenCircle = draw
+              .circle(shipTokenRadius * 2)
+              .stroke({width: 2, color: '#aaa'})
+              .fill("white")
+            shipTokenCircle.node.setAttribute('cx', x + center.x)
+            shipTokenCircle.node.setAttribute('cy', y + center.y)
+            shipTokenCircle.addTo(shipToken);
+            
+            const shipTokenImage = draw
+              .image(shipURL)
+              .size(`${shipTokenRadius * 1.7}px`, `${shipTokenRadius * 1.7}px`)
+              .translate(x + center.x - (shipTokenRadius * 1.7 / 2), y + center.y - (shipTokenRadius * 1.7 / 2));
+            shipTokenImage.addTo(shipToken);
+
+            shipToken.node.setAttribute('cx', x + center.x)
+            shipToken.node.setAttribute('cy', y + center.y)
+            shipToken.node.classList.add('number-token-circle');
+            Object.assign(this, {token: {group: shipToken, circle: shipTokenCircle, image: shipTokenImage}});
+          }
         },
 
         redrawOcean(maxHexSize) {
           const {x, y} = this.toPoint()
           const corners = this.corners()
-
+          const center = this.center();
+          
           this.size.xRadius = (maxHexSize.width) / (2 * hexagonRatio);
           this.size.yRadius = (maxHexSize.width) / (2 * hexagonRatio);
           this.hexPolygon.node.points.forEach((point, i) => {
@@ -356,6 +396,20 @@ export default {
           this.hexPolygon.node.setAttribute('stroke-width', self.graphics.oceanGap)
           this.hexPolygon.transform(0)
           this.hexPolygon.translate(x, y)
+
+          if (this.token) {
+            // Redraw circle
+            const shipTokenRadius = this.hexPolygon.height() * self.graphics.shipTokenPercentOfHex;
+            this.token.circle.node.setAttribute('stroke-width', self.graphics.tokenBorder)
+            this.token.circle.node.setAttribute('r', shipTokenRadius)
+            this.token.circle.node.setAttribute('cx', x + center.x)
+            this.token.circle.node.setAttribute('cy', y + center.y)
+            
+            this.token.image
+              .size(`${shipTokenRadius * 1.7}px`, `${shipTokenRadius * 1.7}px`)
+              .transform(0)
+              .translate(x + center.x - (shipTokenRadius * 1.7 / 2), y + center.y - (shipTokenRadius * 1.7 / 2));
+          }
         },
 
         // highlight() {
