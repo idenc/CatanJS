@@ -1,8 +1,7 @@
 <template>
   <div id="game-container">
     <div id="board-container">
-      <DevCardModal v-if="devModal === true" show="devModal"/>
-      <GameBoard />
+      <GameBoard ref="gameBoard" />
     </div>
     <div id="sidebar-container">
       <div id="sidebar-players-container">
@@ -15,7 +14,10 @@
         <ChatWindow id="chat" />
       </div>
       <div id="sidebar-buttons-container">
-        <button class="btn btn-primary btn-block">
+        <button
+          class="btn btn-primary btn-block"
+          @click="startBuild"
+        >
           Build
         </button>
         <button class="btn btn-primary btn-block">
@@ -47,6 +49,11 @@ export default {
     }
   },
   mounted: function () {
+  },
+  methods: {
+    startBuild() {
+      this.$refs.gameBoard.startBuild();
+    }
   }
 }
 </script>

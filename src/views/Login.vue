@@ -109,7 +109,7 @@ export default {
               'Content-Type': 'application/json'
             }
           })
-          .then(() => this.$router.push('/dashboard'))
+          .then(() => this.$router.push('/game'))
           .catch(err => {
             console.log(err.response);
             this.myStatusMessage = err.response.data.info.message;

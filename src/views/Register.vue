@@ -102,7 +102,7 @@ export default {
   mounted() {
     axios.get('/register')
         .then(response => {
-          this.fromGoogle = response;
+          this.fromGoogle = response.data
           this.getFinished = true;
         })
         .catch(err => console.log(err));
@@ -142,7 +142,7 @@ export default {
     },
     googleRegistration() {
       axios.post('/register', {name: this.name}, { withCredentials: true})
-          .then(() => this.$router.push('/dashboard'))
+          .then(() => this.$router.push('/game'))
           .catch(err => this.errors.push(err.response.data.msg));
     },
     register() {
