@@ -136,6 +136,8 @@ export default {
       hexagonRatio: 0.866025, // Hexagon ration, height to width
       gameboardRadius: 3,
       resources: ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'],
+      tiles: [],
+      numberTokens: [],
       draw: SVG(),
       settlements: [],
       numberTokenSVGs: [],
@@ -156,106 +158,108 @@ export default {
     // Let the server know a player has connected
     // TODO: Replace the placeholder username with the player's actual username
     this.$socket.emit('player_joined', 'placeholder_username');
-    console.log(SCREEN_BREAKPOINTS.SM)
-    this.updateGraphicsPropertiesByWindowSize();
-
-    let gameboardContainer = this.$refs.boardSvgContainer;
-    let maxHexSize = this.determineMaxHexSize(gameboardContainer);
-
-    // Create svg container that fits the maximum gameboard size and store svg in draw variable
-    this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
-    const draw = this.draw;
-    const drawHexGroup = draw.group();
-
-    // Copy the defs into the dynamically created svg.
-    // There should be a smarter way to do this but I was having trouble with scope or something.
-    const defR = this.$refs.defRef
-    draw.node.appendChild(defR)
-
-    // Hex object
-    let Hex = this.defineHexObject(maxHexSize, drawHexGroup);
-    console.log(Hex)
-    let Grid = Honeycomb.defineGrid(Hex)
-    console.log(Grid)
-
-    // Render resource tiles
-    const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles, this.numberTokens);
-    console.log(grid);
-
-    this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
-    console.log(this.numberTokenSVGs)
-
-    // Render ocean tiles
-    const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
-    console.log(oceanGrid);
-
-    // Setup settlements
-    const maxRowWidth = grid.radius * 2 + 1;
-    this.settlements = locateSettlements(grid);
-    //renderSettlements(settlementsArray, draw, this.settlementRadius);
-    assignNeighbours(this.settlements, maxRowWidth);
-    // const settlementsMap = getSettlementsMap(this.settlements);
-    // drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
-
-    // Add a click listener to hexes
-    this.$el.addEventListener('click', ({offsetX, offsetY}) => {
-      const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
-      console.log(hexCoordinates)
-      console.log(offsetX, offsetY)
-      const hex = grid.get(hexCoordinates)
-      console.log(hex)
-
-      // if (hex) {
-      //   hex.highlight()
-      // }
-    })
-
-    // Add a hover listener to hexes
-    this.$el.addEventListener('mousemove', ({offsetX, offsetY}) => {
-      const hexCoordinates = Grid.pointToHex([offsetX, offsetY]);
-      const hoveredHex = grid.get(hexCoordinates);
-
-      grid.forEach(hex => {
-        if (hex === hoveredHex) {
-          hex.handleMouseOver();
-        } else {
-          hex.handleMouseOut();
-        }
-      })
-    })
-
-    // Add an event listener that run the function when window dimensions change
-    window.addEventListener('resize', this.debounce(() => {
-      handleWindowResize();
-    }, 150));
-
-    const handleWindowResize = () => {
-      this.updateGraphicsPropertiesByWindowSize();
-      // Recalculate max dimensions, redefine the grid, edit svg container dimensions to max dims
-      maxHexSize = this.determineMaxHexSize(gameboardContainer);
-      Hex = this.defineHexObject(maxHexSize, drawHexGroup);
-      Grid = Honeycomb.defineGrid(Hex);
-      draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
-      draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`)
-      // Update the dimensions of the grid and ocean tiles
-      grid.forEach((hex) => {
-        hex.redraw(maxHexSize);
-      })
-      grid.center.redraw(maxHexSize) // I'm not sure why it doesn't work without this.
-      oceanGrid.forEach((hex) => {
-        hex.redrawOcean(maxHexSize);
-      })
-      // Update the dimensions of the settlements
-      this.settlements = updateSettlementLocations(grid, this.settlements);
-      this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
-      redrawSettlements(this.settlements, draw);
-    }
-    console.log((maxHexSize.width) / (2 * this.hexagonRatio))
   },
   methods: {
+    initializeBoard() {
+      console.log(SCREEN_BREAKPOINTS.SM)
+      this.updateGraphicsPropertiesByWindowSize();
+
+      let gameboardContainer = this.$refs.boardSvgContainer;
+      let maxHexSize = this.determineMaxHexSize(gameboardContainer);
+
+      // Create svg container that fits the maximum gameboard size and store svg in draw variable
+      this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+      const draw = this.draw;
+      const drawHexGroup = draw.group();
+
+      // Copy the defs into the dynamically created svg.
+      // There should be a smarter way to do this but I was having trouble with scope or something.
+      const defR = this.$refs.defRef
+      draw.node.appendChild(defR)
+
+      // Hex object
+      let Hex = this.defineHexObject(maxHexSize, drawHexGroup);
+      console.log(Hex)
+      let Grid = Honeycomb.defineGrid(Hex)
+      console.log(Grid)
+
+      // Render resource tiles
+      const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles, this.numberTokens);
+      console.log(grid);
+
+      this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
+      console.log(this.numberTokenSVGs)
+
+      // Render ocean tiles
+      const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
+      console.log(oceanGrid);
+
+      // Setup settlements
+      const maxRowWidth = grid.radius * 2 + 1;
+      this.settlements = locateSettlements(grid);
+      //renderSettlements(settlementsArray, draw, this.settlementRadius);
+      assignNeighbours(this.settlements, maxRowWidth);
+      // const settlementsMap = getSettlementsMap(this.settlements);
+      // drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
+
+      // Add a click listener to hexes
+      this.$el.addEventListener('click', ({offsetX, offsetY}) => {
+        const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
+        console.log(hexCoordinates)
+        console.log(offsetX, offsetY)
+        const hex = grid.get(hexCoordinates)
+        console.log(hex)
+
+        // if (hex) {
+        //   hex.highlight()
+        // }
+      })
+
+      // Add a hover listener to hexes
+      this.$el.addEventListener('mousemove', ({offsetX, offsetY}) => {
+        const hexCoordinates = Grid.pointToHex([offsetX, offsetY]);
+        const hoveredHex = grid.get(hexCoordinates);
+
+        grid.forEach(hex => {
+          if (hex === hoveredHex) {
+            hex.handleMouseOver();
+          } else {
+            hex.handleMouseOut();
+          }
+        })
+      })
+
+      // Add an event listener that run the function when window dimensions change
+      window.addEventListener('resize', this.debounce(() => {
+        handleWindowResize();
+      }, 150));
+
+      const handleWindowResize = () => {
+        this.updateGraphicsPropertiesByWindowSize();
+        // Recalculate max dimensions, redefine the grid, edit svg container dimensions to max dims
+        maxHexSize = this.determineMaxHexSize(gameboardContainer);
+        Hex = this.defineHexObject(maxHexSize, drawHexGroup);
+        Grid = Honeycomb.defineGrid(Hex);
+        draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
+        draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`)
+        // Update the dimensions of the grid and ocean tiles
+        grid.forEach((hex) => {
+          hex.redraw(maxHexSize);
+        })
+        grid.center.redraw(maxHexSize) // I'm not sure why it doesn't work without this.
+        oceanGrid.forEach((hex) => {
+          hex.redrawOcean(maxHexSize);
+        })
+        // Update the dimensions of the settlements
+        this.settlements = updateSettlementLocations(grid, this.settlements);
+        this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
+        redrawSettlements(this.settlements, draw);
+      }
+      console.log((maxHexSize.width) / (2 * this.hexagonRatio))
+    },
     updateGraphicsPropertiesByWindowSize() {
       // Set the road gap based on the window size
-      console.log( window.innerWidth  );
+      console.log(window.innerWidth);
       this.graphics.roadGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 5 : 10;
       this.graphics.oceanGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
       this.graphics.tokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
@@ -461,11 +465,11 @@ export default {
       const numberTokenText = drawSVG
           .text(`${number}`)
           .font({size: 10})
-          .translate(x + center.x, y + center.y - this.graphics.roadGap/2);
+          .translate(x + center.x, y + center.y - this.graphics.roadGap / 2);
       numberTokenText.node.classList.add('number-token-text');
       numberTokenText.addTo(numberToken);
       // Adjust by text up by its height/2
-      numberTokenText.translate(0,-numberTokenText.node.getBBox().height / 2);
+      numberTokenText.translate(0, -numberTokenText.node.getBBox().height / 2);
       if (number === '6' || number === '8') {
         numberTokenText.fill('red');
       }
@@ -497,9 +501,9 @@ export default {
             .circle(dotRadius)
             .stroke({width: 1, color: fillColor})
             .fill(fillColor)
-        dot.node.setAttribute('cx', x + center.x + dotRadius/2)
+        dot.node.setAttribute('cx', x + center.x + dotRadius / 2)
         dot.node.setAttribute('cy', y + center.y)
-        dot.translate(dotRadius*2.75*i, numberTokenText.node.getBBox().height/2);
+        dot.translate(dotRadius * 2.75 * i, numberTokenText.node.getBBox().height / 2);
       }
       dotGroup.translate(-dotGroup.node.getBBox().width / 2, 0)
       return dotGroup;
@@ -526,13 +530,13 @@ export default {
       // redraw text
       numberTokenSVG.text
           .transform(0)
-          .translate(x + center.x, y + center.y - this.graphics.roadGap/2);
+          .translate(x + center.x, y + center.y - this.graphics.roadGap / 2);
       // Adjust by text up by its height/2
-      numberTokenSVG.text.translate(0,-numberTokenSVG.text.node.getBBox().height / 2);
+      numberTokenSVG.text.translate(0, -numberTokenSVG.text.node.getBBox().height / 2);
 
       numberTokenSVG.dots.remove();
       numberTokenSVG.dots = this.renderNumberTokenDots(number, numberTokenSVG.container,
-                                numberTokenSVG.text, hex.toPoint(), hex.center());
+          numberTokenSVG.text, hex.toPoint(), hex.center());
     },
     startBuild() {
       // TODO: check if the player is able to build a settlement
@@ -540,8 +544,11 @@ export default {
     }
   },
   sockets: {
-    on_load: function () {
+    board_info: function (boardInfo) {
+      this.tiles = boardInfo.tiles;
+      this.numberTokens = boardInfo.numberTokens;
 
+      this.initializeBoard();
     }
   }
 }

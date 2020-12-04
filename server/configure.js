@@ -51,7 +51,7 @@ module.exports = app => {
     app.use(passport.session());
 
     // TODO: Integrate this to be created with a lobby
-    const debugGame = Game('placeholderRoom');
+    const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
         // Using socket io to handle registration,

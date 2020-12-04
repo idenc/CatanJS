@@ -1,6 +1,6 @@
 "use strict";
 
-const io = require('../socket');
+const io = require('../socket').getio();
 
 /**
  * Handles an instance of a game
@@ -79,6 +79,14 @@ class Game {
      * @param socket the socket for a player
      */
     configureSocketInteractions(socket) {
+        socket.join(this.socketRoom);
+        socket.on('player_joined', (username) => {
+            io.to(this.socketRoom).emit('board_info', {
+                tiles: this.tiles,
+                numberTokens: this.numberTokens
+            });
+        });
+
         //Prototype for creating game
         //initialize tiles, players, and socketRoom
         socket.on('new_game', () => {
@@ -159,6 +167,6 @@ class Game {
     }
 }
 
-export {
+module.exports = {
     Game
 }
