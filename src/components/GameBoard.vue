@@ -142,12 +142,14 @@ export default {
       settlements: [],
       numberTokenSVGs: [],
       graphics: {
-        oceanGap: 5,
-        roadGap: 10,
+        oceanGap: 8,
+        roadGap: 8,
         settlementRadius: 15,
         tokenBorder: 5,
         tokenDotRadius: 1.5,
         numberTokenPercentOfHex: 0.16,
+        shipTokenPercentOfHex: 0.24,
+        shipTokenBorder: 3,
       }
     }
   },
@@ -167,10 +169,12 @@ export default {
       let gameboardContainer = this.$refs.boardSvgContainer;
       let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
-      // Create svg container that fits the maximum gameboard size and store svg in draw variable
-      this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
-      const draw = this.draw;
-      const drawHexGroup = draw.group();
+    // Create svg container that fits the maximum gameboard size and store svg in draw variable
+    this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+    const draw = this.draw;
+    const drawOceanHexGroup = draw.group();
+    const drawHexGroup = draw.group();
+
 
       // Copy the defs into the dynamically created svg.
       // There should be a smarter way to do this but I was having trouble with scope or something.
@@ -190,9 +194,9 @@ export default {
       this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
       console.log(this.numberTokenSVGs)
 
-      // Render ocean tiles
-      const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
-      console.log(oceanGrid);
+    // Render ocean tiles
+    const oceanGrid = this.renderOceanHexes(Hex, Grid, drawOceanHexGroup);
+    console.log(oceanGrid);
 
       // Finds the proper location to render settlements
       locateSettlements(grid, this.settlements);
@@ -254,11 +258,12 @@ export default {
     },
     updateGraphicsPropertiesByWindowSize() {
       // Set the road gap based on the window size
-      console.log(window.innerWidth);
-      this.graphics.roadGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 5 : 10;
-      this.graphics.oceanGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
+      console.log( window.innerWidth  );
+      this.graphics.roadGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 4 : 8;
+      this.graphics.oceanGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 4 : 8;
       this.graphics.tokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
       this.graphics.tokenDotRadius = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 1 : 1.5;
+      this.graphics.shipTokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 1 : 3;
     },
     // Determine maximum size of gameboard that fits play area div
     determineMaxHexSize(gameboardContainer) {
@@ -327,21 +332,78 @@ export default {
         renderOcean(draw) {
           const {x, y} = this.toPoint()
           const corners = this.corners()
+          const center = this.center()
 
           this.hexPolygon = draw
               .polygon(corners.map(({x, y}) => `${x},${y}`))
-              .stroke({width: self.graphics.oceanGap, color: '#f7eac3'})
+              .stroke({width: self.graphics.oceanGap, color: '#2357A5'})
               .fill('none')
               .translate(x, y)
 
           this.hexPolygon.node.classList.add('ocean-hex')
           this.hexPolygon.node.setAttribute('resource', 'ocean');
+
+          let shipURL = '';
+          let dockCorners;
+          this.x === 2 && this.y === 6 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+          this.x === 2 && this.y === 6 ? dockCorners = [corners[5], center, center, corners[0]] : '';
+          this.x === 1 && this.y === 4 ? shipURL = require('../assets/svg/ship-clay.svg') : '';
+          this.x === 1 && this.y === 4 ? dockCorners = [corners[0], center, center, corners[1]] : '';
+          this.x === 1 && this.y === 2 ? shipURL = require('../assets/svg/ship-wood.svg') : '';
+          this.x === 1 && this.y === 2 ? dockCorners = [corners[0], center, center, corners[1]] : '';
+          this.x === 2 && this.y === 0 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+          this.x === 2 && this.y === 0 ? dockCorners = [corners[1], center, center, corners[2]] : '';
+          this.x === 4 && this.y === 0 ? shipURL = require('../assets/svg/ship-wheat.svg') : '';
+          this.x === 4 && this.y === 0 ? dockCorners = [corners[2], center, center, corners[3]] : '';
+          this.x === 5 && this.y === 1 ? shipURL = require('../assets/svg/ship-ore.svg') : '';
+          this.x === 5 && this.y === 1 ? dockCorners = [corners[2], center, center, corners[3]] : '';
+          this.x === 6 && this.y === 3 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+          this.x === 6 && this.y === 3 ? dockCorners = [corners[3], center, center, corners[4]] : '';
+          this.x === 5 && this.y === 5 ? shipURL = require('../assets/svg/ship-sheep.svg') : '';
+          this.x === 5 && this.y === 5 ? dockCorners = [corners[4], center, center, corners[5]] : '';
+          this.x === 4 && this.y === 6 ? shipURL = require('../assets/svg/ship-3to1.svg') : '';
+          this.x === 4 && this.y === 6 ? dockCorners = [corners[4], center, center, corners[5]] : '';
+
+          if (dockCorners) {
+            const dock = draw
+              .polyline(dockCorners.map(({x, y}) => `${x},${y}`))
+              .stroke({width: self.graphics.oceanGap, color: '#824d14'})
+              .fill('transparent')
+              .translate(x, y)
+              Object.assign(this, {dock: dock});
+          }
+
+          if (shipURL !== '') {
+            const shipTokenRadius = this.hexPolygon.height() * self.graphics.shipTokenPercentOfHex;
+            const shipToken = draw.group()
+
+            const shipTokenCircle = draw
+              .circle(shipTokenRadius * 2.2)
+              .stroke({width: self.graphics.shipTokenBorder, color: '#aaa'})
+              .fill("white")
+            shipTokenCircle.node.setAttribute('cx', x + center.x)
+            shipTokenCircle.node.setAttribute('cy', y + center.y)
+            shipTokenCircle.addTo(shipToken);
+
+            const shipTokenImage = draw
+              .image(shipURL)
+              .size(`${shipTokenRadius * 1.9}px`, `${shipTokenRadius * 1.9}px`)
+              .translate(x + center.x - (shipTokenRadius * 1.9 / 2), y + center.y - (shipTokenRadius * 1.9 / 2));
+            shipTokenImage.addTo(shipToken);
+
+            shipToken.node.setAttribute('cx', x + center.x)
+            shipToken.node.setAttribute('cy', y + center.y)
+            shipToken.node.classList.add('number-token-circle');
+            Object.assign(this, {token: {group: shipToken, circle: shipTokenCircle, image: shipTokenImage}});
+          }
         },
 
         redrawOcean(maxHexSize) {
-          const {x, y} = this.toPoint()
-          const corners = this.corners()
+          let {x, y} = this.toPoint()
+          let corners = this.corners()
+          let center = this.center();
 
+          // Redraw ocean hex
           this.size.xRadius = (maxHexSize.width) / (2 * hexagonRatio);
           this.size.yRadius = (maxHexSize.width) / (2 * hexagonRatio);
           this.hexPolygon.node.points.forEach((point, i) => {
@@ -351,6 +413,41 @@ export default {
           this.hexPolygon.node.setAttribute('stroke-width', self.graphics.oceanGap)
           this.hexPolygon.transform(0)
           this.hexPolygon.translate(x, y)
+
+          // Redraw docks
+          let dockCorners;
+          this.x === 2 && this.y === 6 ? dockCorners = [corners[5], center, center, corners[0]] : '';
+          this.x === 1 && this.y === 4 ? dockCorners = [corners[0], center, center, corners[1]] : '';
+          this.x === 1 && this.y === 2 ? dockCorners = [corners[0], center, center, corners[1]] : '';
+          this.x === 2 && this.y === 0 ? dockCorners = [corners[1], center, center, corners[2]] : '';
+          this.x === 4 && this.y === 0 ? dockCorners = [corners[2], center, center, corners[3]] : '';
+          this.x === 5 && this.y === 1 ? dockCorners = [corners[2], center, center, corners[3]] : '';
+          this.x === 6 && this.y === 3 ? dockCorners = [corners[3], center, center, corners[4]] : '';
+          this.x === 5 && this.y === 5 ? dockCorners = [corners[4], center, center, corners[5]] : '';
+          this.x === 4 && this.y === 6 ? dockCorners = [corners[4], center, center, corners[5]] : '';
+          if (dockCorners) {
+            this.dock.node.points.forEach((point, i) => {
+              point.x = dockCorners[i].x;
+              point.y = dockCorners[i].y;
+            })
+            this.dock
+              .transform(0)
+              .translate(x, y)
+          }
+
+          if (this.token) {
+            // Redraw circle
+            const shipTokenRadius = this.hexPolygon.height() * self.graphics.shipTokenPercentOfHex;
+            this.token.circle.node.setAttribute('stroke-width', self.graphics.shipTokenBorder)
+            this.token.circle.node.setAttribute('r', shipTokenRadius * 1.1)
+            this.token.circle.node.setAttribute('cx', x + center.x)
+            this.token.circle.node.setAttribute('cy', y + center.y)
+
+            this.token.image
+              .size(`${shipTokenRadius * 1.9}px`, `${shipTokenRadius * 1.9}px`)
+              .transform(0)
+              .translate(x + center.x - (shipTokenRadius * 1.9 / 2), y + center.y - (shipTokenRadius * 1.9 / 2));
+          }
         },
 
         // highlight() {
