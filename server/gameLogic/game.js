@@ -81,7 +81,7 @@ class Game {
     configureSocketInteractions(socket) {
         socket.join(this.socketRoom);
         socket.on('player_joined', (username) => {
-            io.to(this.socketRoom).emit('board_info', {
+            socket.emit('board_info', {
                 tiles: this.tiles,
                 numberTokens: this.numberTokens
             });
