@@ -27,7 +27,9 @@
           Dev Cards
         </button>
       </div>
-      <div id="sidebar-resources-container" />
+      <div id="sidebar-resources-container">
+        <Resources />
+      </div>
     </div>
   </div>
 </template>
@@ -37,11 +39,12 @@
 import GameBoard from "@/components/GameBoard";
 import UserList from "@/components/chat/UserList";
 import ChatWindow from "@/components/chat/ChatWindow";
+import Resources from "@/components/Resources";
 
 export default {
 
   name: "Game",
-  components: {ChatWindow, UserList, GameBoard},
+  components: {ChatWindow, UserList, GameBoard, Resources},
   mounted: function () {
   },
   methods: {
@@ -73,17 +76,20 @@ export default {
   height: 100vh;
   background: rgb(133, 133, 133);
   padding: 1rem;
+  max-width: 40%;
 }
 
 #sidebar-players-container {
   background: rgb(44, 44, 44);
-  height: 33%;
+  /* height: 33%; */
+  flex: 1 0;
   margin-bottom: 1rem;
 }
 
 #sidebar-chat-container {
   background: rgb(44, 44, 44);
-  height: 33%;
+  /* height: 33%; */
+  flex: 1 0;
   margin-bottom: 1rem;
 }
 
@@ -102,7 +108,7 @@ export default {
 
 #sidebar-resources-container {
   background: rgb(44, 44, 44);
-  flex-grow: 1;
+  /* flex-grow: 1; */
 }
 
 #user-list, #chat {

@@ -126,6 +126,7 @@ import {
   updateSettlementLocations,
   redrawSettlements
 } from "@/assets/js/settlements";
+import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
 
 export default {
   name: "GameBoard",
@@ -138,17 +139,26 @@ export default {
       tiles: ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber',
         'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'],
       numberTokens: ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'],
-      oceanGap: 5,
-      roadGap: 10,
-      settlementRadius: 15,
       draw: SVG(),
-      settlements: []
+      settlements: [],
+      numberTokenSVGs: [],
+      graphics: {
+        oceanGap: 5,
+        roadGap: 10,
+        settlementRadius: 15,
+        tokenBorder: 5,
+        tokenDotRadius: 1.5,
+        numberTokenPercentOfHex: 0.16,
+      }
     }
   },
   created: function () {
 
   },
   mounted: function () {
+    console.log(SCREEN_BREAKPOINTS.SM)
+    this.updateGraphicsPropertiesByWindowSize();
+
     let gameboardContainer = this.$refs.boardSvgContainer;
     let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
@@ -175,6 +185,9 @@ export default {
     // Render resource tiles
     const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles, this.numberTokens);
     console.log(grid);
+
+    this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
+    console.log(this.numberTokenSVGs)
 
     // Render ocean tiles
     const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
@@ -218,9 +231,10 @@ export default {
     // Add an event listener that run the function when window dimensions change
     window.addEventListener('resize', this.debounce(() => {
       handleWindowResize();
-    }, 100));
+    }, 150));
 
     const handleWindowResize = () => {
+      this.updateGraphicsPropertiesByWindowSize();
       // Recalculate max dimensions, redefine the grid, edit svg container dimensions to max dims
       maxHexSize = this.determineMaxHexSize(gameboardContainer);
       Hex = this.defineHexObject(maxHexSize, drawHexGroup);
@@ -237,11 +251,20 @@ export default {
       })
       // Update the dimensions of the settlements
       this.settlements = updateSettlementLocations(grid, this.settlements);
+      this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
       redrawSettlements(this.settlements, draw);
     }
     console.log((maxHexSize.width) / (2 * this.hexagonRatio))
   },
   methods: {
+    updateGraphicsPropertiesByWindowSize() {
+      // Set the road gap based on the window size
+      console.log( window.innerWidth  );
+      this.graphics.roadGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 5 : 10;
+      this.graphics.oceanGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
+      this.graphics.tokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
+      this.graphics.tokenDotRadius = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 1 : 1.5;
+    },
     // Determine maximum size of gameboard that fits play area div
     determineMaxHexSize(gameboardContainer) {
       let offsetWidth = gameboardContainer.offsetWidth;
@@ -274,7 +297,7 @@ export default {
 
           this.hexPolygon = draw
               .polygon(corners.map(({x, y}) => `${x},${y}`))
-              .stroke({width: self.roadGap, color: '#f7eac3'})
+              .stroke({width: self.graphics.roadGap, color: '#f7eac3'})
               .fill('none')
               .translate(x, y)
 
@@ -301,6 +324,7 @@ export default {
             point.x = corners[i].x;
             point.y = corners[i].y;
           })
+          this.hexPolygon.node.setAttribute('stroke-width', self.graphics.roadGap)
           this.hexPolygon.transform(0)
           this.hexPolygon.translate(x, y)
         },
@@ -311,7 +335,7 @@ export default {
 
           this.hexPolygon = draw
               .polygon(corners.map(({x, y}) => `${x},${y}`))
-              .stroke({width: self.oceanGap, color: '#f7eac3'})
+              .stroke({width: self.graphics.oceanGap, color: '#f7eac3'})
               .fill('none')
               .translate(x, y)
 
@@ -329,6 +353,7 @@ export default {
             point.x = corners[i].x;
             point.y = corners[i].y;
           })
+          this.hexPolygon.node.setAttribute('stroke-width', self.graphics.oceanGap)
           this.hexPolygon.transform(0)
           this.hexPolygon.translate(x, y)
         },
@@ -407,9 +432,115 @@ export default {
         }, delay);
       };
     },
+    // Draw the number tiles
+    renderNumberTokens(drawSVG, grid) {
+      const numberTokenSVGs = [];
+      grid.forEach(hex => {
+        const numberTokenSVG = this.renderNumberToken(drawSVG, hex);
+        numberTokenSVGs.push(numberTokenSVG);
+      })
+      return numberTokenSVGs;
+    },
+    renderNumberToken(drawSVG, hex) {
+      let number = hex.hexPolygon.node.getAttribute('numberToken')
+      if (!number) {
+        return;
+      }
+      const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
+      const center = hex.center();
+      const {x, y} = hex.toPoint();
+      const numberToken = drawSVG.group();
+
+      // Create Circle and add to group
+      const numberTokenCircle = drawSVG
+          .circle(numberTokenRadius * 2)
+          .stroke({width: this.graphics.tokenBorder, color: '#aaa'})
+          .fill("white")
+      numberTokenCircle.node.setAttribute('cx', x + center.x)
+      numberTokenCircle.node.setAttribute('cy', y + center.y)
+      numberTokenCircle.node.classList.add('number-token-circle');
+      numberTokenCircle.addTo(numberToken);
+
+      // Create text and add to group
+      const numberTokenText = drawSVG
+          .text(`${number}`)
+          .font({size: 10})
+          .translate(x + center.x, y + center.y - this.graphics.roadGap/2);
+      numberTokenText.node.classList.add('number-token-text');
+      numberTokenText.addTo(numberToken);
+      // Adjust by text up by its height/2
+      numberTokenText.translate(0,-numberTokenText.node.getBBox().height / 2);
+      if (number === '6' || number === '8') {
+        numberTokenText.fill('red');
+      }
+
+      const dotGroup = this.renderNumberTokenDots(number, numberToken, numberTokenText, hex.toPoint(), hex.center());
+      
+      const numberTokenSVG = {
+        container: numberToken,
+        circle: numberTokenCircle,
+        text: numberTokenText, 
+        dots: dotGroup
+      };
+      return numberTokenSVG;
+    },
+    renderNumberTokenDots(number, numberToken, numberTokenText, {x, y}, center) {
+      const dotRadius = this.graphics.tokenDotRadius;
+      const dotGroup = numberToken.group();
+      let numDots = 0;
+      let fillColor = 'black'
+      number = parseInt(number);
+      number === 2 || number === 12 ? numDots = 1 : '';
+      number === 3 || number === 11 ? numDots = 2 : '';
+      number === 4 || number === 10 ? numDots = 3 : '';
+      number === 5 || number === 9 ? numDots = 4 : '';
+      number === 6 || number === 8 ? numDots = 5 : '';
+      number === 6 || number === 8 ? fillColor = 'red' : '';
+      for (let i = 0; i < numDots; i++) {
+        const dot = dotGroup
+            .circle(dotRadius)
+            .stroke({width: 1, color: fillColor})
+            .fill(fillColor)
+        dot.node.setAttribute('cx', x + center.x + dotRadius/2)
+        dot.node.setAttribute('cy', y + center.y)
+        dot.translate(dotRadius*2.75*i, numberTokenText.node.getBBox().height/2);
+      }
+      dotGroup.translate(-dotGroup.node.getBBox().width / 2, 0)
+      return dotGroup;
+    },
+    redrawNumberTokens(drawSVG, grid, numberTokenSVGs) {
+      grid.forEach((hex, i) => {
+        this.redrawNumberToken(drawSVG, hex, numberTokenSVGs[i]);
+      })
+    },
+    redrawNumberToken(drawSVG, hex, numberTokenSVG) {
+      let number = hex.hexPolygon.node.getAttribute('numberToken')
+      if (!number) {
+        return;
+      }
+      const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
+      const center = hex.center();
+      const {x, y} = hex.toPoint();
+
+      // Redraw circle
+      numberTokenSVG.circle.node.setAttribute('stroke-width', this.graphics.tokenBorder)
+      numberTokenSVG.circle.node.setAttribute('r', numberTokenRadius)
+      numberTokenSVG.circle.node.setAttribute('cx', x + center.x)
+      numberTokenSVG.circle.node.setAttribute('cy', y + center.y)
+      // redraw text
+      numberTokenSVG.text
+          .transform(0)
+          .translate(x + center.x, y + center.y - this.graphics.roadGap/2);
+      // Adjust by text up by its height/2
+      numberTokenSVG.text.translate(0,-numberTokenSVG.text.node.getBBox().height / 2);
+
+      numberTokenSVG.dots.remove();
+      numberTokenSVG.dots = this.renderNumberTokenDots(number, numberTokenSVG.container, 
+                                numberTokenSVG.text, hex.toPoint(), hex.center());
+    },
     startBuild() {
       // TODO: check if the player is able to build a settlement
-      renderSettlements(this.settlements, this.draw, this.settlementRadius, this.roadGap);
+      renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius, this.graphics.roadGap);
     }
   }
 }
@@ -476,6 +607,13 @@ export default {
 
 ::v-deep .build-selector:hover {
   fill: green;
+}
+
+::v-deep .number-token-text {
+  text-anchor: middle;
+  /* dominant-baseline: text-after-edge; */
+  font-weight: bold;
+  pointer-events: none;
 }
 
 </style>
