@@ -62,6 +62,7 @@ export default {
 }
 
 #board-container {
+  background: #1b75bb;
   flex-grow: 5;
   flex-shrink: 1;
   height: 100vh;
