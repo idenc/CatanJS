@@ -194,13 +194,8 @@ export default {
       const oceanGrid = this.renderOceanHexes(Hex, Grid, drawHexGroup);
       console.log(oceanGrid);
 
-      // Setup settlements
-      const maxRowWidth = grid.radius * 2 + 1;
-      this.settlements = locateSettlements(grid);
-      //renderSettlements(settlementsArray, draw, this.settlementRadius);
-      assignNeighbours(this.settlements, maxRowWidth);
-      // const settlementsMap = getSettlementsMap(this.settlements);
-      // drawRoadDebug(settlementsMap, draw, this.settlementRadius, this.roadGap);
+      // Finds the proper location to render settlements
+      locateSettlements(grid, this.settlements);
 
       // Add a click listener to hexes
       this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -251,9 +246,9 @@ export default {
           hex.redrawOcean(maxHexSize);
         })
         // Update the dimensions of the settlements
-        this.settlements = updateSettlementLocations(grid, this.settlements);
+        updateSettlementLocations(grid, this.settlements.values());
         this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
-        redrawSettlements(this.settlements, draw);
+        redrawSettlements(this.settlements.values(), draw);
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
     },
@@ -529,6 +524,7 @@ export default {
   sockets: {
     board_info: function (boardInfo) {
       this.tiles = boardInfo.tiles;
+      this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.initializeBoard();
     }
   }

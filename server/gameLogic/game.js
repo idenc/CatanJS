@@ -1,6 +1,7 @@
 "use strict";
 
 const Tile = require("./tile");
+const Settlement = require("./settlement");
 const io = require('../socket').getio();
 
 /**
@@ -11,6 +12,10 @@ const io = require('../socket').getio();
  */
 class Game {
     tiles = []
+    // Initialize settlements as an array,
+    // Once the settlements are populated,
+    // a hash map is generated with keys
+    // being the settlement's (x, y) coordinate
     settlements = [];
     roads = [];
     longestRoad = null;
@@ -19,12 +24,14 @@ class Game {
     players = [];
     availableDevCards = [];
     socketRoom = 'room';
+    static gameboardRadius = 3;
 
     // socketRoom should be a string to identify
     // which room the game should communicate with
     constructor(socketRoom) {
         this.socketRoom = socketRoom;
         this.generateTiles();
+        this.generateSettlements();
     }
 
     generateTiles() {
@@ -38,6 +45,87 @@ class Game {
             this.tiles.push(new Tile(tileResources[i], tileNumbers[i]));
         }
     }
+
+    getSettlementsMap() {
+        const settlementsMap = new Map();
+        for (const settlement of this.settlements) {
+            settlementsMap.set(
+                JSON.stringify({x: settlement.x, y: settlement.y}),
+                settlement
+            );
+        }
+        return settlementsMap;
+    }
+
+    /**
+     * Sets the initial state of each settlement
+     * @returns {[]}
+     */
+    generateSettlements() {
+        const rowWidth = Game.gameboardRadius;
+        const maxRowWidth = (Game.gameboardRadius - 1) * 2 + 1;
+        let rowNumTop = 0;
+        let rowNumBottom = maxRowWidth;
+        for (let i = rowWidth; i <= maxRowWidth; i++) {
+            // Loops through each hex in the current row
+            for (let j = 0; j < i; j++) {
+                if (j === 0) {
+                    this.settlements.push(new Settlement(0,rowNumTop));
+                    this.settlements.push(new Settlement(0, rowNumBottom));
+                }
+
+                this.settlements.push(new Settlement((j * 2) + 1,rowNumTop));
+                this.settlements.push(new Settlement((j * 2) + 2, rowNumTop));
+                this.settlements.push(new Settlement((j * 2) + 2, rowNumBottom));
+                this.settlements.push(new Settlement((j * 2) + 1, rowNumBottom));
+            }
+            rowNumTop++;
+            rowNumBottom--;
+        }
+        this.assignNeighbours(maxRowWidth);
+        this.settlements = this.getSettlementsMap();
+    }
+
+    assignNeighbours(maxRowWidth) {
+        const numRows = maxRowWidth + 1;
+        const halfRow = Math.ceil(numRows / 2);
+        for (let i = 0; i < maxRowWidth + 1; i++) {
+
+            // Get all settlements in a row
+            const rowSettlements = this.settlements.filter(s => s.y === i);
+
+            rowSettlements.forEach((settlement) => {
+                const neighbours = [];
+                if (settlement.x > 0) {
+                    // left neighbour
+                    neighbours.push({x: settlement.x - 1, y: settlement.y});
+                }
+                if (settlement.y > 0
+                    && (settlement.y < halfRow && settlement.x % 2 !== 0 || settlement.y >= halfRow && settlement.x % 2 === 0)) {
+                    // above neighbour
+                    neighbours.push({
+                        x: i < halfRow ? settlement.x - 1 : i > halfRow ? settlement.x + 1 : settlement.x,
+                        y: settlement.y - 1
+                    })
+                }
+                // right neighbour
+                if (settlement.x < rowSettlements.length - 1) {
+                    neighbours.push({x: settlement.x + 1, y: settlement.y});
+                }
+                if (settlement.y < maxRowWidth
+                    && (settlement.y < halfRow && settlement.x % 2 === 0 || settlement.y >= halfRow && settlement.x % 2 !== 0)) {
+                    // below neighbour
+                    neighbours.push({
+                        x: i < halfRow - 1 ? settlement.x + 1 : i >= halfRow ? settlement.x - 1 : settlement.x,
+                        y: settlement.y + 1
+                    })
+                }
+
+                settlement.neighbours = neighbours;
+            });
+        }
+    }
+
 
     // Shuffle the elements of an inputted array
     static shuffleArray(array) {
@@ -91,7 +179,8 @@ class Game {
         socket.join(this.socketRoom);
         socket.on('player_joined', (username) => {
             socket.emit('board_info', {
-                tiles: this.tiles
+                tiles: this.tiles,
+                settlements: JSON.stringify(Array.from(this.settlements.entries()))
             });
         });
 
