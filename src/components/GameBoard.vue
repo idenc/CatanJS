@@ -184,7 +184,7 @@ export default {
       console.log(Grid)
 
       // Render resource tiles
-      const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles, this.numberTokens);
+      const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles);
       console.log(grid);
 
       this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
@@ -290,7 +290,7 @@ export default {
       return Honeycomb.extendHex({
         size: (maxHexSize.width) / (2 * hexagonRatio),
 
-        render(draw, tiles, numberTokens) {
+        render(draw, tiles) {
           const {x, y} = this.toPoint()
           const corners = this.corners()
 
@@ -303,12 +303,12 @@ export default {
 
           this.hexPolygon.node.classList.add('hex')
 
-          this.hexPolygon.node.setAttribute('resource', tiles[resourceIndex]);
+          this.hexPolygon.node.setAttribute('resource', tiles[resourceIndex].resource);
 
           //If the current resource is not a desert assign it a number
           //Store the assigned number in 'numberToken' attribute
-          if (tiles[resourceIndex] !== 'desert') {
-            this.hexPolygon.node.setAttribute('numberToken', numberTokens[tokenIndex]);
+          if (tiles[resourceIndex].resource !== 'desert') {
+            this.hexPolygon.node.setAttribute('numberToken', tiles[tokenIndex].number);
             tokenIndex += 1;
           }
           resourceIndex += 1;
@@ -380,14 +380,14 @@ export default {
       });
     },
     // Render hexes
-    renderResourceHexes(Hex, Grid, drawHexGroup, tiles, numberTokens) {
+    renderResourceHexes(Hex, Grid, drawHexGroup, tiles) {
       const grid = Grid.spiral({
         radius: this.gameboardRadius - 1,
         center: Hex(3, 3),
 
         // render each hex, passing the draw instance
         onCreate(hex) {
-          hex.render(drawHexGroup, tiles, numberTokens);
+          hex.render(drawHexGroup, tiles);
         }
       })
       return grid;
@@ -402,23 +402,6 @@ export default {
         }
       })
       return oceanGrid;
-    },
-    // Shuffle the elements of an inputted array
-    shuffleArray(array) {
-      let tempArray = array;
-      let remainingElements = tempArray.length, temp, index;
-
-      while (remainingElements) {
-        //pick a random remaining unshuffeled element from the array
-        index = Math.floor(Math.random() * remainingElements--)
-        //move that random element to the back of the array then decrease array size by 1
-        //elements in the back of the array are shuffled
-        temp = tempArray[remainingElements];
-        tempArray[remainingElements] = tempArray[index];
-        tempArray[index] = temp;
-      }
-
-      return tempArray;
     },
     // Debounce function for events
     debounce(fn, delay) {
@@ -546,8 +529,6 @@ export default {
   sockets: {
     board_info: function (boardInfo) {
       this.tiles = boardInfo.tiles;
-      this.numberTokens = boardInfo.numberTokens;
-
       this.initializeBoard();
     }
   }

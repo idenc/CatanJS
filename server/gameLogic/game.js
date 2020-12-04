@@ -1,5 +1,6 @@
 "use strict";
 
+const Tile = require("./tile");
 const io = require('../socket').getio();
 
 /**
@@ -9,12 +10,7 @@ const io = require('../socket').getio();
  * Each game should have a Game class instance
  */
 class Game {
-    tiles = Game.shuffleArray(['brick', 'brick', 'brick', 'desert', 'grain',
-        'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber',
-        'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool']);
-    numberTokens = Game.shuffleArray(['2', '3', '3', '4', '4', '5', '5', '6', '6',
-        '8', '8', '9', '9', '10', '10', '11', '11', '12']);
-
+    tiles = []
     settlements = [];
     roads = [];
     longestRoad = null;
@@ -28,6 +24,19 @@ class Game {
     // which room the game should communicate with
     constructor(socketRoom) {
         this.socketRoom = socketRoom;
+        this.generateTiles();
+    }
+
+    generateTiles() {
+        const tileResources = Game.shuffleArray(['brick', 'brick', 'brick', 'desert', 'grain',
+            'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber',
+            'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool']);
+        const tileNumbers = Game.shuffleArray(['2', '3', '3', '4', '4', '5', '5', '6', '6',
+            '8', '8', '9', '9', '10', '10', '11', '11', '12']);
+
+        for (let i = 0; i < tileResources.length; i++) {
+            this.tiles.push(new Tile(tileResources[i], tileNumbers[i]));
+        }
     }
 
     // Shuffle the elements of an inputted array
@@ -82,8 +91,7 @@ class Game {
         socket.join(this.socketRoom);
         socket.on('player_joined', (username) => {
             socket.emit('board_info', {
-                tiles: this.tiles,
-                numberTokens: this.numberTokens
+                tiles: this.tiles
             });
         });
 
