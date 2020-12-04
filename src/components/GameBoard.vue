@@ -136,9 +136,6 @@ export default {
       hexagonRatio: 0.866025, // Hexagon ration, height to width
       gameboardRadius: 3,
       resources: ['brick', 'desert', 'grain', 'lumber', 'ore', 'wool'],
-      tiles: ['brick', 'brick', 'brick', 'desert', 'grain', 'grain', 'grain', 'grain', 'lumber', 'lumber', 'lumber', 'lumber',
-        'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool'],
-      numberTokens: ['2', '3', '3', '4', '4', '5', '5', '6', '6', '8', '8', '9', '9', '10', '10', '11', '11', '12'],
       draw: SVG(),
       settlements: [],
       numberTokenSVGs: [],
@@ -156,6 +153,9 @@ export default {
 
   },
   mounted: function () {
+    // Let the server know a player has connected
+    // TODO: Replace the placeholder username with the player's actual username
+    this.$socket.emit('player_joined', 'placeholder_username');
     console.log(SCREEN_BREAKPOINTS.SM)
     this.updateGraphicsPropertiesByWindowSize();
 
@@ -171,10 +171,6 @@ export default {
     // There should be a smarter way to do this but I was having trouble with scope or something.
     const defR = this.$refs.defRef
     draw.node.appendChild(defR)
-
-    //Shuffle terrain tiles and number tokens
-    this.tiles = this.shuffleArray(this.tiles);
-    this.numberTokens = this.shuffleArray(this.numberTokens);
 
     // Hex object
     let Hex = this.defineHexObject(maxHexSize, drawHexGroup);
@@ -475,11 +471,11 @@ export default {
       }
 
       const dotGroup = this.renderNumberTokenDots(number, numberToken, numberTokenText, hex.toPoint(), hex.center());
-      
+
       const numberTokenSVG = {
         container: numberToken,
         circle: numberTokenCircle,
-        text: numberTokenText, 
+        text: numberTokenText,
         dots: dotGroup
       };
       return numberTokenSVG;
@@ -535,12 +531,17 @@ export default {
       numberTokenSVG.text.translate(0,-numberTokenSVG.text.node.getBBox().height / 2);
 
       numberTokenSVG.dots.remove();
-      numberTokenSVG.dots = this.renderNumberTokenDots(number, numberTokenSVG.container, 
+      numberTokenSVG.dots = this.renderNumberTokenDots(number, numberTokenSVG.container,
                                 numberTokenSVG.text, hex.toPoint(), hex.center());
     },
     startBuild() {
       // TODO: check if the player is able to build a settlement
       renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius, this.graphics.roadGap);
+    }
+  },
+  sockets: {
+    on_load: function () {
+
     }
   }
 }
