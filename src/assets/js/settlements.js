@@ -1,5 +1,3 @@
-import {startRoadSelection} from "@/assets/js/roads";
-
 /**
  * This is just for finding the correct x, y positions to draw settlements
  * @param grid
@@ -145,35 +143,30 @@ const renderSettlement = (drawSVG, settlement, settlements, settlementRadius, ro
         removeBuildSelectors(drawSVG);
         // TODO: call to backend to update settlements
         settlement.state = "settlement";
-        startRoadSelection(drawSVG, settlements, settlementRadius, roadGap);
     })
 
     return nested;
 }
 
 const redrawSettlements = (settlements, drawSVG) => {
-    settlements.forEach(settlement => {
+    for (const [, settlement] of settlements.entries()) {
         redrawSettlement(drawSVG, settlement);
-    })
+    }
 }
 
 const redrawSettlement = (drawSVG, settlement) => {
-    const {x, y} = settlement.point;
-    settlement.svg.transform(0);
-    settlement.svg.transform({
-        position: [x, y],
-        origin: 'center'
-    });
+    if (settlement.svg) {
+        const {x, y} = settlement.point;
+        settlement.svg.transform(0);
+        settlement.svg.transform({
+            position: [x, y],
+            origin: 'center'
+        });
+    }
 }
 
 const updateSettlementLocations = (grid, settlements) => {
-    const newSettlements = locateSettlements(grid);
-    settlements.forEach((settlement, i) => {
-        settlement.x = newSettlements[i].x;
-        settlement.y = newSettlements[i].y;
-        settlement.point = newSettlements[i].point;
-    })
-    return settlements;
+    return locateSettlements(grid, settlements);
 }
 
 

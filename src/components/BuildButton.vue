@@ -3,12 +3,14 @@
     <button
       id="road-button"
       class="btn btn-primary btn-block animatedFadeInUp"
+      @click="buildRoadClicked"
     >
       road
     </button>
     <button
       id="settlement-button"
       class="btn btn-primary btn-block animatedFadeInUp"
+      @click="buildSettlementClicked"
     >
       settle
     </button>
@@ -43,8 +45,6 @@ export default {
       let settlementBtnPosition = buildButton.offsetLeft + buildButton.offsetWidth / 2 + buffer;
       const roadBtnPosition = window.innerWidth - buildButton.offsetLeft - (buildButton.offsetWidth / 2) + buffer;
 
-      console.log(`centerX: ${settlementBtnPosition}`);
-
       const roadButton = document.getElementById('road-button');
       roadButton.style.right = `${roadBtnPosition}px`;
       roadButton.classList.add("animated", "fadeInUp");
@@ -52,12 +52,22 @@ export default {
       const settlementButton = document.getElementById('settlement-button');
       settlementButton.style.left = `${settlementBtnPosition}px`;
       settlementButton.classList.add("animated", "fadeInUp");
+    },
+    buildRoadClicked() {
+      this.$emit('buildStarted', 'road');
+    },
+    buildSettlementClicked() {
+      this.$emit('buildStarted', 'settlement');
     }
   }
 }
 </script>
 
 <style scoped>
+#build-button {
+  height: 100%;
+}
+
 #container {
   position: relative;
 }

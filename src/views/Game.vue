@@ -17,6 +17,7 @@
         <BuildButton
           id="build-button"
           style="width: 30%;"
+          @buildStarted="startBuild"
         />
         <button class="btn btn-primary btn-block">
           Trade
@@ -47,8 +48,8 @@ export default {
   mounted: function () {
   },
   methods: {
-    startBuild() {
-      this.$refs.gameBoard.startBuild();
+    startBuild(type) {
+      this.$refs.gameBoard.startBuild(type);
     }
   }
 }
