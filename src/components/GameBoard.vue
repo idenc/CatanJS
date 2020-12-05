@@ -169,11 +169,11 @@ export default {
       let gameboardContainer = this.$refs.boardSvgContainer;
       let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
-    // Create svg container that fits the maximum gameboard size and store svg in draw variable
-    this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
-    const draw = this.draw;
-    const drawOceanHexGroup = draw.group();
-    const drawHexGroup = draw.group();
+      // Create svg container that fits the maximum gameboard size and store svg in draw variable
+      this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+      const draw = this.draw;
+      const drawOceanHexGroup = draw.group();
+      const drawHexGroup = draw.group();
 
 
       // Copy the defs into the dynamically created svg.
@@ -193,9 +193,9 @@ export default {
 
       this.renderNumberTokens(draw, grid);
 
-    // Render ocean tiles
-    const oceanGrid = this.renderOceanHexes(Hex, Grid, drawOceanHexGroup);
-    console.log(oceanGrid);
+      // Render ocean tiles
+      const oceanGrid = this.renderOceanHexes(Hex, Grid, drawOceanHexGroup);
+      console.log(oceanGrid);
 
       // Finds the proper location to render settlements
       locateSettlements(grid, this.settlements);
