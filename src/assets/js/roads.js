@@ -96,12 +96,11 @@ const canBuildRoad = () => {
 // This begins either after a user builds a settlement in their first two turns
 // or when they choose to build a road
 const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => {
-    const settlementMap = getSettlementsMap(settlements);
     // Iterate through each settlement (i.e. grid intersection point)
-    settlements.forEach((settlement) => {
+    for (const [, settlement] of settlements.entries()) {
         const neighbours = settlement.neighbours;
         neighbours.forEach((neighbourCoord) => {
-            const neighbour = settlementMap.get(JSON.stringify(neighbourCoord));
+            const neighbour = settlements.get(JSON.stringify(neighbourCoord));
             if (canBuildRoad()) {
                 const point = {
                     x: (settlement.point.x + neighbour.point.x) / 2,
@@ -119,7 +118,7 @@ const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => 
                 });
             }
         });
-    });
+    }
 }
 
 export {
