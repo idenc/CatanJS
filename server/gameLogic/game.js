@@ -218,7 +218,18 @@ class Game {
 
         //Build Settlement
         socket.on('build_settlement', (newSettlement) => {
+            console.log('settlement received');
+            // Update the server's settlement object
+            const settlement = this.settlements.get(JSON.stringify({
+                x: newSettlement.x,
+                y: newSettlement.y
+            }));
+            settlement.player = newSettlement.player;
+            settlement.state = newSettlement.state;
 
+            // Send the updated settlement to all players
+            io.to(this.socketRoom).emit('update_settlements',
+                JSON.stringify(Array.from(this.settlements.entries())));
         });
 
         //Build Road

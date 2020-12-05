@@ -142,6 +142,7 @@ export default {
       settlements: [],
       roads: [],
       numberTokenSVGs: [],
+      grid: null,
       graphics: {
         oceanGap: 8,
         roadGap: 8,
@@ -190,6 +191,7 @@ export default {
 
       // Render resource tiles
       const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles);
+      this.grid = grid;
       console.log(grid);
 
       this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
@@ -624,9 +626,7 @@ export default {
             this.graphics.roadGap);
       } else if (type === 'settlement') {
         // TODO: check if the player is able to build a settlement
-        renderSettlements(this.settlements,
-            this.draw,
-            this.graphics.settlementRadius);
+        renderSettlements(this);
       }
 
     }
@@ -636,6 +636,13 @@ export default {
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.initializeBoard();
+    },
+    update_settlements: function (newSettlements) {
+      this.settlements = new Map(JSON.parse(newSettlements));
+
+      // Update the dimensions of the settlements
+      updateSettlementLocations(this.grid, this.settlements);
+      redrawSettlements(this.settlements, this.draw);
     }
   }
 }

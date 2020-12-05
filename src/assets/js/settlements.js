@@ -65,13 +65,10 @@ const settlementAvailable = (settlement) => {
 }
 
 // Draw the settlements
-const renderSettlements = (settlements, drawSVG, settlementRadius) => {
-    for (const [, settlement] of settlements.entries()) {
+const renderSettlements = (gameBoard) => {
+    for (const [, settlement] of gameBoard.settlements.entries()) {
         if (settlementAvailable(settlement)) {
-            let settlementSVG = renderSettlement(drawSVG,
-                settlement,
-                settlements,
-                settlementRadius);
+            let settlementSVG = renderSettlement(gameBoard, settlement);
             Object.assign(settlement, {svg: settlementSVG});
         }
     }
@@ -127,8 +124,10 @@ const removeBuildSelectors = (drawSVG) => {
         .forEach((s) => s.remove());
 }
 
-const renderSettlement = (drawSVG, settlement, settlements, settlementRadius) => {
-    const nested = renderBuildable(drawSVG, settlement.point, settlementRadius);
+const renderSettlement = (gameBoard, settlement) => {
+    const nested = renderBuildable(gameBoard.draw,
+        settlement.point,
+        gameBoard.graphics.settlementRadius);
 
     const settlementSVG = nested.children()[1].node;
     settlementSVG.classList.add('build-selector');
@@ -139,10 +138,14 @@ const renderSettlement = (drawSVG, settlement, settlements, settlementRadius) =>
         settlementSVG.classList.add('settlement-svg');
         settlementSVG.setAttribute('state', 'settlement');
         // Remove all the settlement selection graphics, keep selected settlement
-        removeBuildSelectors(drawSVG);
+        removeBuildSelectors(gameBoard.draw);
         // TODO: call to backend to update settlements
         settlement.state = "settlement";
-    })
+        settlement.player = 'placeholder'
+
+        console.log('emitting build')
+        gameBoard.$socket.emit('build_settlement', settlement);
+    });
 
     return nested;
 }
