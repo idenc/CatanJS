@@ -170,7 +170,9 @@ export default {
       let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
       // Create svg container that fits the maximum gameboard size and store svg in draw variable
-      this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+      this.draw = SVG().addTo('#board')
+      this.draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
+      this.draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
       const draw = this.draw;
       const drawOceanHexGroup = draw.group();
       const drawHexGroup = draw.group();

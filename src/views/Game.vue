@@ -62,8 +62,7 @@ export default {
 }
 
 #board-container {
-  flex-grow: 5;
-  flex-shrink: 1;
+  flex-grow: 1;
   height: 100vh;
   overflow: hidden;
   background-color: #1b75bb;
@@ -73,8 +72,7 @@ export default {
 #sidebar-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 2;
-  flex-shrink: 0;
+  flex: 0 0 340px;
   height: 100vh;
   background: rgb(133, 133, 133);
   padding: 1rem;
