@@ -126,7 +126,7 @@ import {
   redrawSettlements
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
-import {startRoadSelection} from "@/assets/js/roads";
+import {redrawRoads, startRoadSelection} from "@/assets/js/roads";
 
 export default {
   name: "GameBoard",
@@ -140,6 +140,7 @@ export default {
       numberTokens: [],
       draw: SVG(),
       settlements: [],
+      roads: [],
       numberTokenSVGs: [],
       graphics: {
         oceanGap: 8,
@@ -253,6 +254,7 @@ export default {
         updateSettlementLocations(grid, this.settlements);
         this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
         redrawSettlements(this.settlements, draw);
+        redrawRoads(this.roads, this.settlements);
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
     },
@@ -617,14 +619,14 @@ export default {
       if (type === 'road') {
         startRoadSelection(this.draw,
             this.settlements,
+            this.roads,
             this.graphics.settlementRadius,
             this.graphics.roadGap);
       } else if (type === 'settlement') {
         // TODO: check if the player is able to build a settlement
         renderSettlements(this.settlements,
             this.draw,
-            this.graphics.settlementRadius,
-            this.graphics.roadGap);
+            this.graphics.settlementRadius);
       }
 
     }

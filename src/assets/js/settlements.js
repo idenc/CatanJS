@@ -65,14 +65,13 @@ const settlementAvailable = (settlement) => {
 }
 
 // Draw the settlements
-const renderSettlements = (settlements, drawSVG, settlementRadius, roadGap) => {
+const renderSettlements = (settlements, drawSVG, settlementRadius) => {
     for (const [, settlement] of settlements.entries()) {
         if (settlementAvailable(settlement)) {
             let settlementSVG = renderSettlement(drawSVG,
                 settlement,
                 settlements,
-                settlementRadius,
-                roadGap);
+                settlementRadius);
             Object.assign(settlement, {svg: settlementSVG});
         }
     }
@@ -128,7 +127,7 @@ const removeBuildSelectors = (drawSVG) => {
         .forEach((s) => s.remove());
 }
 
-const renderSettlement = (drawSVG, settlement, settlements, settlementRadius, roadGap) => {
+const renderSettlement = (drawSVG, settlement, settlements, settlementRadius) => {
     const nested = renderBuildable(drawSVG, settlement.point, settlementRadius);
 
     const settlementSVG = nested.children()[1].node;

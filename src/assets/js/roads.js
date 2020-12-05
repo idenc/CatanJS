@@ -1,4 +1,4 @@
-import {renderBuildable, getSettlementsMap, removeBuildSelectors} from "@/assets/js/settlements";
+import {renderBuildable, removeBuildSelectors} from "@/assets/js/settlements";
 
 const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
     const visitedCoords = [];
@@ -53,16 +53,19 @@ const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
     }
 }
 
-const buildRoad = (drawSVG, settlement, settlementRadius, neighbour, roadGap) => {
+const calculateRoadAngle = (toPoint, fromPoint) => {
+    return Math.atan2(
+        fromPoint.y - toPoint.y,
+        fromPoint.x - toPoint.x
+    ) * 180 / Math.PI;
+}
+
+const buildRoad = (drawSVG, settlement, roads, settlementRadius, neighbour, roadGap) => {
     const settlementPoint = settlement.point;
     const neighbourPoint = neighbour.point;
 
     // Calculate angle between each neighbouring settlement
-    const angleDeg = Math.atan2(
-        neighbourPoint.y - settlementPoint.y,
-        neighbourPoint.x - settlementPoint.x
-    ) * 180 / Math.PI;
-
+    const angleDeg = calculateRoadAngle(settlementPoint, neighbourPoint);
     // Calculate distance between the settlements and add a small gap
     const length = Math.hypot(
         neighbourPoint.x - settlementPoint.x,
@@ -81,6 +84,31 @@ const buildRoad = (drawSVG, settlement, settlementRadius, neighbour, roadGap) =>
         console.log(`Clicked road (${settlement.x}, ${settlement.y})`);
     });
 
+    // Keep track of road
+    // Roads are bidirectional so from/to doesn't really matter
+    roads.push({
+        from: {x: settlement.x, y: settlement.y},
+        to: {x: neighbour.x, y: neighbour.y},
+        player: 'placeholder',
+        svg: road
+    });
+}
+
+const redrawRoads = (roads, settlements) => {
+    roads.forEach((road) => {
+        if (road.svg) {
+            const to = settlements.get(JSON.stringify(road.to));
+            const from = settlements.get(JSON.stringify(road.from));
+
+            const angleDeg = calculateRoadAngle(to.point, from.point);
+
+            road.svg.transform(0);
+            road.svg
+                .cx((to.point.x + from.point.x) / 2)
+                .cy((to.point.y + from.point.y) / 2)
+                .rotate(angleDeg);
+        }
+    });
 }
 
 const canBuildRoad = () => {
@@ -95,7 +123,7 @@ const canBuildRoad = () => {
 
 // This begins either after a user builds a settlement in their first two turns
 // or when they choose to build a road
-const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => {
+const startRoadSelection = (drawSVG, settlements, roads, settlementRadius, roadGap) => {
     // Iterate through each settlement (i.e. grid intersection point)
     for (const [, settlement] of settlements.entries()) {
         const neighbours = settlement.neighbours;
@@ -114,7 +142,7 @@ const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => 
                 selectorSVG.addEventListener('click', () => {
                     console.log('road clicked');
                     removeBuildSelectors(drawSVG);
-                    buildRoad(drawSVG, settlement, settlementRadius, neighbour, roadGap)
+                    buildRoad(drawSVG, settlement, roads, settlementRadius, neighbour, roadGap)
                 });
             }
         });
@@ -123,5 +151,6 @@ const startRoadSelection = (drawSVG, settlements, settlementRadius, roadGap) => 
 
 export {
     drawRoadDebug,
-    startRoadSelection
+    startRoadSelection,
+    redrawRoads
 }
