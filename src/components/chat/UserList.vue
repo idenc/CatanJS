@@ -4,68 +4,90 @@
     <div id="user-list">
       <div id="user-rows">
         <template v-for="user in users">
-        <li  
-          v-if="user.username === 'username'"
-          :key="user.username"
-          :style="{'color': 'white'}"
-        >
-          <div id="user-row" 
-            :class="user.username"
-            :style="{'background-color': user.color}"
+          <li
+            v-if="user.username === 'username'"
+            :key="user.username"
+            :style="{'color': 'white'}"
+          >
+            <div 
+              :id="'user-row'" 
+              :class="user.username"
+              :style="{'background-color': user.color}"
             >
-            <div id="name">
-              {{ user.username }} (You)
-            </div>
+              <div id="name">
+                {{ user.username }} (You) 
+              </div>
 
-            <div id="vic-points">
-              # VP:<br> 0
-              <!-- here is where we put victory points *********************-->
+              <div id="vic-points">
+                # VP:<br> 0
+                <!-- here is where we put victory points *********************-->
+              </div>
+              <div id="num-roads">
+                # Roads:<br> 0
+                <!-- here is where we put num of roads *********************-->
+              </div>
+              <div id="num-cards">
+                # Cards: <br> 0
+                <!-- here is where we put num of cards *********************-->
+              </div>
+              <div id="admin-buttons">
+                <button 
+                  :id="kick-button" 
+                  :class="user.username"
+                >
+                  Kick
+                </button>
+                <button 
+                  :id="mute-button" 
+                  :class="user.username"
+                >
+                  Mute
+                </button>
+              </div> 
             </div>
-            <div id="num-roads">
-              # Roads:<br> 0
-              <!-- here is where we put num of roads *********************-->
-            </div>
-            <div id="num-cards">
-              # Cards: <br> 0
-              <!-- here is where we put num of cards *********************-->
-            </div>
-            <div id="admin-buttons">
-              <button id="kick-button" :class="user.username">Kick</button>
-              <button id="mute-button" :class="user.username">Mute</button>
-            </div> 
-          </div>
-        </li>  
-        <li
-          v-else
-          :key="user.username"
-          :style="{'color': 'white'}"
-        >
-          <div id="user-row" 
-            :class="user.username"
-            :style="{'background-color': user.color}"
+          </li>  
+          <li
+            v-else
+            :key="user.username"
+            :style="{'color': 'white'}"
+          >
+            <div 
+              :id="'user-row'" 
+              :class="user.username"
+              :style="{'background-color': user.color}"
             >
-            <div id="name">
-              {{ user.username }}
-            </div>
+              <div id="name">
+                {{ user.username }} <!-- (You) -->
+              </div>
 
-            <div id="vic-points">
-              # VP:<br> 0
-              <!-- here is where we put victory points *********************-->
+              <div id="vic-points">
+                # VP:<br> 0
+                <!-- here is where we put victory points *********************-->
+              </div>
+              <div id="num-roads">
+                # Roads:<br> 0
+                <!-- here is where we put num of roads *********************-->
+              </div>
+              <div id="num-cards">
+                # Cards: <br> 0
+                <!-- here is where we put num of cards *********************-->
+              </div>
+              <div id="admin-buttons">
+                <button 
+                  :id="kick-button" 
+                  :class="user.username"
+                >
+                  Kick
+                </button>
+                <button 
+                  :id="mute-button" 
+                  :class="user.username"
+                >
+                  Mute
+                </button>
+              </div> 
             </div>
-            <div id="num-roads">
-              # Roads:<br> 0
-              <!-- here is where we put num of roads *********************-->
-            </div>
-            <div id="num-cards">
-              # Cards: <br> 0
-              <!-- here is where we put num of cards *********************-->
-            </div>
-            <div id="admin-buttons">
-              <button id="kick-button" :class="user.username">Kick</button>
-              <button id="mute-button" :class="user.username">Mute</button>
-            </div> 
-          </div>
-        </li>
+          </li>
         </template>
       </div>
 
@@ -73,25 +95,6 @@
     </div>
   </div>
 </template>
-
-      <!-- <template v-for="user in users">
-        <li
-          v-if="user.username === 'username'"
-          :key="user.username"
-          :style="{'color': 'white'}"
-        >
-
-          <b>{{ user.username }} (you)</b>
-        </li>
-        <li
-          v-else
-          :key="user.username"
-          :style="{'color': 'white'}"
-        >
-          {{ user.username }}
-        </li>
-      </template> -->
-
 <script>
 export default {
   name: "UserList",
@@ -104,7 +107,7 @@ export default {
   mounted: function () {
     this.sockets.subscribe('user joined', (user) => {
       console.log(`user joined: ${user}`)
-      if (!this.users.some(u => u.username = user.username)) {
+      if (!this.users.some(u => u.username === user.username)) {
         this.users.push(user);
       }
     });
@@ -154,22 +157,24 @@ h1 {
 }
 
 #user-list {
-  height: 100%;
+  height: 88%;
 }
 
 #user-row {
   width: 100%;
   display: flex;
+  height: 100%;
   flex-direction: row;
   align-content: stretch;
   justify-content: space-between;
-  background-color: red;
+
   
 }
 
 
 
 #user-rows {
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-content: stretch;
@@ -177,6 +182,8 @@ h1 {
 }
 
 #user-row div { 
+
+
 
   align-self: center;
   align-content: space-between;
@@ -194,7 +201,9 @@ h1 {
 
 
 li {
+  padding: 1px;
   width: 100%;
+  height: 33%;
   marker:none;
   list-style-type:none;
   color: white;
