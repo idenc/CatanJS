@@ -1,6 +1,7 @@
 <template>
   <div id="game-container">
     <div id="board-container">
+      <DevCardModal v-if="devModal === true" />
       <GameBoard ref="gameBoard" />
     </div>
     <div id="sidebar-container">
@@ -23,7 +24,10 @@
         <button class="btn btn-primary btn-block">
           Trade
         </button>
-        <button class="btn btn-primary btn-block" @click="devModal=!devModal">
+        <button 
+          class="btn btn-primary btn-block" 
+          @click="devModal=!devModal"
+        >
           Dev Cards
         </button>
       </div>
