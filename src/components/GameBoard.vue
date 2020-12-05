@@ -140,7 +140,7 @@ export default {
       numberTokens: [],
       draw: SVG(),
       settlements: [],
-      numberTokenSVGs: [],
+      // numberTokenSVGs: [],
       graphics: {
         oceanGap: 8,
         roadGap: 8,
@@ -169,11 +169,13 @@ export default {
       let gameboardContainer = this.$refs.boardSvgContainer;
       let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
-    // Create svg container that fits the maximum gameboard size and store svg in draw variable
-    this.draw = SVG().addTo('#board').size(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`, `${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
-    const draw = this.draw;
-    const drawOceanHexGroup = draw.group();
-    const drawHexGroup = draw.group();
+      // Create svg container that fits the maximum gameboard size and store svg in draw variable
+      this.draw = SVG().addTo('#board')
+      this.draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
+      this.draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
+      const draw = this.draw;
+      const drawOceanHexGroup = draw.group();
+      const drawHexGroup = draw.group();
 
 
       // Copy the defs into the dynamically created svg.
@@ -191,12 +193,11 @@ export default {
       const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles);
       console.log(grid);
 
-      this.numberTokenSVGs = this.renderNumberTokens(draw, grid);
-      console.log(this.numberTokenSVGs)
+      this.renderNumberTokens(draw, grid);
 
-    // Render ocean tiles
-    const oceanGrid = this.renderOceanHexes(Hex, Grid, drawOceanHexGroup);
-    console.log(oceanGrid);
+      // Render ocean tiles
+      const oceanGrid = this.renderOceanHexes(Hex, Grid, drawOceanHexGroup);
+      console.log(oceanGrid);
 
       // Finds the proper location to render settlements
       locateSettlements(grid, this.settlements);
@@ -246,12 +247,13 @@ export default {
           hex.redraw(maxHexSize);
         })
         grid.center.redraw(maxHexSize) // I'm not sure why it doesn't work without this.
+        console.log(grid)
         oceanGrid.forEach((hex) => {
           hex.redrawOcean(maxHexSize);
         })
+        this.redrawNumberTokens(draw, grid);
         // Update the dimensions of the settlements
         updateSettlementLocations(grid, this.settlements.values());
-        this.redrawNumberTokens(draw, grid, this.numberTokenSVGs);
         redrawSettlements(this.settlements.values(), draw);
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
@@ -514,7 +516,7 @@ export default {
         const numberTokenSVG = this.renderNumberToken(drawSVG, hex);
         numberTokenSVGs.push(numberTokenSVG);
       })
-      return numberTokenSVGs;
+      console.log(numberTokenSVGs)
     },
     renderNumberToken(drawSVG, hex) {
       let number = hex.hexPolygon.node.getAttribute('numberToken')
@@ -524,94 +526,51 @@ export default {
       const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
       const center = hex.center();
       const {x, y} = hex.toPoint();
-      const numberToken = drawSVG.group();
 
-      // Create Circle and add to group
-      const numberTokenCircle = drawSVG
-          .circle(numberTokenRadius * 2)
-          .stroke({width: this.graphics.tokenBorder, color: '#aaa'})
-          .fill("white")
-      numberTokenCircle.node.setAttribute('cx', x + center.x)
-      numberTokenCircle.node.setAttribute('cy', y + center.y)
-      numberTokenCircle.node.classList.add('number-token-circle');
-      numberTokenCircle.addTo(numberToken);
+      let numberTokenURL = '';
+      number === '2' ? numberTokenURL = require('../assets/svg/token-2.svg') : '';
+      number === '3' ? numberTokenURL = require('../assets/svg/token-3.svg') : '';
+      number === '4' ? numberTokenURL = require('../assets/svg/token-4.svg') : '';
+      number === '5' ? numberTokenURL = require('../assets/svg/token-5.svg') : '';
+      number === '6' ? numberTokenURL = require('../assets/svg/token-6.svg') : '';
+      number === '8' ? numberTokenURL = require('../assets/svg/token-8.svg') : '';
+      number === '9' ? numberTokenURL = require('../assets/svg/token-9.svg') : '';
+      number === '10' ? numberTokenURL = require('../assets/svg/token-10.svg') : '';
+      number === '11' ? numberTokenURL = require('../assets/svg/token-11.svg') : '';
+      number === '12' ? numberTokenURL = require('../assets/svg/token-12.svg') : '';
+      if (numberTokenURL !== '') {
+        const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
 
-      // Create text and add to group
-      const numberTokenText = drawSVG
-          .text(`${number}`)
-          .font({size: 10})
-          .translate(x + center.x, y + center.y - this.graphics.roadGap / 2);
-      numberTokenText.node.classList.add('number-token-text');
-      numberTokenText.addTo(numberToken);
-      // Adjust by text up by its height/2
-      numberTokenText.translate(0, -numberTokenText.node.getBBox().height / 2);
-      if (number === '6' || number === '8') {
-        numberTokenText.fill('red');
+        const numberToken = drawSVG
+              .image(numberTokenURL)
+              .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
+              .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
+        Object.assign(hex, {token: numberToken});
       }
-
-      const dotGroup = this.renderNumberTokenDots(number, numberToken, numberTokenText, hex.toPoint(), hex.center());
-
-      const numberTokenSVG = {
-        container: numberToken,
-        circle: numberTokenCircle,
-        text: numberTokenText,
-        dots: dotGroup
-      };
-      return numberTokenSVG;
     },
-    renderNumberTokenDots(number, numberToken, numberTokenText, {x, y}, center) {
-      const dotRadius = this.graphics.tokenDotRadius;
-      const dotGroup = numberToken.group();
-      let numDots = 0;
-      let fillColor = 'black'
-      number = parseInt(number);
-      number === 2 || number === 12 ? numDots = 1 : '';
-      number === 3 || number === 11 ? numDots = 2 : '';
-      number === 4 || number === 10 ? numDots = 3 : '';
-      number === 5 || number === 9 ? numDots = 4 : '';
-      number === 6 || number === 8 ? numDots = 5 : '';
-      number === 6 || number === 8 ? fillColor = 'red' : '';
-      for (let i = 0; i < numDots; i++) {
-        const dot = dotGroup
-            .circle(dotRadius)
-            .stroke({width: 1, color: fillColor})
-            .fill(fillColor)
-        dot.node.setAttribute('cx', x + center.x + dotRadius / 2)
-        dot.node.setAttribute('cy', y + center.y)
-        dot.translate(dotRadius * 2.75 * i, numberTokenText.node.getBBox().height / 2);
-      }
-      dotGroup.translate(-dotGroup.node.getBBox().width / 2, 0)
-      return dotGroup;
-    },
-    redrawNumberTokens(drawSVG, grid, numberTokenSVGs) {
-      grid.forEach((hex, i) => {
-        this.redrawNumberToken(drawSVG, hex, numberTokenSVGs[i]);
+    redrawNumberTokens(drawSVG, grid) {
+      grid.forEach((hex) => {
+        this.redrawNumberToken(drawSVG, hex);
       })
     },
-    redrawNumberToken(drawSVG, hex, numberTokenSVG) {
+    redrawNumberToken(drawSVG, hex) {
       let number = hex.hexPolygon.node.getAttribute('numberToken')
       if (!number) {
         return;
       }
+
       const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
       const center = hex.center();
       const {x, y} = hex.toPoint();
+      console.log(center)
+      console.log(x,y)
+      console.log(hex)
 
-      // Redraw circle
-      numberTokenSVG.circle.node.setAttribute('stroke-width', this.graphics.tokenBorder)
-      numberTokenSVG.circle.node.setAttribute('r', numberTokenRadius)
-      numberTokenSVG.circle.node.setAttribute('cx', x + center.x)
-      numberTokenSVG.circle.node.setAttribute('cy', y + center.y)
-      // redraw text
-      numberTokenSVG.text
+      // Redraw number token
+      hex.token
+          .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
           .transform(0)
-          .translate(x + center.x, y + center.y - this.graphics.roadGap / 2);
-      // Adjust by text up by its height/2
-      numberTokenSVG.text.translate(0, -numberTokenSVG.text.node.getBBox().height / 2);
-
-      numberTokenSVG.dots.remove();
-      numberTokenSVG.dots = this.renderNumberTokenDots(number, numberTokenSVG.container,
-          numberTokenSVG.text, hex.toPoint(), hex.center());
+          .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
     },
     startBuild() {
       // TODO: check if the player is able to build a settlement
@@ -689,13 +648,6 @@ export default {
 
 ::v-deep .build-selector:hover {
   fill: green;
-}
-
-::v-deep .number-token-text {
-  text-anchor: middle;
-  /* dominant-baseline: text-after-edge; */
-  font-weight: bold;
-  pointer-events: none;
 }
 
 </style>
