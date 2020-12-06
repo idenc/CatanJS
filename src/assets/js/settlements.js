@@ -124,7 +124,7 @@ const renderBuildable = (drawSVG, point, settlementRadius, isSelectable = true) 
 
     nested
         .circle(settlementRadius * 2)
-        .fill('none')
+        .fill('transparent')
         .stroke({width: 4, color: 'white'})
         .translate(x - settlementRadius, y - settlementRadius);
 
