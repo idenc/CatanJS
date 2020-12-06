@@ -1,5 +1,29 @@
+const {Game} = require("./gameLogic/game");
+
 // All active games
+let lobbies = {};
 let games = {};
+
+class Player {
+    name = "";
+    colour = "";
+
+    victoryPoints = 0;
+    numClay = 0;
+    numOre = 0;
+    numSheep = 0;
+    numWheat = 0;
+    numLumber = 0;
+
+    isTurn = false;
+    
+    devCards = [] // String array
+    numDevCards = 0;
+
+    numKnights = 0;
+
+    harbourBonuses = [] // Coordinate Array
+}
 
 module.exports = socket => {
     // Request to create game
@@ -11,7 +35,11 @@ module.exports = socket => {
             response = "failed";
         } else {
             gameRequest["players"] = [socket];
-            games[key] = gameRequest;
+            //socket.join(key);
+            lobbies[key] = gameRequest;
+            games[key] = new Game(key);
+            games[key].configureSocketInteractions(socket);
+            games[key].players.push(new Player());
             console.log(games);
             response = "success"; // replace with room code?
         }
@@ -29,10 +57,10 @@ module.exports = socket => {
             const searchName = key.toLowerCase();
             if (searchName.startsWith(queryName)) {
                 result[key] = {
-                    name : games[key]["name"],
-                    type : games[key]["type"],
-                    numPlayers : games[key]["numPlayers"],
-                    playerCap : games[key]["playerCap"]
+                    name : lobbies[key]["name"],
+                    type : lobbies[key]["type"],
+                    numPlayers : lobbies[key]["numPlayers"],
+                    playerCap : lobbies[key]["playerCap"]
                 };
             }
         }
@@ -43,11 +71,12 @@ module.exports = socket => {
     socket.on("join_game", (name) => {
         const key = name.toLowerCase();
 
-        if (games[key]["numPlayers"] < games[key]["playerCap"]) {
-            if (games[key]["type"] == "public") {
-                games[key]["numPlayers"] += 1;
-                games[key]["players"].push(socket);
-                console.log(games);
+        if (lobbies[key]["numPlayers"] < lobbies[key]["playerCap"]) {
+            if (lobbies[key]["type"] == "public") {
+                lobbies[key]["numPlayers"] += 1;
+                lobbies[key]["players"].push(socket);
+                games[key].configureSocketInteractions(socket);
+                games[key].players.push(new Player());
                 socket.emit("create_game", "success"); // Temporary hack
             } else {
                 // socket.emit("enter_password", name);
@@ -57,15 +86,16 @@ module.exports = socket => {
 
 
     socket.on("disconnect", () => {
-        for (let key in games) {
-            let game = games[key];
+        for (let key in lobbies) {
+            let lobby = lobbies[key];
 
-            const ind = game["players"].indexOf(socket);
+            const ind = lobby["players"].indexOf(socket);
             if (ind != -1) {
-                game["players"].splice(ind, 1); // remove socket from playerlist
-                game["numPlayers"] -= 1;
+                lobby["players"].splice(ind, 1); // remove socket from playerlist
+                lobby["numPlayers"] -= 1;
 
-                if (game["numPlayers"] == 0) {
+                if (lobby["numPlayers"] == 0) {
+                    delete lobbies[key];
                     delete games[key];
                 }
 

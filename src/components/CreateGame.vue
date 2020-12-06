@@ -1,5 +1,51 @@
 <template>
   <div class="container">
+    <div 
+      id="errorModal"
+      v-show="showError"
+      class="modal"
+      aria-hidden="false"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5
+              class="modal-title"
+              id="errorModalLabel"
+            >
+              {{ errorTitle }}
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>{{ errorMessage }}</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button 
+      id="toggleModal"
+      class="d-none"
+      data-toggle="modal"
+      data-target="#errorModal"
+    >
+    </button>
     <div class="mb-3">
       <p>Game Name:</p>
       <div class="form-row">
@@ -113,7 +159,10 @@ export default {
   name: "CreateGame",
   data() {
     return {
-      showPass : false
+      showPass : false,
+      showError : true,
+      errorMessage : "Error Message",
+      errorTitle : "Error Title"
     }
   },
   methods : {
@@ -131,21 +180,25 @@ export default {
           type : gameType,
           numPlayers : 1,
           playerCap : playerType,
-          players : [], // Server adds owner's socket (other sockets to be added by joining)
+          players : [],
           password : gamePassword
         };
         //console.log(gameRequest);
 
         this.$socket.emit("create_game", gameRequest);
       } else {
-        alert("Fill in all fields");
+        document.getElementById("toggleModal").click();
+        this.errorTitle = "Error Creating Game"
+        this.errorMessage = "Please fill in all fields";
       }
     }
   },
   sockets: {
     create_game: function(response) {
       if (response == "failed") {
-        alert("That Game Name already exists.");
+        document.getElementById("toggleModal").click();
+        this.errorTitle = "Error Creating Game"
+        this.errorMessage = "That game name already exists";
         return;
       }
 
