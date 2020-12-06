@@ -49,7 +49,12 @@ import Resources from "@/components/Resources";
 export default {
 
   name: "Game",
-  components: {ChatWindow, UserList, GameBoard, Resources},
+  components: {ChatWindow, UserList, GameBoard, Resources, DevCardModal},
+  data(){
+    return{
+      devModal: false
+    }
+  },
   mounted: function () {
   },
   methods: {
