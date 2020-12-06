@@ -10,6 +10,7 @@ const {ensureAuthenticated} = require('./config/auth');
 const configureUserRegistration = require('./registration');
 const configureChat = require('./chat');
 const configureLobby = require('./lobby');
+const {Game} = require("./gameLogic/game");
 
 module.exports = app => {
     // Passport config
@@ -49,6 +50,8 @@ module.exports = app => {
     app.use(passport.initialize());
     app.use(passport.session());
 
+    // TODO: Integrate this to be created with a lobby
+    const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
         // Using socket io to handle registration,
@@ -58,6 +61,7 @@ module.exports = app => {
         }
         console.log('user connected');
 
+        debugGame.configureSocketInteractions(socket);
         configureChat(socket);
         configureLobby(socket);
     });
