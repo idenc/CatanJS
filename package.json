@@ -17,7 +17,6 @@
     "connect-mongo": "^3.2.0",
     "core-js": "^3.6.5",
     "honeycomb-grid": "^3.1.7",
-    "materialize-css": "^1.0.0-rc.2",
     "nodemon": "^2.0.6",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
