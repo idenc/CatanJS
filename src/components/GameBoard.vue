@@ -124,10 +124,14 @@ import {
   startBuildSettlements,
   updateSettlementLocations,
   redrawSettlements,
-  renderSettlements
+  renderSettlements,
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
-import {redrawRoads, startRoadSelection} from "@/assets/js/roads";
+import {
+  redrawRoads,
+  startRoadSelection,
+  renderRoads
+} from "@/assets/js/roads";
 
 export default {
   name: "GameBoard",
@@ -204,6 +208,8 @@ export default {
       locateSettlements(grid, this.settlements);
       // Render any settlements already built
       renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius);
+      // Render any roads already built
+      renderRoads(this);
 
       // Add a click listener to hexes
       this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -587,11 +593,7 @@ export default {
     },
     startBuild(type) {
       if (type === 'road') {
-        startRoadSelection(this.draw,
-            this.settlements,
-            this.roads,
-            this.graphics.settlementRadius,
-            this.graphics.roadGap);
+        startRoadSelection(this);
       } else if (type === 'settlement') {
         // TODO: check if the player is able to build a settlement
         startBuildSettlements(this);
@@ -603,15 +605,15 @@ export default {
     board_info: function (boardInfo) {
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
+      this.roads = boardInfo.roads;
+      console.log(`roads: `);
+      console.log(this.roads);
       this.initializeBoard();
     },
-    // update_settlements: function (newSettlements) {
-    //   this.settlements = new Map(JSON.parse(newSettlements));
-    //
-    //   // Update the dimensions of the settlements
-    //   updateSettlementLocations(this.grid, this.settlements);
-    //   redrawSettlements(this.settlements, this.draw);
-    // }
+    update_roads: function (newRoads) {
+      this.roads = newRoads;
+      renderRoads(this);
+    }
   }
 }
 

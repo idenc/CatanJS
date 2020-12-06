@@ -123,34 +123,64 @@ const canBuildRoad = () => {
 
 // This begins either after a user builds a settlement in their first two turns
 // or when they choose to build a road
-const startRoadSelection = (drawSVG, settlements, roads, settlementRadius, roadGap) => {
+const startRoadSelection = (gameBoard) => {
     // Iterate through each settlement (i.e. grid intersection point)
-    for (const [, settlement] of settlements.entries()) {
+    for (const [, settlement] of gameBoard.settlements.entries()) {
         const neighbours = settlement.neighbours;
         neighbours.forEach((neighbourCoord) => {
-            const neighbour = settlements.get(JSON.stringify(neighbourCoord));
+            const neighbour = gameBoard.settlements.get(JSON.stringify(neighbourCoord));
             if (canBuildRoad()) {
                 const point = {
                     x: (settlement.point.x + neighbour.point.x) / 2,
                     y: (settlement.point.y + neighbour.point.y) / 2,
                 }
-                const nested = renderBuildable(drawSVG, point, settlementRadius);
+                const nested = renderBuildable(gameBoard.draw,
+                    point,
+                    gameBoard.graphics.settlementRadius);
 
                 const selectorSVG = nested.children()[1].node;
                 selectorSVG.classList.add('build-selector');
 
                 selectorSVG.addEventListener('click', () => {
                     console.log('road clicked');
-                    removeBuildSelectors(drawSVG);
-                    buildRoad(drawSVG, settlement, roads, settlementRadius, neighbour, roadGap)
+                    removeBuildSelectors(gameBoard.draw);
+                    buildRoad(gameBoard.draw,
+                        settlement,
+                        gameBoard.roads,
+                        gameBoard.graphics.settlementRadius,
+                        neighbour,
+                        gameBoard.graphics.roadGap);
+                    // TODO: add correct player
+                    gameBoard.$socket.emit('build_road', {
+                        to: {x: settlement.x, y: settlement.y},
+                        from: {x: neighbour.x, y: neighbour.y},
+                        player: 'placeholder'
+                    });
                 });
             }
         });
     }
 }
 
+const renderRoads = (gameBoard) => {
+    for (const road of gameBoard.roads) {
+        if (!road.svg) {
+            const to = gameBoard.settlements.get(JSON.stringify({x: road.to.x, y: road.to.y}));
+            const from = gameBoard.settlements.get(JSON.stringify({x: road.from.x, y: road.from.y}));
+
+            buildRoad(gameBoard.draw,
+                to,
+                gameBoard.roads,
+                gameBoard.graphics.settlementRadius,
+                from,
+                gameBoard.graphics.roadGap);
+        }
+    }
+}
+
 export {
     drawRoadDebug,
     startRoadSelection,
-    redrawRoads
+    redrawRoads,
+    renderRoads
 }
