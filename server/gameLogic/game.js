@@ -42,8 +42,15 @@ class Game {
         const tileNumbers = Game.shuffleArray(['2', '3', '3', '4', '4', '5', '5', '6', '6',
             '8', '8', '9', '9', '10', '10', '11', '11', '12']);
 
+        let numberIndex = 0;
         for (let i = 0; i < tileResources.length; i++) {
-            this.tiles.push(new Tile(tileResources[i], tileNumbers[i]));
+            if(tileResources[i] === 'desert'){
+                this.tiles.push(new Tile(tileResources[i], 0));
+            }
+            else{
+                this.tiles.push(new Tile(tileResources[i], tileNumbers[numberIndex]));
+                numberIndex += 1;
+            }
         }
     }
 
