@@ -120,13 +120,14 @@
 import * as Honeycomb from 'honeycomb-grid'
 import {SVG} from '@svgdotjs/svg.js'
 import {
-  assignNeighbours,
   locateSettlements,
-  renderSettlements,
+  startBuildSettlements,
   updateSettlementLocations,
-  redrawSettlements
+  redrawSettlements,
+  renderSettlements
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
+import {redrawRoads, startRoadSelection} from "@/assets/js/roads";
 
 export default {
   name: "GameBoard",
@@ -140,7 +141,7 @@ export default {
       numberTokens: [],
       draw: SVG(),
       settlements: [],
-      // numberTokenSVGs: [],
+      roads: [],
       graphics: {
         oceanGap: 8,
         roadGap: 8,
@@ -201,6 +202,8 @@ export default {
 
       // Finds the proper location to render settlements
       locateSettlements(grid, this.settlements);
+      // Render any settlements already built
+      renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius);
 
       // Add a click listener to hexes
       this.$el.addEventListener('click', ({offsetX, offsetY}) => {
@@ -253,14 +256,24 @@ export default {
         })
         this.redrawNumberTokens(draw, grid);
         // Update the dimensions of the settlements
-        updateSettlementLocations(grid, this.settlements.values());
-        redrawSettlements(this.settlements.values(), draw);
+        updateSettlementLocations(grid, this.settlements);
+        redrawSettlements(this.settlements, draw);
+        redrawRoads(this.roads, this.settlements);
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
+
+      this.sockets.subscribe('update_settlements', (newSettlements) => {
+        console.log('updating settlements');
+        this.settlements = new Map(JSON.parse(newSettlements));
+
+        // Update the dimensions of the settlements
+        updateSettlementLocations(grid, this.settlements);
+        renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius);
+      });
     },
     updateGraphicsPropertiesByWindowSize() {
       // Set the road gap based on the window size
-      console.log( window.innerWidth  );
+      console.log(window.innerWidth);
       this.graphics.roadGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 4 : 8;
       this.graphics.oceanGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 4 : 8;
       this.graphics.tokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
@@ -368,11 +381,11 @@ export default {
 
           if (dockCorners) {
             const dock = draw
-              .polyline(dockCorners.map(({x, y}) => `${x},${y}`))
-              .stroke({width: self.graphics.oceanGap, color: '#824d14'})
-              .fill('transparent')
-              .translate(x, y)
-              Object.assign(this, {dock: dock});
+                .polyline(dockCorners.map(({x, y}) => `${x},${y}`))
+                .stroke({width: self.graphics.oceanGap, color: '#824d14'})
+                .fill('transparent')
+                .translate(x, y)
+            Object.assign(this, {dock: dock});
           }
 
           if (shipURL !== '') {
@@ -380,17 +393,17 @@ export default {
             const shipToken = draw.group()
 
             const shipTokenCircle = draw
-              .circle(shipTokenRadius * 2.2)
-              .stroke({width: self.graphics.shipTokenBorder, color: '#aaa'})
-              .fill("white")
+                .circle(shipTokenRadius * 2.2)
+                .stroke({width: self.graphics.shipTokenBorder, color: '#aaa'})
+                .fill("white")
             shipTokenCircle.node.setAttribute('cx', x + center.x)
             shipTokenCircle.node.setAttribute('cy', y + center.y)
             shipTokenCircle.addTo(shipToken);
 
             const shipTokenImage = draw
-              .image(shipURL)
-              .size(`${shipTokenRadius * 1.9}px`, `${shipTokenRadius * 1.9}px`)
-              .translate(x + center.x - (shipTokenRadius * 1.9 / 2), y + center.y - (shipTokenRadius * 1.9 / 2));
+                .image(shipURL)
+                .size(`${shipTokenRadius * 1.9}px`, `${shipTokenRadius * 1.9}px`)
+                .translate(x + center.x - (shipTokenRadius * 1.9 / 2), y + center.y - (shipTokenRadius * 1.9 / 2));
             shipTokenImage.addTo(shipToken);
 
             shipToken.node.setAttribute('cx', x + center.x)
@@ -433,8 +446,8 @@ export default {
               point.y = dockCorners[i].y;
             })
             this.dock
-              .transform(0)
-              .translate(x, y)
+                .transform(0)
+                .translate(x, y)
           }
 
           if (this.token) {
@@ -446,9 +459,9 @@ export default {
             this.token.circle.node.setAttribute('cy', y + center.y)
 
             this.token.image
-              .size(`${shipTokenRadius * 1.9}px`, `${shipTokenRadius * 1.9}px`)
-              .transform(0)
-              .translate(x + center.x - (shipTokenRadius * 1.9 / 2), y + center.y - (shipTokenRadius * 1.9 / 2));
+                .size(`${shipTokenRadius * 1.9}px`, `${shipTokenRadius * 1.9}px`)
+                .transform(0)
+                .translate(x + center.x - (shipTokenRadius * 1.9 / 2), y + center.y - (shipTokenRadius * 1.9 / 2));
           }
         },
 
@@ -542,9 +555,9 @@ export default {
         const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
 
         const numberToken = drawSVG
-              .image(numberTokenURL)
-              .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
-              .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
+            .image(numberTokenURL)
+            .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
+            .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
         Object.assign(hex, {token: numberToken});
       }
     },
@@ -563,7 +576,7 @@ export default {
       const center = hex.center();
       const {x, y} = hex.toPoint();
       console.log(center)
-      console.log(x,y)
+      console.log(x, y)
       console.log(hex)
 
       // Redraw number token
@@ -572,9 +585,18 @@ export default {
           .transform(0)
           .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
     },
-    startBuild() {
-      // TODO: check if the player is able to build a settlement
-      renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius, this.graphics.roadGap);
+    startBuild(type) {
+      if (type === 'road') {
+        startRoadSelection(this.draw,
+            this.settlements,
+            this.roads,
+            this.graphics.settlementRadius,
+            this.graphics.roadGap);
+      } else if (type === 'settlement') {
+        // TODO: check if the player is able to build a settlement
+        startBuildSettlements(this);
+      }
+
     }
   },
   sockets: {
@@ -582,7 +604,14 @@ export default {
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.initializeBoard();
-    }
+    },
+    // update_settlements: function (newSettlements) {
+    //   this.settlements = new Map(JSON.parse(newSettlements));
+    //
+    //   // Update the dimensions of the settlements
+    //   updateSettlementLocations(this.grid, this.settlements);
+    //   redrawSettlements(this.settlements, this.draw);
+    // }
   }
 }
 

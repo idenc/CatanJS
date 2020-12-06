@@ -1,5 +1,3 @@
-import {startRoadSelection} from "@/assets/js/roads";
-
 /**
  * This is just for finding the correct x, y positions to draw settlements
  * @param grid
@@ -57,7 +55,6 @@ const locateSettlements = (grid, settlements) => {
         rowNumTop++;
         rowNumBottom--;
     }
-    console.log(settlements);
     return settlements;
 }
 
@@ -67,14 +64,10 @@ const settlementAvailable = (settlement) => {
 }
 
 // Draw the settlements
-const renderSettlements = (settlements, drawSVG, settlementRadius, roadGap) => {
-    for (const [, settlement] of settlements.entries()) {
+const startBuildSettlements = (gameBoard) => {
+    for (const [, settlement] of gameBoard.settlements.entries()) {
         if (settlementAvailable(settlement)) {
-            let settlementSVG = renderSettlement(drawSVG,
-                settlement,
-                settlements,
-                settlementRadius,
-                roadGap);
+            let settlementSVG = addSettlementSelector(gameBoard, settlement);
             Object.assign(settlement, {svg: settlementSVG});
         }
     }
@@ -106,13 +99,28 @@ const addSelectSettlementAnimation = (drawSVG, x, y, settlementRadius) => {
     animatedCircle.node.appendChild(fadeAnimation);
 }
 
-const renderBuildable = (drawSVG, point, settlementRadius) => {
+const renderSettlements = (settlements, drawSVG, settlementRadius) => {
+    for (const [, settlement] of settlements.entries()) {
+        if (settlement.state !== 'empty' && !settlement.svg) {
+            const settlementSVG = renderBuildable(drawSVG,
+                settlement.point,
+                settlementRadius,
+                false).children()[0].node;
+            settlementSVG.setAttribute('state', settlement.state);
+            settlementSVG.classList.add('settlement-svg');
+        }
+    }
+}
+
+const renderBuildable = (drawSVG, point, settlementRadius, isSelectable = true) => {
     const {x, y} = point;
     // Create an element to nest settlement graphics in for easier transforming
     const nested = drawSVG.group();
     nested.node.classList.add('buildable');
-    // Adds a pulsing circle animation
-    addSelectSettlementAnimation(nested, x, y, settlementRadius);
+    if (isSelectable) {
+        // Adds a pulsing circle animation
+        addSelectSettlementAnimation(nested, x, y, settlementRadius);
+    }
 
     nested
         .circle(settlementRadius * 2)
@@ -130,8 +138,10 @@ const removeBuildSelectors = (drawSVG) => {
         .forEach((s) => s.remove());
 }
 
-const renderSettlement = (drawSVG, settlement, settlements, settlementRadius, roadGap) => {
-    const nested = renderBuildable(drawSVG, settlement.point, settlementRadius);
+const addSettlementSelector = (gameBoard, settlement) => {
+    const nested = renderBuildable(gameBoard.draw,
+        settlement.point,
+        gameBoard.graphics.settlementRadius);
 
     const settlementSVG = nested.children()[1].node;
     settlementSVG.classList.add('build-selector');
@@ -142,38 +152,43 @@ const renderSettlement = (drawSVG, settlement, settlements, settlementRadius, ro
         settlementSVG.classList.add('settlement-svg');
         settlementSVG.setAttribute('state', 'settlement');
         // Remove all the settlement selection graphics, keep selected settlement
-        removeBuildSelectors(drawSVG);
+        removeBuildSelectors(gameBoard.draw);
         // TODO: call to backend to update settlements
         settlement.state = "settlement";
-        startRoadSelection(drawSVG, settlements, settlementRadius, roadGap);
-    })
+        settlement.player = 'placeholder'
+
+        console.log('emitting build')
+        // Cannot JSON stringify DOM elements
+        gameBoard.$socket.emit('build_settlement', {
+            x: settlement.x,
+            y: settlement.y,
+            player: settlement.player,
+            state: settlement.state
+        });
+    });
 
     return nested;
 }
 
 const redrawSettlements = (settlements, drawSVG) => {
-    settlements.forEach(settlement => {
+    for (const [, settlement] of settlements.entries()) {
         redrawSettlement(drawSVG, settlement);
-    })
+    }
 }
 
 const redrawSettlement = (drawSVG, settlement) => {
-    const {x, y} = settlement.point;
-    settlement.svg.transform(0);
-    settlement.svg.transform({
-        position: [x, y],
-        origin: 'center'
-    });
+    if (settlement.svg) {
+        const {x, y} = settlement.point;
+        settlement.svg.transform(0);
+        settlement.svg.transform({
+            position: [x, y],
+            origin: 'center'
+        });
+    }
 }
 
 const updateSettlementLocations = (grid, settlements) => {
-    const newSettlements = locateSettlements(grid);
-    settlements.forEach((settlement, i) => {
-        settlement.x = newSettlements[i].x;
-        settlement.y = newSettlements[i].y;
-        settlement.point = newSettlements[i].point;
-    })
-    return settlements;
+    return locateSettlements(grid, settlements);
 }
 
 
@@ -191,11 +206,12 @@ const getSettlementsMap = (settlementsArray) => {
 export {
     locateSettlements,
     getSettlementsMap,
-    renderSettlements,
-    renderSettlement,
+    startBuildSettlements,
+    addSettlementSelector,
     updateSettlementLocations,
     redrawSettlements,
     redrawSettlement,
     renderBuildable,
-    removeBuildSelectors
+    removeBuildSelectors,
+    renderSettlements
 }

@@ -32,6 +32,7 @@ class Game {
         this.socketRoom = socketRoom;
         this.generateTiles();
         this.generateSettlements();
+        this.generateDevCards();
     }
 
     generateTiles() {
@@ -123,6 +124,24 @@ class Game {
 
                 settlement.neighbours = neighbours;
             });
+        }
+    }
+
+    generateDevCards() {
+        for(var i = 0; i < 14; i++){
+            this.availableDevCards.push('knight');
+        }
+        for(var i = 0; i < 5; i++){
+            this.availableDevCards.push('victoryPoint');
+        }
+        for(var i = 0; i < 2; i++){
+            this.availableDevCards.push('roadBuilding');
+        }
+        for(var i = 0; i < 2; i++){
+            this.availableDevCards.push('yearOfPlenty');
+        }
+        for(var i = 0; i < 2; i++){
+            this.availableDevCards.push('monopoly');
         }
     }
 
@@ -218,7 +237,18 @@ class Game {
 
         //Build Settlement
         socket.on('build_settlement', (newSettlement) => {
+            console.log('settlement received');
+            // Update the server's settlement object
+            const settlement = this.settlements.get(JSON.stringify({
+                x: newSettlement.x,
+                y: newSettlement.y
+            }));
+            settlement.player = newSettlement.player;
+            settlement.state = newSettlement.state;
 
+            // Send the updated settlement to all players
+            io.to(this.socketRoom).emit('update_settlements',
+                JSON.stringify(Array.from(this.settlements.entries())));
         });
 
         //Build Road
@@ -228,6 +258,13 @@ class Game {
 
         //Build Development Card
         socket.on('build_dev_card', () => {
+            console.log("dev card build")
+            //index between 0 and length-1
+            var index = Math.floor(Math.random() * this.availableDevCards.length);
+            var card = this.availableDevCards.splice(index, 1);
+            socket.emit('dev_card_selected', card); //Dont know where this would go
+
+            //May need to send new length and counts to users to update dev card modal??
 
         });
 

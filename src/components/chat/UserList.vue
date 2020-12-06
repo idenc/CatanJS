@@ -1,26 +1,100 @@
 <template>
   <div id="user-div">
-    <ul id="user-list">
-      <template v-for="user in users">
-        <li
-          v-if="user.username === username"
-          :key="user.username"
-          :style="{'color': user.color}"
-        >
-          <b>{{ user.username }} (you)</b>
-        </li>
-        <li
-          v-else
-          :key="user.username"
-          :style="{'color': user.color}"
-        >
-          {{ user.username }}
-        </li>
-      </template>
-    </ul>
+    <h1>Players</h1>
+    <div id="user-list">
+      <div id="user-rows">
+        <template v-for="user in users">
+          <li
+            v-if="user.username === 'username'"
+            :key="user.username"
+            :style="{'color': 'white'}"
+          >
+            <div 
+              :id="'user-row'" 
+              :class="user.username"
+              :style="{'background-color': user.color}"
+            >
+              <div id="name">
+                {{ user.username }} (You) 
+              </div>
+
+              <div id="vic-points">
+                # VP:<br> 0
+                <!-- here is where we put victory points *********************-->
+              </div>
+              <div id="num-roads">
+                # Roads:<br> 0
+                <!-- here is where we put num of roads *********************-->
+              </div>
+              <div id="num-cards">
+                # Cards: <br> 0
+                <!-- here is where we put num of cards *********************-->
+              </div>
+              <div id="admin-buttons">
+                <button 
+                  :id="kick-button" 
+                  :class="user.username"
+                >
+                  Kick
+                </button>
+                <button 
+                  :id="mute-button" 
+                  :class="user.username"
+                >
+                  Mute
+                </button>
+              </div> 
+            </div>
+          </li>  
+          <li
+            v-else
+            :key="user.username"
+            :style="{'color': 'white'}"
+          >
+            <div 
+              :id="'user-row'" 
+              :class="user.username"
+              :style="{'background-color': user.color}"
+            >
+              <div id="name">
+                {{ user.username }} <!-- (You) -->
+              </div>
+
+              <div id="vic-points">
+                # VP:<br> 0
+                <!-- here is where we put victory points *********************-->
+              </div>
+              <div id="num-roads">
+                # Roads:<br> 0
+                <!-- here is where we put num of roads *********************-->
+              </div>
+              <div id="num-cards">
+                # Cards: <br> 0
+                <!-- here is where we put num of cards *********************-->
+              </div>
+              <div id="admin-buttons">
+                <button 
+                  :id="kick-button" 
+                  :class="user.username"
+                >
+                  Kick
+                </button>
+                <button 
+                  :id="mute-button" 
+                  :class="user.username"
+                >
+                  Mute
+                </button>
+              </div> 
+            </div>
+          </li>
+        </template>
+      </div>
+
+
+    </div>
   </div>
 </template>
-
 <script>
 export default {
   name: "UserList",
@@ -33,7 +107,7 @@ export default {
   mounted: function () {
     this.sockets.subscribe('user joined', (user) => {
       console.log(`user joined: ${user}`)
-      if (!this.users.some(u => u.username = user.username)) {
+      if (!this.users.some(u => u.username === user.username)) {
         this.users.push(user);
       }
     });
@@ -76,6 +150,63 @@ ul {
   margin: 0;
   padding: 10px;
   text-align: left;
+}
+
+h1 {
+  color: white;
+}
+
+#user-list {
+  height: 88%;
+}
+
+#user-row {
+  width: 100%;
+  display: flex;
+  height: 100%;
+  flex-direction: row;
+  align-content: stretch;
+  justify-content: space-between;
+
+  
+}
+
+
+
+#user-rows {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+  align-items: flex-start;
+}
+
+#user-row div { 
+
+
+
+  align-self: center;
+  align-content: space-between;
+  margin: auto; 
+}
+
+#vic-points, #num-roads, #num-cards {
+  text-decoration: underline;
+}
+ 
+
+#kick-button, #mute-button {
+  margin: 2px;
+}
+
+
+li {
+  padding: 1px;
+  width: 100%;
+  height: 33%;
+  marker:none;
+  list-style-type:none;
+  color: white;
 }
 
 </style>
