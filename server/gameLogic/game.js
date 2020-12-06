@@ -171,10 +171,10 @@ class Game {
         }
     }
 
-    generateTestPlayers(){
-        for(let i = 0; i < 4; i++){
-            let tempName = 'player' + i;
-            let tempPlayer = {name: tempName, victoryPoints: 0, clay: 0, ore: 0, sheep: 0,
+function generateTestPlayers(){
+    for(let i = 0; i < 4; i++){
+        let tempName = 'player' + i;
+        let tempPlayer = {name: tempName, victoryPoints: 0, clay: 0, ore: 0, sheep: 0,
                             wheat: 0, lumber: 0, isTurn: false, devCards: [], knights: 0, harbourBonuses: [], color: blue};
             players.push(tempPlayer);
         }
