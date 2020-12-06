@@ -121,9 +121,10 @@ import * as Honeycomb from 'honeycomb-grid'
 import {SVG} from '@svgdotjs/svg.js'
 import {
   locateSettlements,
-  renderSettlements,
+  startBuildSettlements,
   updateSettlementLocations,
-  redrawSettlements
+  redrawSettlements,
+  renderSettlements
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
 import {redrawRoads, startRoadSelection} from "@/assets/js/roads";
@@ -141,9 +142,6 @@ export default {
       draw: SVG(),
       settlements: [],
       roads: [],
-      numberTokenSVGs: [],
-      grid: null,
-      // numberTokenSVGs: [],
       graphics: {
         oceanGap: 8,
         roadGap: 8,
@@ -194,7 +192,6 @@ export default {
 
       // Render resource tiles
       const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles);
-      this.grid = grid;
       console.log(grid);
 
       this.renderNumberTokens(draw, grid);
@@ -262,6 +259,15 @@ export default {
         redrawRoads(this.roads, this.settlements);
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
+
+      this.sockets.subscribe('update_settlements', (newSettlements) => {
+        console.log('updating settlements');
+        this.settlements = new Map(JSON.parse(newSettlements));
+
+        // Update the dimensions of the settlements
+        updateSettlementLocations(grid, this.settlements);
+        renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius);
+      });
     },
     updateGraphicsPropertiesByWindowSize() {
       // Set the road gap based on the window size
@@ -547,9 +553,9 @@ export default {
         const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
 
         const numberToken = drawSVG
-              .image(numberTokenURL)
-              .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
-              .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
+            .image(numberTokenURL)
+            .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
+            .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
         Object.assign(hex, {token: numberToken});
       }
     },
@@ -568,7 +574,7 @@ export default {
       const center = hex.center();
       const {x, y} = hex.toPoint();
       console.log(center)
-      console.log(x,y)
+      console.log(x, y)
       console.log(hex)
 
       // Redraw number token
@@ -586,7 +592,7 @@ export default {
             this.graphics.roadGap);
       } else if (type === 'settlement') {
         // TODO: check if the player is able to build a settlement
-        renderSettlements(this);
+        startBuildSettlements(this);
       }
 
     }
@@ -597,13 +603,13 @@ export default {
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.initializeBoard();
     },
-    update_settlements: function (newSettlements) {
-      this.settlements = new Map(JSON.parse(newSettlements));
-
-      // Update the dimensions of the settlements
-      updateSettlementLocations(this.grid, this.settlements);
-      redrawSettlements(this.settlements, this.draw);
-    }
+    // update_settlements: function (newSettlements) {
+    //   this.settlements = new Map(JSON.parse(newSettlements));
+    //
+    //   // Update the dimensions of the settlements
+    //   updateSettlementLocations(this.grid, this.settlements);
+    //   redrawSettlements(this.settlements, this.draw);
+    // }
   }
 }
 
