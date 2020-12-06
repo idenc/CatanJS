@@ -160,7 +160,7 @@ export default {
   data() {
     return {
       showPass : false,
-      showError : true,
+      showError : false,
       errorMessage : "Error Message",
       errorTitle : "Error Title"
     }
