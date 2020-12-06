@@ -202,6 +202,8 @@ export default {
 
       // Finds the proper location to render settlements
       locateSettlements(grid, this.settlements);
+      // Render any settlements already built
+      renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius);
 
       // Add a click listener to hexes
       this.$el.addEventListener('click', ({offsetX, offsetY}) => {
