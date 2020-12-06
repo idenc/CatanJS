@@ -1,6 +1,7 @@
 <template>
   <div id="game-container">
     <div id="board-container">
+      <DevCardModal v-if="devModal === true" />
       <GameBoard ref="gameBoard" />
     </div>
     <div id="sidebar-container">
@@ -22,7 +23,10 @@
         <button class="btn btn-primary btn-block">
           Trade
         </button>
-        <button class="btn btn-primary btn-block">
+        <button
+          class="btn btn-primary btn-block"
+          @click="devModal=!devModal"
+        >
           Dev Cards
         </button>
       </div>
@@ -38,13 +42,19 @@
 import GameBoard from "@/components/GameBoard";
 import UserList from "@/components/chat/UserList";
 import ChatWindow from "@/components/chat/ChatWindow";
+import DevCardModal from '@/components/DevCardModal';
 import Resources from "@/components/Resources";
 import BuildButton from "@/components/BuildButton";
 
 export default {
 
   name: "Game",
-  components: {BuildButton, ChatWindow, UserList, GameBoard, Resources},
+  components: {BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
+  data(){
+    return{
+      devModal: false
+    }
+  },
   mounted: function () {
   },
   methods: {
