@@ -129,7 +129,7 @@ module.exports = app => {
                     return res.redirect('/#/register');
                 } else {
                     // User has already registered, redirect
-                    return res.redirect('/#/game');
+                    return res.redirect('/#/lobby');
                 }
             });
         }

@@ -142,7 +142,7 @@ export default {
     },
     googleRegistration() {
       axios.post('/register', {name: this.name}, { withCredentials: true})
-          .then(() => this.$router.push('/game'))
+          .then(() => this.$router.push('/lobby'))
           .catch(err => this.errors.push(err.response.data.msg));
     },
     register() {

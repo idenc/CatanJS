@@ -12,7 +12,7 @@ module.exports = app => {
             newUser.save()
                 .then(() => {
                     delete req.session.user;
-                    res.redirect('/#/game');
+                    res.redirect('/#/lobby');
                 })
                 .catch(err => console.log(err));
         } else {
