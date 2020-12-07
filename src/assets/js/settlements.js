@@ -124,7 +124,7 @@ const renderBuildable = (drawSVG, point, settlementRadius, isSelectable = true) 
 
     nested
         .circle(settlementRadius * 2)
-        .fill('none')
+        .fill('transparent')
         .stroke({width: 4, color: 'white'})
         .translate(x - settlementRadius, y - settlementRadius);
 
@@ -153,9 +153,8 @@ const addSettlementSelector = (gameBoard, settlement) => {
         settlementSVG.setAttribute('state', 'settlement');
         // Remove all the settlement selection graphics, keep selected settlement
         removeBuildSelectors(gameBoard.draw);
-        // TODO: call to backend to update settlements
         settlement.state = "settlement";
-        settlement.player = 'placeholder'
+        settlement.player = gameBoard.username;
 
         console.log('emitting build')
         // Cannot JSON stringify DOM elements
