@@ -153,9 +153,8 @@ const addSettlementSelector = (gameBoard, settlement) => {
         settlementSVG.setAttribute('state', 'settlement');
         // Remove all the settlement selection graphics, keep selected settlement
         removeBuildSelectors(gameBoard.draw);
-        // TODO: call to backend to update settlements
         settlement.state = "settlement";
-        settlement.player = 'placeholder'
+        settlement.player = gameBoard.username;
 
         console.log('emitting build')
         // Cannot JSON stringify DOM elements

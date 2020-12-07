@@ -19,7 +19,10 @@
         />
       </div>
       <div id="sidebar-chat-container">
-        <ChatWindow id="chat" />
+        <ChatWindow
+          id="chat"
+          @username="passUsername"
+        />
       </div>
       <div id="sidebar-buttons-container">
         <BuildButton
@@ -70,6 +73,9 @@ export default {
     },
     rollDice() {
       this.$socket.emit('roll_dice')
+    },
+    passUsername(username) {
+      this.$refs.gameBoard.setUsername(username);
     }
   }
 }

@@ -142,6 +142,7 @@ export default {
       draw: SVG(),
       settlements: [],
       roads: [],
+      username: '',
       graphics: {
         oceanGap: 8,
         roadGap: 8,
@@ -608,6 +609,9 @@ export default {
         startBuildSettlements(this);
       }
 
+    },
+    setUsername(username) {
+      this.username = username;
     }
   },
   sockets: {
