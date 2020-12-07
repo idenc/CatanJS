@@ -1,29 +1,9 @@
 const {Game} = require("./gameLogic/game");
+const Player = require("./gameLogic/player");
 
 // All active games
 let lobbies = {};
 let games = {};
-
-class Player {
-    name = "";
-    colour = "";
-
-    victoryPoints = 0;
-    numClay = 0;
-    numOre = 0;
-    numSheep = 0;
-    numWheat = 0;
-    numLumber = 0;
-
-    isTurn = false;
-    
-    devCards = [] // String array
-    numDevCards = 0;
-
-    numKnights = 0;
-
-    harbourBonuses = [] // Coordinate Array
-}
 
 module.exports = socket => {
     // Request to create game

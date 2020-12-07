@@ -3,6 +3,7 @@
 const Tile = require("./tile");
 const Settlement = require("./settlement");
 const io = require('../socket').getio();
+const Player = require("./player");
 const Honeycomb = require('honeycomb-grid');
 
 /**
@@ -57,9 +58,17 @@ class Game {
             'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool']);
         const tileNumbers = Game.shuffleArray(['2', '3', '3', '4', '4', '5', '5', '6', '6',
             '8', '8', '9', '9', '10', '10', '11', '11', '12']);
-
+        let numberIndex = 0;
         for (let i = 0; i < this.grid.length; i++) {
-            const tile = new Tile(tileResources[i], tileNumbers[i]);
+            let tile = {};
+            if(tileResources[i] === 'desert'){
+                tile = new Tile(tileResources[i], 0);
+            }
+            else{
+                tile = new Tile(tileResources[i], tileNumbers[numberIndex]);
+                numberIndex++;
+            }
+
             tile.x = this.grid[i].x;
             tile.y = this.grid[i].y;
             // Get settlements for this
@@ -224,6 +233,10 @@ class Game {
         });
     }
 
+    robberEvent(){
+
+    }
+
     /**
      * Probably this method should be called when a room is created
      * for each player in the room
@@ -257,6 +270,7 @@ class Game {
 
             if (roll === 7) {
                 //i think the client side should handle this then send the results back
+                robberEvent();
                 socket.to(this.socketRoom).emit('handle_robber_event');
             } else {
                 this.dealOutResources(roll);
