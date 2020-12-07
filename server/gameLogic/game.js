@@ -79,11 +79,11 @@ class Game {
             // Loops through each hex in the current row
             for (let j = 0; j < i; j++) {
                 if (j === 0) {
-                    this.settlements.push(new Settlement(0,rowNumTop));
+                    this.settlements.push(new Settlement(0, rowNumTop));
                     this.settlements.push(new Settlement(0, rowNumBottom));
                 }
 
-                this.settlements.push(new Settlement((j * 2) + 1,rowNumTop));
+                this.settlements.push(new Settlement((j * 2) + 1, rowNumTop));
                 this.settlements.push(new Settlement((j * 2) + 2, rowNumTop));
                 this.settlements.push(new Settlement((j * 2) + 2, rowNumBottom));
                 this.settlements.push(new Settlement((j * 2) + 1, rowNumBottom));
@@ -211,7 +211,8 @@ class Game {
         socket.on('player_joined', (username) => {
             socket.emit('board_info', {
                 tiles: this.tiles,
-                settlements: JSON.stringify(Array.from(this.settlements.entries()))
+                settlements: JSON.stringify(Array.from(this.settlements.entries())),
+                roads: this.roads,
             });
         });
 
@@ -266,7 +267,9 @@ class Game {
 
         //Build Road
         socket.on('build_road', (newRoad) => {
-
+            console.log('road received');
+            this.roads.push(newRoad);
+            io.to(this.socketRoom).emit('update_roads', this.roads);
         });
 
         //Build Development Card

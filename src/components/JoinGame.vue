@@ -28,7 +28,11 @@
               </span>
             </p>
             
-            <button class="btn btn-secondary rounded-pill">
+            <button
+              v-if="game.numPlayers < game.playerCap"
+              class="btn btn-secondary rounded-pill"
+              @click="joinGame(game.name)"
+            >
               Join
             </button>
           </div>
@@ -58,6 +62,11 @@ export default {
   watch: {
     searchQuery: function() {
       this.$socket.emit("get_games", this.searchQuery);
+    }
+  },
+  methods: {
+    joinGame(name) {
+      this.$socket.emit("join_game", name);
     }
   }
 }
