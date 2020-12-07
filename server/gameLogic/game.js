@@ -178,21 +178,8 @@ class Game {
         //iterate through all selected tiles
         for (let i = 0; i < selectedTiles; i++) {
             //check every corner of a tile for a settlement
-            for (let j = 0; j < selectedTiles[i].corners.length; j++) {
-                let settlement = this.settlements.filter(obj => obj.point === selectedTiles[i].corcers[j]);
-                //if there is a settlment in that corner figure out who the owner is and
-                //allocate resources
-                if (settlement) {
-                    for (let pindex = 0; pindex < this.players.length; pindex++) {
-                        if (settlement.player === this.players[pindex].name) {
-                            if (settlement.type === 'settlement') {
-                                this.players[pindex][selectedTiles[i].resource] += 1;
-                            } else if (settlement.type === 'city') {
-                                this.players[pindex][selectedTiles[i].resource] += 2;
-                            }
-                        }
-                    }
-                }
+            if(!selectedTiles[i].isRobber){
+                
             }
         }
     }
