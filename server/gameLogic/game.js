@@ -3,6 +3,7 @@
 const Tile = require("./tile");
 const Settlement = require("./settlement");
 const io = require('../socket').getio();
+const Honeycomb = require('honeycomb-grid');
 
 /**
  * Handles an instance of a game
@@ -24,12 +25,27 @@ class Game {
     players = [];
     availableDevCards = [];
     socketRoom = 'room';
+    grid;
     static gameboardRadius = 3;
 
     // socketRoom should be a string to identify
     // which room the game should communicate with
     constructor(socketRoom) {
         this.socketRoom = socketRoom;
+        const Grid = Honeycomb.defineGrid();
+        const Hex = Honeycomb.extendHex();
+        this.grid = Grid.spiral({
+            radius: Game.gameboardRadius - 1,
+            center: Hex(2, 2),
+        });
+
+        // For some reason the bottom and top row start at 1
+        // Change this to be 0-indexed
+        const topRow = this.grid.filter((t) => t.y === 0);
+        topRow.map((t) => t.x--);
+        const bottomRow = this.grid.filter((t) => t.y === Game.gameboardRadius + 1);
+        bottomRow.map((t) => t.x--);
+
         this.generateTiles();
         this.generateSettlements();
         this.generateDevCards();
@@ -42,8 +58,36 @@ class Game {
         const tileNumbers = Game.shuffleArray(['2', '3', '3', '4', '4', '5', '5', '6', '6',
             '8', '8', '9', '9', '10', '10', '11', '11', '12']);
 
-        for (let i = 0; i < tileResources.length; i++) {
-            this.tiles.push(new Tile(tileResources[i], tileNumbers[i]));
+        for (let i = 0; i < this.grid.length; i++) {
+            const tile = new Tile(tileResources[i], tileNumbers[i]);
+            tile.x = this.grid[i].x;
+            tile.y = this.grid[i].y;
+            // Get settlements for this
+            let baseX = tile.x * 2;
+            const halfRow = Math.ceil((Game.gameboardRadius + 1) / 2);
+
+            if (tile.y < halfRow) {
+                baseX++;
+            }
+            // SW
+            tile.settlements.push({x: baseX, y: tile.y + 1});
+            // S
+            tile.settlements.push({x: baseX + 1, y: tile.y + 1});
+            // SE
+            tile.settlements.push({x: baseX + 2, y: tile.y + 1});
+            if (tile.y < halfRow) {
+                baseX--;
+            } else if (tile.y > halfRow) {
+                baseX++;
+            }
+            // NE
+            tile.settlements.push({x: baseX + 2, y: tile.y});
+            // N
+            tile.settlements.push({x: baseX + 1, y: tile.y});
+            // NW
+            tile.settlements.push({x: baseX, y: tile.y});
+
+            this.tiles.push(tile);
         }
     }
 
@@ -57,7 +101,6 @@ class Game {
         }
         return settlementsMap;
     }
-
     /**
      * Sets the initial state of each settlement
      * @returns {[]}
@@ -128,19 +171,20 @@ class Game {
     }
 
     generateDevCards() {
-        for(var i = 0; i < 14; i++){
+        let i;
+        for (i = 0; i < 14; i++) {
             this.availableDevCards.push('knight');
         }
-        for(var i = 0; i < 5; i++){
+        for (i = 0; i < 5; i++) {
             this.availableDevCards.push('victoryPoint');
         }
-        for(var i = 0; i < 2; i++){
+        for (i = 0; i < 2; i++) {
             this.availableDevCards.push('roadBuilding');
         }
-        for(var i = 0; i < 2; i++){
+        for (i = 0; i < 2; i++) {
             this.availableDevCards.push('yearOfPlenty');
         }
-        for(var i = 0; i < 2; i++){
+        for (i = 0; i < 2; i++) {
             this.availableDevCards.push('monopoly');
         }
     }
@@ -166,27 +210,18 @@ class Game {
 
     //there has to be a more efficient way of doing this
     dealOutResources(diceRoll) {
-        let selectedTiles = this.tiles.filter(obj => obj.number === diceRoll);
+        let selectedTiles = this.tiles.filter(obj => obj.number.toString() === diceRoll);
         //iterate through all selected tiles
-        for (let i = 0; i < selectedTiles; i++) {
-            //check every corner of a tile for a settlement
-            for (let j = 0; j < selectedTiles[i].corners.length; j++) {
-                let settlement = this.settlements.filter(obj => obj.point === selectedTiles[i].corcers[j]);
-                //if there is a settlment in that corner figure out who the owner is and
-                //allocate resources
-                if (settlement) {
-                    for (let pindex = 0; pindex < this.players.length; pindex++) {
-                        if (settlement.player === this.players[pindex].name) {
-                            if (settlement.type === 'settlement') {
-                                this.players[pindex][selectedTiles[i].resource] += 1;
-                            } else if (settlement.type === 'city') {
-                                this.players[pindex][selectedTiles[i].resource] += 2;
-                            }
-                        }
-                    }
+        selectedTiles.forEach((tile) => {
+            // Iterate through all settlement locations touching tile
+            tile.settlements.forEach((settleCoord) => {
+                const settlement = this.settlements.get(JSON.stringify(settleCoord));
+                const player = this.players.find(p => p.name === settlement.player);
+                if (player.length) {
+                    player[tile.resource]++;
                 }
-            }
-        }
+            });
+        });
     }
 
     /**
@@ -217,6 +252,8 @@ class Game {
             let die1 = Math.floor(Math.random() * 6) + 1;
             let die2 = Math.floor(Math.random() * 6) + 1;
             let roll = die1 + die2;
+
+            console.log(`dice roll was ${roll}`)
 
             if (roll === 7) {
                 //i think the client side should handle this then send the results back
