@@ -6,6 +6,7 @@
       <button
         id="dice-button"
         class="btn btn-primary btn-block"
+        @click="rollDice"
       >
         Roll Dice
       </button>
@@ -66,6 +67,9 @@ export default {
   methods: {
     startBuild(type) {
       this.$refs.gameBoard.startBuild(type);
+    },
+    rollDice() {
+      this.$socket.emit('roll_dice')
     }
   }
 }
