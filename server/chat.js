@@ -169,7 +169,9 @@ module.exports = socket => {
                     userInfo.username = user.name;
                     socket.color = userInfo.color;
                     socket.emit('user info', userInfo);
-                    users.push(userInfo);
+                    if (!users.some(u => u.username === user.name)) {
+                        users.push(userInfo);
+                    }
                     console.log('a user connected with username ' + socket.username);
                     socket.broadcast.emit('user joined', userInfo);
                     socket.emit('chat info', {current_users: users, messages: messages});
