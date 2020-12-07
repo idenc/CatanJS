@@ -234,7 +234,27 @@ class Game {
     }
 
     robberEvent(){
-
+        //check if each player has > 7, if they do remove half of their resources 
+        for(let i = 0; i < this.players.length; i++){
+            let player = this.players[i];
+            let totalResources = player['wool'] + player['brick'] + player['ore'] +
+                                    + player['grain'] + player['lumber'];
+            if(totalResources >= 7){
+                let removalArray = ['brick', 'wool', 'ore', 'grain', 'lumber'];
+                let numberToRemove = Math.floor(totalResources/2);
+                let removed = 0;
+                while(removed < numberToRemove){
+                    let index = Math.floor(Math.random() * removalArray.length);
+                    if(player[removalArray[index]] > 0){
+                        player[removalArray[index]]--;
+                        removed++;
+                    }
+                    else{
+                        removalArray.splice(index, 1);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -269,11 +289,14 @@ class Game {
             console.log(`dice roll was ${roll}`)
 
             if (roll === 7) {
-                //i think the client side should handle this then send the results back
-                robberEvent();
+                this.robberEvent();
+                //Not sure how we want to update players
+                socket.to(this.socketRoom).emit('update_players', {playerData: this.players, diceRoll: roll});
+                //Somehow allow the player that rolled the 7 to move teh robber
                 socket.to(this.socketRoom).emit('handle_robber_event');
             } else {
                 this.dealOutResources(roll);
+                //Not sure how we want to update players
                 socket.to(this.socketRoom).emit('update_players', {playerData: this.players, diceRoll: roll});
             }
         });
