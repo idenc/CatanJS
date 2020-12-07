@@ -79,6 +79,7 @@ export default {
       this.username = user.username;
       this.color = user.color;
       this.chat_messages.push({message: `You are ${user.username}`, id: 'username message'})
+      this.$emit('username', this.username);
     })
 
     // Server sends the chat history and user list

@@ -290,6 +290,7 @@ class Game {
         //Build Settlement
         socket.on('build_settlement', (newSettlement) => {
             console.log('settlement received');
+            console.log(newSettlement);
             // Update the server's settlement object
             const settlement = this.settlements.get(JSON.stringify({
                 x: newSettlement.x,
