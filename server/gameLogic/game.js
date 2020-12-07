@@ -3,6 +3,7 @@
 const Tile = require("./tile");
 const Settlement = require("./settlement");
 const io = require('../socket').getio();
+const Player = require("./player");
 
 /**
  * Handles an instance of a game
@@ -196,6 +197,10 @@ class Game {
         }
     }
 
+    robberEvent(){
+
+    }
+
     /**
      * Probably this method should be called when a room is created
      * for each player in the room
@@ -226,6 +231,7 @@ class Game {
 
             if (roll === 7) {
                 //i think the client side should handle this then send the results back
+                robberEvent();
                 socket.to(this.socketRoom).emit('handle_robber_event');
             } else {
                 this.dealOutResources(roll);
