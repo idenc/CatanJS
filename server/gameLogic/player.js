@@ -2,21 +2,20 @@
 
 class Player{
     name;
-    victoryPoints;
-    clay;
-    ore;
-    wool;
-    grain;
-    lumber;
-    isTurn;
+    victoryPoints = 0;
+    clay = 0;
+    ore = 0;
+    wool = 0;
+    grain = 0;
+    lumber = 0;
+    isTurn = false;
     devCards = [];
-    numKnights;
+    numKnights = 0;
     harbourBonuses = [];
     colour;
     constructor(name, colour) {
         this.name = name;
         this.colour = colour;
-        isTurn = false;
     }
 }
 
