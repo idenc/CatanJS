@@ -58,9 +58,17 @@ class Game {
             'ore', 'ore', 'ore', 'wool', 'wool', 'wool', 'wool']);
         const tileNumbers = Game.shuffleArray(['2', '3', '3', '4', '4', '5', '5', '6', '6',
             '8', '8', '9', '9', '10', '10', '11', '11', '12']);
-
+        let numberIndex = 0;
         for (let i = 0; i < this.grid.length; i++) {
-            const tile = new Tile(tileResources[i], tileNumbers[i]);
+            let tile = {};
+            if(tileResources[i] === 'desert'){
+                tile = new Tile(tileResources[i], 0);
+            }
+            else{
+                tile = new Tile(tileResources[i], tileNumbers[numberIndex]);
+                numberIndex++;
+            }
+
             tile.x = this.grid[i].x;
             tile.y = this.grid[i].y;
             // Get settlements for this
