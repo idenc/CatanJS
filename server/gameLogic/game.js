@@ -177,7 +177,7 @@ class Game {
         let selectedTiles = this.tiles.filter(obj => obj.number === diceRoll);
         //iterate through all selected tiles
         for (let i = 0; i < selectedTiles; i++) {
-            //check every corner of a tile for a settlement
+            //check every corner of a tile for a settlement if the robber is not on that tile
             if(!selectedTiles[i].isRobber){
                 
             }
