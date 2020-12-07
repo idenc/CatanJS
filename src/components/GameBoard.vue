@@ -121,17 +121,13 @@ import * as Honeycomb from 'honeycomb-grid'
 import {SVG} from '@svgdotjs/svg.js'
 import {
   locateSettlements,
-  startBuildSettlements,
-  updateSettlementLocations,
   redrawSettlements,
   renderSettlements,
+  startBuildSettlements,
+  updateSettlementLocations,
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
-import {
-  redrawRoads,
-  startRoadSelection,
-  renderRoads
-} from "@/assets/js/roads";
+import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
 
 export default {
   name: "GameBoard",
@@ -304,16 +300,27 @@ export default {
       return {width: hexWidth, height: hexHeight}
     },
     defineHexObject(maxHexSize, drawHexGroup) {
-      let resourceIndex = 0;
-      let tokenIndex = 0;
       const hexagonRatio = this.hexagonRatio;
       const self = this;
+      const coords = [];
       return Honeycomb.extendHex({
         size: (maxHexSize.width) / (2 * hexagonRatio),
 
         render(draw, tiles) {
           const {x, y} = this.toPoint()
           const corners = this.corners()
+          let gridX = this.x - 1;
+          const gridY = this.y - 1;
+          coords.push({x: this.x, y: this.y});
+          console.log('coords');
+          console.log(coords);
+
+          // Fix shifting in coords
+          // For some reason 1st, 2nd, and last rows are shifted right one
+          if (gridY !== 2) {
+            gridX--;
+          }
+          const tile = tiles.find((t) => t.x === gridX && t.y === gridY);
 
 
           this.hexPolygon = draw
@@ -324,15 +331,18 @@ export default {
 
           this.hexPolygon.node.classList.add('hex')
 
-          this.hexPolygon.node.setAttribute('resource', tiles[resourceIndex].resource);
+          if (!tile) {
+            console.log("failed to find tile at " + gridX + ", " + gridY);
+            return;
+          }
+
+          this.hexPolygon.node.setAttribute('resource', tile.resource);
 
           //If the current resource is not a desert assign it a number
           //Store the assigned number in 'numberToken' attribute
-          if (tiles[resourceIndex].resource !== 'desert') {
-            this.hexPolygon.node.setAttribute('numberToken', tiles[tokenIndex].number);
-            tokenIndex += 1;
+          if (tile.resource !== 'desert') {
+            this.hexPolygon.node.setAttribute('numberToken', tile.number);
           }
-          resourceIndex += 1;
         },
 
         redraw(maxHexSize) {
@@ -494,7 +504,7 @@ export default {
     },
     // Render hexes
     renderResourceHexes(Hex, Grid, drawHexGroup, tiles) {
-      const grid = Grid.spiral({
+      return Grid.spiral({
         radius: this.gameboardRadius - 1,
         center: Hex(3, 3),
 
@@ -502,8 +512,7 @@ export default {
         onCreate(hex) {
           hex.render(drawHexGroup, tiles);
         }
-      })
-      return grid;
+      });
     },
     renderOceanHexes(Hex, Grid, drawHexGroup) {
       const oceanGrid = Grid.ring({
