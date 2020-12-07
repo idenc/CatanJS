@@ -329,8 +329,7 @@ export default {
           //If the current resource is not a desert assign it a number
           //Store the assigned number in 'numberToken' attribute
           if (tiles[resourceIndex].resource !== 'desert') {
-            this.hexPolygon.node.setAttribute('numberToken', tiles[tokenIndex].number);
-            tokenIndex += 1;
+            this.hexPolygon.node.setAttribute('numberToken', tiles[resourceIndex].number);
           }
           resourceIndex += 1;
         },
