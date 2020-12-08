@@ -184,7 +184,7 @@ const addSettlementSelector = (gameBoard, settlement) => {
         // Remove all the settlement selection graphics, keep selected settlement
         removeBuildSelectors(gameBoard.draw);
         settlement.state = "settlement";
-        settlement.player = gameBoard.username;
+        settlement.player = gameBoard.player.name;
 
         console.log('emitting build')
         // Cannot JSON stringify DOM elements

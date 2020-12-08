@@ -27,6 +27,7 @@ class Game {
     socketRoom = 'room';
     grid;
     turnNumber = 0;
+    playerColours = ['#FF0000', '#008000', '#0000ff', '#FFA500'] // Red, green, blue, orange
 
     static gameboardRadius = 3;
 
@@ -236,21 +237,20 @@ class Game {
 
     robberEvent() {
         //check if each player has > 7, if they do remove half of their resources
-        for(let i = 0; i < this.players.length; i++){
+        for (let i = 0; i < this.players.length; i++) {
             let player = this.players[i];
-            let totalResources = player['wool'] + player['brick'] + player['ore'] +
-                                    + player['grain'] + player['lumber'];
-            if(totalResources >= 7){
+            let totalResources = player['wool'] + player['brick'] + player['ore']
+                + player['grain'] + player['lumber'];
+            if (totalResources >= 7) {
                 let removalArray = ['brick', 'wool', 'ore', 'grain', 'lumber'];
-                let numberToRemove = Math.floor(totalResources/2);
+                let numberToRemove = Math.floor(totalResources / 2);
                 let removed = 0;
-                while(removed < numberToRemove){
+                while (removed < numberToRemove) {
                     let index = Math.floor(Math.random() * removalArray.length);
-                    if(player[removalArray[index]] > 0){
+                    if (player[removalArray[index]] > 0) {
                         player[removalArray[index]]--;
                         removed++;
-                    }
-                    else{
+                    } else {
                         removalArray.splice(index, 1);
                     }
                 }
@@ -266,6 +266,11 @@ class Game {
     configureSocketInteractions(socket) {
         socket.join(this.socketRoom);
         socket.on('player_joined', (username) => {
+            const newPlayer = new Player(username, this.playerColours.pop());
+            if (!this.players.some(p => p.name === username)) {
+                this.players.push(newPlayer);
+            }
+
             socket.emit('board_info', {
                 tiles: this.tiles,
                 settlements: JSON.stringify(Array.from(this.settlements.entries())),
@@ -324,9 +329,28 @@ class Game {
             settlement.player = newSettlement.player;
             settlement.state = newSettlement.state;
 
-            // Send the updated settlement to all players
-            io.to(this.socketRoom).emit('update_settlements',
-                JSON.stringify(Array.from(this.settlements.entries())));
+
+            const player = this.players.find((p) => p.name === settlement.player);
+            player.numSettlements--;
+            // Get tiles adjacent to this settlement
+            const adjacentTiles = this.tiles.filter((t) =>
+                t.settlements.some((s) => s.x === settlement.x && s.y === settlement.y));
+
+            // Give the player one resource for each adjacent tile
+            adjacentTiles.forEach((tile) => {
+                player[tile.resource]++;
+            });
+
+            const jsonSettlements = JSON.stringify(Array.from(this.settlements.entries()));
+
+            // Send the updated settlement to all players except the one who built
+            socket.to(this.socketRoom).emit('update_settlements', {
+                settlements: jsonSettlements
+            });
+            socket.emit('update_settlements', {
+                settlements: jsonSettlements,
+                player: player
+            });
         });
 
         //Build Road

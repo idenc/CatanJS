@@ -5,6 +5,7 @@
       <GameBoard
         ref="gameBoard"
         :turn-number="turnNumber"
+        @updatePlayer="updatePlayer"
       />
       <button
         v-if="turnNumber >= 2"
@@ -52,7 +53,7 @@
         </button>
       </div>
       <div id="sidebar-resources-container">
-        <Resources />
+        <Resources :player="player" />
       </div>
     </div>
   </div>
@@ -75,6 +76,13 @@ export default {
     return {
       devModal: false,
       turnNumber: 0,
+      player: Object({
+        brick: 0,
+        ore: 0,
+        wool: 0,
+        grain: 0,
+        lumber: 0,
+      }),
     }
   },
   mounted: function () {
@@ -88,6 +96,9 @@ export default {
     },
     passUsername(username) {
       this.$refs.gameBoard.setUsername(username);
+    },
+    updatePlayer(newPlayer) {
+      this.player = newPlayer;
     }
   }
 }

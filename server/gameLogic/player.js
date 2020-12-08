@@ -1,6 +1,6 @@
 "use strict"
 
-class Player{
+class Player {
     name;
     victoryPoints = 0;
     brick = 0;
@@ -13,6 +13,11 @@ class Player{
     numKnights = 0;
     harbourBonuses = [];
     colour;
+    numSettlements = 5;
+    numRoads = 15;
+    numCities = 4;
+
+
     constructor(name, colour) {
         this.name = name;
         this.colour = colour;
