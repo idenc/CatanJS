@@ -361,8 +361,17 @@ class Game {
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
+            const player = this.players.find((p) => p.name === newRoad.player);
+            player.numRoads--;
+
             this.roads.push(newRoad);
-            io.to(this.socketRoom).emit('update_roads', this.roads);
+            socket.to(this.socketRoom).emit('update_roads', {
+                roads: this.roads
+            });
+            socket.emit('update_roads', {
+                roads: this.roads,
+                player: player
+            });
         });
 
         //Build Development Card

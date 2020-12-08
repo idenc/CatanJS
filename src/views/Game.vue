@@ -6,6 +6,7 @@
         ref="gameBoard"
         :turn-number="turnNumber"
         @updatePlayer="updatePlayer"
+        @displayEndTurnBtn="displayEndTurnBtn"
       />
       <button
         v-if="turnNumber >= 2"
@@ -99,6 +100,14 @@ export default {
     },
     updatePlayer(newPlayer) {
       this.player = newPlayer;
+    },
+    displayEndTurnBtn() {
+      console.log('displaying end turn');
+      const diceButton = document.getElementById('dice-button');
+      diceButton.classList.remove('disabled');
+      diceButton.classList.add('end-turn');
+
+      diceButton.innerText = 'End Turn';
     }
   }
 }
@@ -126,6 +135,10 @@ export default {
   bottom: 0;
   right: 0;
   width: 25%;
+}
+
+.end-turn {
+  color: red;
 }
 
 #sidebar-container {

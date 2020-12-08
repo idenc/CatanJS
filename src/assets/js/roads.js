@@ -178,11 +178,22 @@ const startRoadSelection = (gameBoard) => {
                     removeBuildSelectors(gameBoard.draw);
                     buildRoad(gameBoard,
                         settlement,
-                        neighbour,);
+                        neighbour);
+
+                    // If first two turns and player has used their turn's buildings
+                    if ((gameBoard.turnNumber === 0
+                        && gameBoard.player.numSettlements === maxBuildings.settlements - 1
+                        && gameBoard.player.numRoads - 1 === maxBuildings.roads - 1)
+                        || (gameBoard.turnNumber === 1
+                            && gameBoard.player.numSettlements === maxBuildings.settlements - 2
+                            && gameBoard.player.numRoads - 1 === maxBuildings.roads - 2)) {
+                        console.log('emitting displayEndTurnBtn');
+                        gameBoard.$emit('displayEndTurnBtn');
+                    }
                     gameBoard.$socket.emit('build_road', {
                         to: {x: settlement.x, y: settlement.y},
                         from: {x: neighbour.x, y: neighbour.y},
-                        player: gameBoard.player
+                        player: gameBoard.player.name
                     });
                 });
             }

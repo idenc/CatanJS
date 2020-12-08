@@ -643,7 +643,10 @@ export default {
       this.initializeBoard();
     },
     update_roads: function (newRoads) {
-      this.roads = newRoads;
+      if (newRoads.player) {
+        this.player = newRoads.player;
+      }
+      this.roads = newRoads.roads;
       renderRoads(this);
     }
   }
