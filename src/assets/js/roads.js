@@ -1,4 +1,5 @@
 import {renderBuildable, removeBuildSelectors} from "@/assets/js/settlements";
+import {maxBuildings} from "@/assets/js/constants";
 
 const drawRoadDebug = (settlementsMap, draw, settlementRadius, roadGap) => {
     const visitedCoords = [];
@@ -111,25 +112,56 @@ const redrawRoads = (roads, settlements) => {
     });
 }
 
-const canBuildRoad = () => {
+const canBuildRoad = (gameBoard, settlement, neighbour) => {
     // Need to check all conditions to build a road
-    // This should be done on the backend
     // 1. The player has necessary resources
     // 2. The road space is empty
     // 3. The road is connected to another road or a settlement
-    return true;
-}
 
+    const arePointsEqual = (p1, p2) => {
+        return p1.x === p2.x && p1.y === p2.y;
+    }
+    const settlementCoord = {x: settlement.x, y: settlement.y};
+    const neighbourCoord = {x: neighbour.x, y: neighbour.y};
+
+    // Get any touching roads
+    const touchingRoads = gameBoard.roads.filter((road) => arePointsEqual(settlementCoord, road.from)
+        || arePointsEqual(neighbourCoord, road.from)
+        || arePointsEqual(settlementCoord, road.to)
+        || arePointsEqual(neighbourCoord, road.to));
+
+    // Check if there is already a road on the edge
+    if (touchingRoads.some((road) => (arePointsEqual(road.from, settlementCoord) && arePointsEqual(road.to, neighbourCoord))
+        || (arePointsEqual(road.from, neighbourCoord) && arePointsEqual(road.to, settlementCoord)))) {
+        return false;
+    }
+
+    // Check if player owns an adjacent settlement
+    const hasSettlement = settlement.player === gameBoard.player.name || neighbour.player === gameBoard.player.name;
+    // Check if player owns an adjacent road
+    const hasRoad = touchingRoads.some(road => road.player === gameBoard.player.name);
+
+    return hasSettlement || hasRoad;
+}
 
 // This begins either after a user builds a settlement in their first two turns
 // or when they choose to build a road
 const startRoadSelection = (gameBoard) => {
+    const firstTwoTurns = gameBoard.turnNumber === 0 && gameBoard.player.numRoads === maxBuildings.roads
+        || gameBoard.turnNumber === 1 && gameBoard.player.numRoads === maxBuildings.roads - 1;
+    const hasResources = gameBoard.player.brick >= 1 && gameBoard.player.lumber >= 1;
+    // Ensure player qualifies to build road
+    if (!firstTwoTurns && !hasResources) {
+        return;
+    }
     // Iterate through each settlement (i.e. grid intersection point)
     for (const [, settlement] of gameBoard.settlements.entries()) {
         const neighbours = settlement.neighbours;
+        // Iterate through each neighbour
+        // The goal is to check every edge on the board
         neighbours.forEach((neighbourCoord) => {
             const neighbour = gameBoard.settlements.get(JSON.stringify(neighbourCoord));
-            if (canBuildRoad()) {
+            if (canBuildRoad(gameBoard, settlement, neighbour)) {
                 const point = {
                     x: (settlement.point.x + neighbour.point.x) / 2,
                     y: (settlement.point.y + neighbour.point.y) / 2,
@@ -147,7 +179,6 @@ const startRoadSelection = (gameBoard) => {
                     buildRoad(gameBoard,
                         settlement,
                         neighbour,);
-                    // TODO: add correct player
                     gameBoard.$socket.emit('build_road', {
                         to: {x: settlement.x, y: settlement.y},
                         from: {x: neighbour.x, y: neighbour.y},

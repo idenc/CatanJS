@@ -1,3 +1,5 @@
+import {maxBuildings} from "@/assets/js/constants";
+
 /**
  * This is just for finding the correct x, y positions to draw settlements
  * @param grid
@@ -68,8 +70,15 @@ const settlementAvailable = (gameBoard, settlement) => {
     if (settlement.state !== 'empty') {
         return false;
     }
-    return true;
     // Check distance rule
+    settlement.neighbours.forEach((neighbourCoord) => {
+        const neighbour = gameBoard.settlements.get(JSON.stringify(neighbourCoord));
+        if (neighbour.state !== 'empty') {
+            return false;
+        }
+    });
+
+    return true;
 }
 
 /**
@@ -81,10 +90,11 @@ const settlementAvailable = (gameBoard, settlement) => {
 const canPlay = (gameBoard) => {
     const player = gameBoard.player;
     // All players get 2 settlements and 2 roads to begin
-    if (player.numSettlements === 5 && gameBoard.turnNumber === 0 || player.numSettlements === 4 && gameBoard.turnNumber === 1) {
+    if (player.numSettlements === maxBuildings.settlements && gameBoard.turnNumber === 0
+        || player.numSettlements === maxBuildings.settlements - 1 && gameBoard.turnNumber === 1) {
         return true;
     }
-    return player.clay >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
+    return player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
 }
 
 /**

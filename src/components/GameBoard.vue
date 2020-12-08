@@ -126,7 +126,7 @@ import {
   startBuildSettlements,
   updateSettlementLocations,
 } from "@/assets/js/settlements";
-import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
+import {SCREEN_BREAKPOINTS, maxBuildings} from "@/assets/js/constants";
 import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
 
 export default {
@@ -152,9 +152,9 @@ export default {
         wool: 0,
         grain: 0,
         lumber: 0,
-        numSettlements: 5,
-        numRoads: 15,
-        numCities: 4,
+        numSettlements: maxBuildings.settlements,
+        numRoads: maxBuildings.roads,
+        numCities: maxBuildings.cities,
         colour: '',
       },
       graphics: {
