@@ -155,6 +155,7 @@ export default {
         numSettlements: 5,
         numRoads: 15,
         numCities: 4,
+        colour: '',
       },
       graphics: {
         oceanGap: 8,
@@ -634,6 +635,7 @@ export default {
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.roads = boardInfo.roads;
       this.turnNumber = boardInfo.turnNumber;
+      this.player = boardInfo.player;
       this.initializeBoard();
     },
     update_roads: function (newRoads) {
@@ -660,10 +662,6 @@ export default {
 
 #drawSVG {
   display: none;
-}
-
-::v-deep .settlement-svg[state="settlement"] {
-  fill: url('#pattern1');
 }
 
 ::v-deep .hex[resource="brick"] {

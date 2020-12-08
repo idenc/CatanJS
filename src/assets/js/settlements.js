@@ -181,11 +181,13 @@ const addSettlementSelector = (gameBoard, settlement) => {
         settlementSVG.classList.remove('build-selector');
         settlementSVG.classList.add('settlement-svg');
         settlementSVG.setAttribute('state', 'settlement');
+        settlementSVG.setAttribute("fill", gameBoard.player.colour);
         // Remove all the settlement selection graphics, keep selected settlement
         removeBuildSelectors(gameBoard.draw);
         settlement.state = "settlement";
         settlement.player = gameBoard.player.name;
 
+        // TODO: handle upgrading to city
         console.log('emitting build')
         // Cannot JSON stringify DOM elements
         gameBoard.$socket.emit('build_settlement', {

@@ -266,16 +266,21 @@ class Game {
     configureSocketInteractions(socket) {
         socket.join(this.socketRoom);
         socket.on('player_joined', (username) => {
-            const newPlayer = new Player(username, this.playerColours.pop());
-            if (!this.players.some(p => p.name === username)) {
+            // See if we can find player
+            let newPlayer = this.players.find(p => p.name === username);
+            if (!newPlayer) {
+                // If not, create a new player
+                newPlayer = new Player(username, this.playerColours.pop());
                 this.players.push(newPlayer);
             }
+            console.log(this.players);
 
             socket.emit('board_info', {
                 tiles: this.tiles,
                 settlements: JSON.stringify(Array.from(this.settlements.entries())),
                 roads: this.roads,
                 turnNumber: this.turnNumber,
+                player: newPlayer
             });
         });
 
