@@ -60,7 +60,7 @@ const calculateRoadAngle = (toPoint, fromPoint) => {
     ) * 180 / Math.PI;
 }
 
-const buildRoad = (drawSVG, settlement, roads, settlementRadius, neighbour, roadGap) => {
+const buildRoad = (gameBoard, settlement, neighbour) => {
     const settlementPoint = settlement.point;
     const neighbourPoint = neighbour.point;
 
@@ -70,12 +70,12 @@ const buildRoad = (drawSVG, settlement, roads, settlementRadius, neighbour, road
     const length = Math.hypot(
         neighbourPoint.x - settlementPoint.x,
         neighbourPoint.y - settlementPoint.y
-    ) - (settlementRadius * 2 + 5);
+    ) - (gameBoard.graphics.settlementRadius * 2 + 5);
 
     // Draw the road
-    const road = drawSVG
-        .rect(length, roadGap)
-        .fill({color: 'blue'})
+    const road = gameBoard.draw
+        .rect(length, gameBoard.graphics.roadGap)
+        .fill(gameBoard.player.colour)
         .cx((settlementPoint.x + neighbourPoint.x) / 2)
         .cy((settlementPoint.y + neighbourPoint.y) / 2)
         .rotate(angleDeg);
@@ -86,7 +86,7 @@ const buildRoad = (drawSVG, settlement, roads, settlementRadius, neighbour, road
 
     // Keep track of road
     // Roads are bidirectional so from/to doesn't really matter
-    roads.push({
+    gameBoard.roads.push({
         from: {x: settlement.x, y: settlement.y},
         to: {x: neighbour.x, y: neighbour.y},
         player: 'placeholder',
@@ -144,12 +144,9 @@ const startRoadSelection = (gameBoard) => {
                 selectorSVG.addEventListener('click', () => {
                     console.log('road clicked');
                     removeBuildSelectors(gameBoard.draw);
-                    buildRoad(gameBoard.draw,
+                    buildRoad(gameBoard,
                         settlement,
-                        gameBoard.roads,
-                        gameBoard.graphics.settlementRadius,
-                        neighbour,
-                        gameBoard.graphics.roadGap);
+                        neighbour,);
                     // TODO: add correct player
                     gameBoard.$socket.emit('build_road', {
                         to: {x: settlement.x, y: settlement.y},
@@ -168,12 +165,9 @@ const renderRoads = (gameBoard) => {
             const to = gameBoard.settlements.get(JSON.stringify({x: road.to.x, y: road.to.y}));
             const from = gameBoard.settlements.get(JSON.stringify({x: road.from.x, y: road.from.y}));
 
-            buildRoad(gameBoard.draw,
+            buildRoad(gameBoard,
                 to,
-                gameBoard.roads,
-                gameBoard.graphics.settlementRadius,
-                from,
-                gameBoard.graphics.roadGap);
+                from);
         }
     }
 }

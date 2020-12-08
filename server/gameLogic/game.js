@@ -334,8 +334,8 @@ class Game {
             settlement.player = newSettlement.player;
             settlement.state = newSettlement.state;
 
-
             const player = this.players.find((p) => p.name === settlement.player);
+            settlement.colour = player.colour;
             player.numSettlements--;
             // Get tiles adjacent to this settlement
             const adjacentTiles = this.tiles.filter((t) =>

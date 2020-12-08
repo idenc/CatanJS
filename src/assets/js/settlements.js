@@ -135,6 +135,7 @@ const renderSettlements = (settlements, drawSVG, settlementRadius) => {
             const settlementSVG = renderBuildable(drawSVG,
                 settlement.point,
                 settlementRadius,
+                settlement.colour,
                 false).children()[0].node;
             settlementSVG.setAttribute('state', settlement.state);
             settlementSVG.classList.add('settlement-svg');
@@ -142,7 +143,7 @@ const renderSettlements = (settlements, drawSVG, settlementRadius) => {
     }
 }
 
-const renderBuildable = (drawSVG, point, settlementRadius, isSelectable = true) => {
+const renderBuildable = (drawSVG, point, settlementRadius, fillColour, isSelectable = true) => {
     const {x, y} = point;
     // Create an element to nest settlement graphics in for easier transforming
     const nested = drawSVG.group();
@@ -151,10 +152,12 @@ const renderBuildable = (drawSVG, point, settlementRadius, isSelectable = true) 
         // Adds a pulsing circle animation
         addSelectSettlementAnimation(nested, x, y, settlementRadius);
     }
+    // Handle null fillColour
+    fillColour = fillColour ? fillColour : 'transparent';
 
     nested
         .circle(settlementRadius * 2)
-        .fill('transparent')
+        .fill(fillColour)
         .stroke({width: 4, color: 'white'})
         .translate(x - settlementRadius, y - settlementRadius);
 
@@ -171,7 +174,8 @@ const removeBuildSelectors = (drawSVG) => {
 const addSettlementSelector = (gameBoard, settlement) => {
     const nested = renderBuildable(gameBoard.draw,
         settlement.point,
-        gameBoard.graphics.settlementRadius);
+        gameBoard.graphics.settlementRadius,
+        'transparent');
 
     const settlementSVG = nested.children()[1].node;
     settlementSVG.classList.add('build-selector');

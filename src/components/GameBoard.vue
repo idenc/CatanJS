@@ -169,6 +169,11 @@ export default {
       }
     }
   },
+  watch: {
+    player: function(val) {
+      this.$emit('updatePlayer', val);
+    }
+  },
   created: function () {
 
   },
@@ -281,7 +286,6 @@ export default {
         this.settlements = new Map(JSON.parse(updatedInfo.settlements));
         if (updatedInfo.player) {
           this.player = updatedInfo.player;
-          this.$emit('updatePlayer', this.player);
         }
 
         // Update the dimensions of the settlements
