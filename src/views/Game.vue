@@ -2,13 +2,24 @@
   <div id="game-container">
     <div id="board-container">
       <DevCardModal v-if="devModal === true" />
-      <GameBoard ref="gameBoard" />
+      <GameBoard
+        ref="gameBoard"
+        :turn-number="turnNumber"
+      />
       <button
+        v-if="turnNumber >= 2"
         id="dice-button"
         class="btn btn-primary btn-block"
         @click="rollDice"
       >
         Roll Dice
+      </button>
+      <button
+        v-else
+        id="dice-button"
+        class="btn btn-primary btn-block disabled"
+      >
+        Place Settlement & Road
       </button>
     </div>
     <div id="sidebar-container">
@@ -62,7 +73,8 @@ export default {
   components: {BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
   data() {
     return {
-      devModal: false
+      devModal: false,
+      turnNumber: 0,
     }
   },
   mounted: function () {

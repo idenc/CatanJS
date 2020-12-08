@@ -22,11 +22,12 @@ class Game {
     roads = [];
     longestRoad = null;
     largestArmy = null;
-    currentTurnIndex = 0;
     players = [];
     availableDevCards = [];
     socketRoom = 'room';
     grid;
+    turnNumber = 0;
+
     static gameboardRadius = 3;
 
     // socketRoom should be a string to identify
@@ -61,10 +62,9 @@ class Game {
         let numberIndex = 0;
         for (let i = 0; i < this.grid.length; i++) {
             let tile = {};
-            if(tileResources[i] === 'desert'){
+            if (tileResources[i] === 'desert') {
                 tile = new Tile(tileResources[i], 0);
-            }
-            else{
+            } else {
                 tile = new Tile(tileResources[i], tileNumbers[numberIndex]);
                 numberIndex++;
             }
@@ -110,6 +110,7 @@ class Game {
         }
         return settlementsMap;
     }
+
     /**
      * Sets the initial state of each settlement
      * @returns {[]}
@@ -233,7 +234,7 @@ class Game {
         });
     }
 
-    robberEvent(){
+    robberEvent() {
 
     }
 
@@ -249,6 +250,7 @@ class Game {
                 tiles: this.tiles,
                 settlements: JSON.stringify(Array.from(this.settlements.entries())),
                 roads: this.roads,
+                turnNumber: this.turnNumber,
             });
         });
 

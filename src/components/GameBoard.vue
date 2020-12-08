@@ -132,6 +132,9 @@ import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
 export default {
   name: "GameBoard",
   components: {},
+  props: {
+    turnNumber: Number(0)
+  },
   data() {
     return {
       hexagonRatio: 0.866025, // Hexagon ration, height to width
@@ -143,6 +146,16 @@ export default {
       settlements: [],
       roads: [],
       username: '',
+      player: {
+        clay: 0,
+        ore: 0,
+        wool: 0,
+        grain: 0,
+        lumber: 0,
+        numSettlements: 5,
+        numRoads: 15,
+        numCities: 4,
+      },
       graphics: {
         oceanGap: 8,
         roadGap: 8,
@@ -619,8 +632,7 @@ export default {
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.roads = boardInfo.roads;
-      console.log(`roads: `);
-      console.log(this.roads);
+      this.turnNumber = boardInfo.turnNumber;
       this.initializeBoard();
     },
     update_roads: function (newRoads) {
