@@ -72,6 +72,9 @@ Colors.random = function () {
     return result;
 };
 
+const messages = [];
+let users = [];
+
 /**
  * Checks whether a color string is a valid hex color
  * source: https://stackoverflow.com/questions/8027423/how-to-check-if-a-string-is-a-valid-hex-color-representation
@@ -121,13 +124,16 @@ module.exports = socket => {
 
     }
 
-    const messages = [];
-    let users = [];
-
     socket.on('disconnect', () => {
         console.log(`${socket.username} left`)
-        users = users.filter(u => u.username !== socket.username);
-        io.emit('user left', socket.username);
+        const user = users.find(u => u.username === socket.username);
+        if (user) {
+            user.numSessions--;
+            if (user.numSessions <= 0) {
+                users = users.filter(u => u.username !== socket.username);
+                io.emit('user left', socket.username);
+            }
+        }
     });
     socket.on('chat message', (msg) => {
         // Keep 200 most recent messages
@@ -169,13 +175,24 @@ module.exports = socket => {
                     userInfo.username = user.name;
                     socket.color = userInfo.color;
                     socket.emit('user info', userInfo);
-                    users.push(userInfo);
+                    // Check if the user is already present in the chat
+                    // We want to keep track of the number of tabs user has open
+                    if (!users.some(u => u.username === socket.username)) {
+                        // If they are not, initialize their numSessions
+                        userInfo.numSessions = 1;
+                        users.push(userInfo);
+                        socket.broadcast.emit('user joined', userInfo);
+                    } else {
+                        // Increment numSessions
+                        console.log('found user')
+                        const user = users.find(u => u.username === socket.username);
+                        user.numSessions++;
+                    }
                     console.log('a user connected with username ' + socket.username);
-                    socket.broadcast.emit('user joined', userInfo);
-                    socket.emit('chat info', {current_users: users, messages: messages});
                     console.log(users);
                 })
                 .catch((e) => console.log(e))
         }
+        socket.emit('chat info', {current_users: users, messages: messages});
     });
 }
