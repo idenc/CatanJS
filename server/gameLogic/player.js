@@ -3,7 +3,7 @@
 class Player{
     name;
     victoryPoints = 0;
-    clay = 0;
+    brick = 0;
     ore = 0;
     wool = 0;
     grain = 0;
