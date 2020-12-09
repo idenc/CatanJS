@@ -112,7 +112,13 @@
         </pattern>
       </defs>
     </svg>
-    <b-toast id="game-toast" class="align-self-start" title="BootstrapVue" static auto-hide-delay=5000>
+    <b-toast
+      id="game-toast"
+      class="align-self-start"
+      title="BootstrapVue"
+      static
+      auto-hide-delay="5000"
+    >
       <template #toast-title>
         <strong class="mr-2"> {{ toastTitle }} </strong>
       </template>
@@ -131,10 +137,11 @@ import {
   renderSettlements,
   startBuildSettlements,
   updateSettlementLocations,
+  upgradeSettlement
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS, maxBuildings} from "@/assets/js/constants";
 import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
-import { BToast } from 'bootstrap-vue'
+import {BToast} from 'bootstrap-vue'
 
 export default {
   name: "GameBoard",
@@ -665,6 +672,14 @@ export default {
       }
       this.roads = newRoads.roads;
       renderRoads(this);
+    },
+    update_city: function (info) {
+      const settlement = this.settlements.get(JSON.stringify(info.city));
+      settlement.state = 'city';
+      if (info.player) {
+        this.player = info.player;
+      }
+      upgradeSettlement(settlement);
     },
     start_turn: function (players) {
       const clientPlayer = players.find(p => p.name === this.player.name);
