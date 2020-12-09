@@ -104,9 +104,9 @@ export default {
 }
 
 .animated {
-  animation-duration: 1s;
+  animation-duration: 0.5s;
   animation-fill-mode: both;
-  -webkit-animation-duration: 1s;
+  -webkit-animation-duration: 0.5s;
   -webkit-animation-fill-mode: both
 }
 

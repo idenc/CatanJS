@@ -7,6 +7,7 @@
         :turn-number="turnNumber"
         @updatePlayer="updatePlayer"
         @displayEndTurnBtn="displayEndTurnBtn"
+        @updateTurnNumber="updateTurnNumber"
       />
       <button
         v-if="turnNumber >= 2"

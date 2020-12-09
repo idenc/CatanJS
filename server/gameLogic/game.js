@@ -220,15 +220,20 @@ class Game {
     }
 
     dealOutResources(diceRoll) {
-        let selectedTiles = this.tiles.filter(obj => obj.number.toString() === diceRoll);
+        let selectedTiles = this.tiles.filter(obj => obj.number === diceRoll.toString());
         //iterate through all selected tiles
         selectedTiles.forEach((tile) => {
             // Iterate through all settlement locations touching tile
             tile.settlements.forEach((settleCoord) => {
                 const settlement = this.settlements.get(JSON.stringify(settleCoord));
-                const player = this.players.find(p => p.name === settlement.player);
-                if (player.length) {
-                    player[tile.resource]++;
+                if (settlement.state !== 'empty') {
+                    const player = this.players.find(p => p.name === settlement.player);
+                    console.log('player');
+                    console.log(player);
+
+                    if (player) {
+                        player[tile.resource]++;
+                    }
                 }
             });
         });
@@ -303,14 +308,13 @@ class Game {
 
             if (roll === 7) {
                 this.robberEvent();
-                //Not sure how we want to update players
-                socket.to(this.socketRoom).emit('update_players', {playerData: this.players, diceRoll: roll});
+                // io.to emits to everyone in room, socket.to emits to everyone except sender
+                io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
                 //Somehow allow the player that rolled the 7 to move teh robber
                 socket.to(this.socketRoom).emit('handle_robber_event');
             } else {
                 this.dealOutResources(roll);
-                //Not sure how we want to update players
-                socket.to(this.socketRoom).emit('update_players', {playerData: this.players, diceRoll: roll});
+                io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
             }
         });
 

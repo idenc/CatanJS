@@ -669,6 +669,13 @@ export default {
       } else {
         this.player.isTurn = false;
       }
+    },
+    dice_result: function(result) {
+      const newPlayer = result.playerData.find(p => p.name === this.player.name);
+      if (newPlayer) {
+        this.player = newPlayer;
+      }
+      // TODO: Display dice roll to everyone
     }
   }
 }
