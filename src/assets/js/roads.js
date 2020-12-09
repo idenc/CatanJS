@@ -61,7 +61,7 @@ const calculateRoadAngle = (toPoint, fromPoint) => {
     ) * 180 / Math.PI;
 }
 
-const buildRoad = (gameBoard, settlement, neighbour) => {
+const buildRoad = (gameBoard, roadColour, settlement, neighbour) => {
     const settlementPoint = settlement.point;
     const neighbourPoint = neighbour.point;
 
@@ -76,7 +76,7 @@ const buildRoad = (gameBoard, settlement, neighbour) => {
     // Draw the road
     const road = gameBoard.draw
         .rect(length, gameBoard.graphics.roadGap)
-        .fill(gameBoard.player.colour)
+        .fill(roadColour)
         .cx((settlementPoint.x + neighbourPoint.x) / 2)
         .cy((settlementPoint.y + neighbourPoint.y) / 2)
         .rotate(angleDeg);
@@ -199,6 +199,7 @@ const renderRoads = (gameBoard) => {
             const from = gameBoard.settlements.get(JSON.stringify({x: road.from.x, y: road.from.y}));
 
             road.svg = buildRoad(gameBoard,
+                road.colour,
                 to,
                 from);
         }
