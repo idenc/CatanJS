@@ -81,33 +81,22 @@ const buildRoad = (gameBoard, settlement, neighbour) => {
         .cy((settlementPoint.y + neighbourPoint.y) / 2)
         .rotate(angleDeg);
     road.front();
+    road.addClass('road');
     road.click(function () {
         console.log(`Clicked road (${settlement.x}, ${settlement.y})`);
     });
 
-    // Keep track of road
-    // Roads are bidirectional so from/to doesn't really matter
-    gameBoard.roads.push({
-        from: {x: settlement.x, y: settlement.y},
-        to: {x: neighbour.x, y: neighbour.y},
-        player: 'placeholder',
-        svg: road
-    });
+    return road;
 }
 
-const redrawRoads = (roads, settlements) => {
-    roads.forEach((road) => {
+const redrawRoads = (gameBoard) => {
+    gameBoard.roads.forEach((road) => {
         if (road.svg) {
-            const to = settlements.get(JSON.stringify(road.to));
-            const from = settlements.get(JSON.stringify(road.from));
+            const to = gameBoard.settlements.get(JSON.stringify(road.to));
+            const from = gameBoard.settlements.get(JSON.stringify(road.from));
 
-            const angleDeg = calculateRoadAngle(to.point, from.point);
-
-            road.svg.transform(0);
-            road.svg
-                .cx((to.point.x + from.point.x) / 2)
-                .cy((to.point.y + from.point.y) / 2)
-                .rotate(angleDeg);
+            road.svg.remove();
+            road.svg = buildRoad(gameBoard, to, from);
         }
     });
 }
@@ -169,6 +158,7 @@ const startRoadSelection = (gameBoard) => {
                 const nested = renderBuildable(gameBoard.draw,
                     point,
                     gameBoard.graphics.settlementRadius);
+                nested.addClass('road-selector');
 
                 const selectorSVG = nested.children()[1].node;
                 selectorSVG.classList.add('build-selector');
@@ -202,12 +192,13 @@ const startRoadSelection = (gameBoard) => {
 }
 
 const renderRoads = (gameBoard) => {
+    gameBoard.draw.find('.road').remove();
     for (const road of gameBoard.roads) {
         if (!road.svg) {
             const to = gameBoard.settlements.get(JSON.stringify({x: road.to.x, y: road.to.y}));
             const from = gameBoard.settlements.get(JSON.stringify({x: road.from.x, y: road.from.y}));
 
-            buildRoad(gameBoard,
+            road.svg = buildRoad(gameBoard,
                 to,
                 from);
         }

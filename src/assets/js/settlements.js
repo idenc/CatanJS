@@ -107,8 +107,7 @@ const startBuildSettlements = (gameBoard) => {
     }
     for (const [, settlement] of gameBoard.settlements.entries()) {
         if (settlementAvailable(gameBoard, settlement)) {
-            let settlementSVG = addSettlementSelector(gameBoard, settlement);
-            Object.assign(settlement, {svg: settlementSVG});
+            settlement.svg = addSettlementSelector(gameBoard, settlement);
         }
     }
 }
@@ -140,15 +139,18 @@ const addSelectSettlementAnimation = (drawSVG, x, y, settlementRadius) => {
 }
 
 const renderSettlements = (settlements, drawSVG, settlementRadius) => {
+    drawSVG.find('.buildable').remove();
     for (const [, settlement] of settlements.entries()) {
         if (settlement.state !== 'empty' && !settlement.svg) {
-            const settlementSVG = renderBuildable(drawSVG,
+            const nested = renderBuildable(drawSVG,
                 settlement.point,
                 settlementRadius,
                 settlement.colour,
-                false).children()[0].node;
+                false);
+            const settlementSVG = nested.children()[0].node;
             settlementSVG.setAttribute('state', settlement.state);
             settlementSVG.classList.add('settlement-svg');
+            settlement.svg = nested;
         }
     }
 }

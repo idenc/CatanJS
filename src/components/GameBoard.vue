@@ -156,6 +156,7 @@ export default {
         numRoads: maxBuildings.roads,
         numCities: maxBuildings.cities,
         colour: '',
+        isTurn: false,
       },
       graphics: {
         oceanGap: 8,
@@ -170,7 +171,7 @@ export default {
     }
   },
   watch: {
-    player: function(val) {
+    player: function (val) {
       this.$emit('updatePlayer', val);
     }
   },
@@ -277,7 +278,13 @@ export default {
         // Update the dimensions of the settlements
         updateSettlementLocations(grid, this.settlements);
         redrawSettlements(this.settlements, draw);
-        redrawRoads(this.roads, this.settlements);
+        redrawRoads(this);
+        const roadSelectors = this.draw.find('.road-selector');
+        if (roadSelectors.length > 0) {
+          roadSelectors.remove();
+          startRoadSelection(this);
+        }
+
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
 
@@ -638,7 +645,7 @@ export default {
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.roads = boardInfo.roads;
-      this.turnNumber = boardInfo.turnNumber;
+      this.$emit('updateTurnNumber', boardInfo.turnNumber);
       this.player = boardInfo.player;
       this.initializeBoard();
     },
@@ -648,6 +655,20 @@ export default {
       }
       this.roads = newRoads.roads;
       renderRoads(this);
+    },
+    start_turn: function (playerName) {
+      if (playerName === this.player.name) {
+        const diceButton = document.getElementById('dice-button');
+        diceButton.classList.remove('end-turn');
+        if (this.turnNumber < 2) {
+          diceButton.classList.add('disabled');
+          diceButton.innerText = 'Place Settlement & Road';
+        } else {
+          diceButton.innerText = 'Roll Dice';
+        }
+      } else {
+        this.player.isTurn = false;
+      }
     }
   }
 }

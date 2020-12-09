@@ -219,7 +219,6 @@ class Game {
         return tempArray;
     }
 
-    //there has to be a more efficient way of doing this
     dealOutResources(diceRoll) {
         let selectedTiles = this.tiles.filter(obj => obj.number.toString() === diceRoll);
         //iterate through all selected tiles
@@ -273,6 +272,8 @@ class Game {
                 newPlayer = new Player(username, this.playerColours.pop());
                 this.players.push(newPlayer);
             }
+            const currentTurnPlayer = this.players[this.turnNumber % this.players.length];
+            newPlayer.isTurn = currentTurnPlayer.name === newPlayer.name;
             console.log(this.players);
 
             socket.emit('board_info', {
@@ -361,7 +362,7 @@ class Game {
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
-            const player = this.players.find((p) => p.name === newRoad.player);
+            const player = this.players[this.turnNumber % this.players.length];
             player.numRoads--;
 
             this.roads.push(newRoad);
@@ -393,12 +394,13 @@ class Game {
 
         //End Turn
         socket.on('end_turn', () => {
-            if (this.currentTurnIndex === this.players.length - 1) {
-                this.currentTurnIndex = 0;
-            } else {
-                this.currentTurnIndex += 1;
-            }
-            socket.to(this.socketRoom).emit('change_isTurn', this.players[this.currentTurnIndex].name);
+            const playerEndingTurn = this.players[this.turnNumber % this.players.length];
+            playerEndingTurn.isTurn = false;
+            this.turnNumber++;
+            const playerStartingTurn = this.players[this.turnNumber % this.players.length];
+            playerStartingTurn.isTurn = true;
+
+            io.to(this.socketRoom).emit('start_turn', playerStartingTurn.name);
         });
 
         socket.on('robber_moved', (tile) => {

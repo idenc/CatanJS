@@ -27,6 +27,9 @@
 <script>
 export default {
   name: "BuildButton",
+  props: {
+    isTurn: Boolean(false),
+  },
   mounted: function () {
     document.addEventListener('click', (e) => {
       if (e.target.id !== 'build-button') {
@@ -40,18 +43,20 @@ export default {
   },
   methods: {
     buildClicked() {
-      const buildButton = document.getElementById('build-button');
-      const buffer = 10;
-      let settlementBtnPosition = buildButton.offsetLeft + buildButton.offsetWidth / 2 + buffer;
-      const roadBtnPosition = window.innerWidth - buildButton.offsetLeft - (buildButton.offsetWidth / 2) + buffer;
+      if (this.isTurn) {
+        const buildButton = document.getElementById('build-button');
+        const buffer = 10;
+        let settlementBtnPosition = buildButton.offsetLeft + buildButton.offsetWidth / 2 + buffer;
+        const roadBtnPosition = window.innerWidth - buildButton.offsetLeft - (buildButton.offsetWidth / 2) + buffer;
 
-      const roadButton = document.getElementById('road-button');
-      roadButton.style.right = `${roadBtnPosition}px`;
-      roadButton.classList.add("animated", "fadeInUp");
+        const roadButton = document.getElementById('road-button');
+        roadButton.style.right = `${roadBtnPosition}px`;
+        roadButton.classList.add("animated", "fadeInUp");
 
-      const settlementButton = document.getElementById('settlement-button');
-      settlementButton.style.left = `${settlementBtnPosition}px`;
-      settlementButton.classList.add("animated", "fadeInUp");
+        const settlementButton = document.getElementById('settlement-button');
+        settlementButton.style.left = `${settlementBtnPosition}px`;
+        settlementButton.classList.add("animated", "fadeInUp");
+      }
     },
     buildRoadClicked() {
       this.$emit('buildStarted', 'road');
