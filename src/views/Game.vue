@@ -89,6 +89,7 @@ export default {
     }
   },
   mounted: function () {
+
   },
   methods: {
     startBuild(type) {

@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import VueSocketIO from "vue-socket.io";
 import io from 'socket.io-client';
+import { BootstrapVue } from 'bootstrap-vue'
 
 Vue.use(new VueSocketIO({
     debug: true,
@@ -16,6 +17,8 @@ Vue.use(new VueSocketIO({
         rejectUnauthorized: false
     })
 }));
+
+Vue.use(BootstrapVue);
 
 Vue.config.productionTip = false
 
