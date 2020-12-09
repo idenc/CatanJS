@@ -166,4 +166,10 @@ form {
   display: flex;
   flex: 1;
 }
+
+@media (max-width: 768px) {
+  #message_box {
+    font-size: 0.75rem;
+  }
+}
 </style>
