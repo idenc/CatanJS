@@ -71,12 +71,12 @@ const settlementAvailable = (gameBoard, settlement) => {
         return false;
     }
     // Check distance rule
-    settlement.neighbours.forEach((neighbourCoord) => {
+    for (const neighbourCoord of settlement.neighbours) {
         const neighbour = gameBoard.settlements.get(JSON.stringify(neighbourCoord));
         if (neighbour.state !== 'empty') {
             return false;
         }
-    });
+    }
 
     return true;
 }
