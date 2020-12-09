@@ -6,6 +6,8 @@
         ref="gameBoard"
         :turn-number="turnNumber"
         @updatePlayer="updatePlayer"
+        @displayEndTurnBtn="displayEndTurnBtn"
+        @updateTurnNumber="updateTurnNumber"
       />
       <button
         v-if="turnNumber >= 2"
@@ -40,6 +42,7 @@
         <BuildButton
           id="build-button"
           style="width: 30%;"
+          :is-turn="player.isTurn"
           @buildStarted="startBuild"
         />
         <button class="btn btn-primary btn-block">
@@ -92,13 +95,28 @@ export default {
       this.$refs.gameBoard.startBuild(type);
     },
     rollDice() {
-      this.$socket.emit('roll_dice')
+      this.$socket.emit('roll_dice');
     },
     passUsername(username) {
       this.$refs.gameBoard.setUsername(username);
     },
     updatePlayer(newPlayer) {
       this.player = newPlayer;
+    },
+    updateTurnNumber(newTurnNumber) {
+      this.turnNumber = newTurnNumber;
+    },
+    displayEndTurnBtn() {
+      console.log('displaying end turn');
+      const diceButton = document.getElementById('dice-button');
+      diceButton.classList.remove('disabled');
+      diceButton.classList.add('end-turn');
+
+      diceButton.innerText = 'End Turn';
+      diceButton.onclick = () => {
+        this.turnNumber++;
+        this.$socket.emit('end_turn');
+      }
     }
   }
 }
@@ -126,6 +144,10 @@ export default {
   bottom: 0;
   right: 0;
   width: 25%;
+}
+
+.end-turn {
+  background: red;
 }
 
 #sidebar-container {
