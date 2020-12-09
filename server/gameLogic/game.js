@@ -5,6 +5,7 @@ const Settlement = require("./settlement");
 const io = require('../socket').getio();
 const Player = require("./player");
 const Honeycomb = require('honeycomb-grid');
+const maxBuildings = require('../../src/assets/js/constants').maxBuildings;
 
 /**
  * Handles an instance of a game
@@ -13,6 +14,11 @@ const Honeycomb = require('honeycomb-grid');
  * Each game should have a Game class instance
  */
 class Game {
+    static MAX_ROADS = maxBuildings.roads;
+    static MAX_SETTLEMENTS = maxBuildings.settlements;
+    static MAX_CITIES = maxBuildings.cities;
+    static GAMEBOARD_RADIUS = 3;
+
     tiles = []
     // Initialize settlements as an array,
     // Once the settlements are populated,
@@ -29,8 +35,6 @@ class Game {
     turnNumber = 0;
     playerColours = ['#FF0000', '#008000', '#0000ff', '#FFA500'] // Red, green, blue, orange
 
-    static gameboardRadius = 3;
-
     // socketRoom should be a string to identify
     // which room the game should communicate with
     constructor(socketRoom) {
@@ -38,7 +42,7 @@ class Game {
         const Grid = Honeycomb.defineGrid();
         const Hex = Honeycomb.extendHex();
         this.grid = Grid.spiral({
-            radius: Game.gameboardRadius - 1,
+            radius: Game.GAMEBOARD_RADIUS - 1,
             center: Hex(2, 2),
         });
 
@@ -46,7 +50,7 @@ class Game {
         // Change this to be 0-indexed
         const topRow = this.grid.filter((t) => t.y === 0);
         topRow.map((t) => t.x--);
-        const bottomRow = this.grid.filter((t) => t.y === Game.gameboardRadius + 1);
+        const bottomRow = this.grid.filter((t) => t.y === Game.GAMEBOARD_RADIUS + 1);
         bottomRow.map((t) => t.x--);
 
         this.generateTiles();
@@ -74,7 +78,7 @@ class Game {
             tile.y = this.grid[i].y;
             // Get settlements for this
             let baseX = tile.x * 2;
-            const halfRow = Math.ceil((Game.gameboardRadius + 1) / 2);
+            const halfRow = Math.ceil((Game.GAMEBOARD_RADIUS + 1) / 2);
 
             if (tile.y < halfRow) {
                 baseX++;
@@ -117,8 +121,8 @@ class Game {
      * @returns {[]}
      */
     generateSettlements() {
-        const rowWidth = Game.gameboardRadius;
-        const maxRowWidth = (Game.gameboardRadius - 1) * 2 + 1;
+        const rowWidth = Game.GAMEBOARD_RADIUS;
+        const maxRowWidth = (Game.GAMEBOARD_RADIUS - 1) * 2 + 1;
         let rowNumTop = 0;
         let rowNumBottom = maxRowWidth;
         for (let i = rowWidth; i <= maxRowWidth; i++) {
@@ -305,6 +309,7 @@ class Game {
             let roll = die1 + die2;
 
             console.log(`dice roll was ${roll}`)
+            this.player[this.turnNumber % this.players.length].hasRolled = true;
 
             if (roll === 7) {
                 this.robberEvent();
@@ -370,6 +375,16 @@ class Game {
             player.numRoads--;
             newRoad.colour = player.colour;
 
+            if ((this.turnNumber === 0
+                && player.numSettlements === maxBuildings.settlements - 1
+                && player.numRoads === maxBuildings.roads - 1)
+                || (this.turnNumber === 1
+                    && player.numSettlements === maxBuildings.settlements - 2
+                    && player.numRoads === maxBuildings.roads - 2)) {
+                console.log('updating end turn');
+                player.hasRolled = true;
+            }
+
             this.roads.push(newRoad);
             socket.to(this.socketRoom).emit('update_roads', {
                 roads: this.roads
@@ -401,11 +416,12 @@ class Game {
         socket.on('end_turn', () => {
             const playerEndingTurn = this.players[this.turnNumber % this.players.length];
             playerEndingTurn.isTurn = false;
+            playerEndingTurn.hasRolled = false;
             this.turnNumber++;
             const playerStartingTurn = this.players[this.turnNumber % this.players.length];
             playerStartingTurn.isTurn = true;
 
-            io.to(this.socketRoom).emit('start_turn', playerStartingTurn.name);
+            io.to(this.socketRoom).emit('start_turn', this.players);
         });
 
         socket.on('robber_moved', (tile) => {

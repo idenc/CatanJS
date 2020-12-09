@@ -666,21 +666,13 @@ export default {
       this.roads = newRoads.roads;
       renderRoads(this);
     },
-    start_turn: function (playerName) {
-      if (playerName === this.player.name) {
-        const diceButton = document.getElementById('dice-button');
-        diceButton.classList.remove('end-turn');
-        if (this.turnNumber < 2) {
-          diceButton.classList.add('disabled');
-          diceButton.innerText = 'Place Settlement & Road';
-        } else {
-          diceButton.innerText = 'Roll Dice';
-        }
-      } else {
-        this.player.isTurn = false;
+    start_turn: function (players) {
+      const clientPlayer = players.find(p => p.name === this.player.name);
+      if (clientPlayer) {
+        this.player = clientPlayer;
       }
     },
-    dice_result: function(result) {
+    dice_result: function (result) {
       const newPlayer = result.playerData.find(p => p.name === this.player.name);
       if (newPlayer) {
         this.player = newPlayer;
