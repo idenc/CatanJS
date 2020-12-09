@@ -368,6 +368,7 @@ class Game {
             console.log('road received');
             const player = this.players[this.turnNumber % this.players.length];
             player.numRoads--;
+            newRoad.colour = player.colour;
 
             this.roads.push(newRoad);
             socket.to(this.socketRoom).emit('update_roads', {

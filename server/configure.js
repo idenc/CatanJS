@@ -55,8 +55,6 @@ module.exports = app => {
     //const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
-        // Using socket io to handle registration,
-        // Should probably change to just using a post request
         if (socket.request.session.passport && socket.request.session.passport.user) {
             console.log('user connected with id ' + socket.request.session.passport.user);
         }
@@ -99,6 +97,7 @@ module.exports = app => {
 
     app.get('/logout', (req, res) => {
         req.logout();
+        req.session.destroy();
 
         console.log('logged out');
 
