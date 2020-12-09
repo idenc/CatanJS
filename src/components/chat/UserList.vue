@@ -167,11 +167,8 @@ h1 {
   flex-direction: row;
   align-content: stretch;
   justify-content: space-between;
-
-  
+  overflow: hidden;
 }
-
-
 
 #user-rows {
   height: 100%;
@@ -182,12 +179,17 @@ h1 {
 }
 
 #user-row div { 
-
-
-
   align-self: center;
   align-content: space-between;
-  margin: auto; 
+  /* margin: auto;  */
+  padding: 0.25rem 0 0.25rem;
+}
+
+#name {
+  width: 40%;
+  padding: 1em;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 #vic-points, #num-roads, #num-cards {
@@ -207,6 +209,17 @@ li {
   marker:none;
   list-style-type:none;
   color: white;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1rem;
+    margin: 0.25rem;
+  }
+
+  #user-rows {
+    font-size: 0.5rem;
+  }
 }
 
 </style>

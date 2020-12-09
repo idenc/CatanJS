@@ -16,7 +16,7 @@
     </button>
     <button
       id="build-button"
-      class="btn btn-primary btn-block"
+      class="btn btn-primary btn-block sidebar-main-button"
       @click="buildClicked"
     >
       Build
@@ -121,6 +121,14 @@ export default {
   opacity: 0;
   animation-name: fadeInUp;
   -webkit-animation-name: fadeInUp;
+}
+
+@media (max-width: 768px) {
+  /* #build-button button {
+    margin: 0;
+    width: 30%;
+    padding: 0.25rem 0.25rem;
+  } */
 }
 
 </style>

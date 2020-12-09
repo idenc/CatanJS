@@ -41,15 +41,16 @@
       <div id="sidebar-buttons-container">
         <BuildButton
           id="build-button"
+          class="button-component"
           style="width: 30%;"
           :is-turn="player.isTurn"
           @buildStarted="startBuild"
         />
-        <button class="btn btn-primary btn-block">
+        <button class="btn btn-primary btn-block sidebar-main-button">
           Trade
         </button>
         <button
-          class="btn btn-primary btn-block"
+          class="btn btn-primary btn-block sidebar-main-button"
           @click="devModal=!devModal"
         >
           Dev Cards
@@ -182,9 +183,13 @@ export default {
   margin-bottom: 1rem;
 }
 
-#sidebar-buttons-container button {
+#sidebar-buttons-container button,
+#sidebar-buttons-container .button-component {
+  width: 30%
+}
+
+::v-deep .sidebar-main-button {
   margin: 0;
-  width: 30%;
   padding: 0.5rem 1rem;
 }
 
@@ -196,6 +201,31 @@ export default {
 #user-list, #chat {
   height: 100%;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  ::v-deep .sidebar-main-button {
+    margin: 0;
+    padding: 0.25rem 0.25rem;
+    height: 2rem;
+    font-size: 0.5rem;
+  }
+
+  #sidebar-container {
+    padding: 0.5rem;
+  }
+
+  #sidebar-buttons-container {
+    margin-bottom: 0.5rem;
+  }
+
+  #sidebar-chat-container {
+    margin-bottom: 0.5rem;
+  }
+
+  #sidebar-players-container {
+    margin-bottom: 0.5rem;
+  }
 }
 
 </style>
