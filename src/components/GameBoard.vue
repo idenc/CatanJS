@@ -132,7 +132,7 @@ import {
   startBuildSettlements,
   updateSettlementLocations,
 } from "@/assets/js/settlements";
-import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
+import {SCREEN_BREAKPOINTS, maxBuildings} from "@/assets/js/constants";
 import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
 import { BToast } from 'bootstrap-vue'
 
@@ -159,9 +159,11 @@ export default {
         wool: 0,
         grain: 0,
         lumber: 0,
-        numSettlements: 5,
-        numRoads: 15,
-        numCities: 4,
+        numSettlements: maxBuildings.settlements,
+        numRoads: maxBuildings.roads,
+        numCities: maxBuildings.cities,
+        colour: '',
+        isTurn: false,
       },
       graphics: {
         oceanGap: 8,
@@ -175,6 +177,11 @@ export default {
       },
       toastTitle: 'Put toast title here',
       toastMessage: 'Put toast message here',
+    }
+  },
+  watch: {
+    player: function (val) {
+      this.$emit('updatePlayer', val);
     }
   },
   created: function () {
@@ -281,7 +288,13 @@ export default {
         // Update the dimensions of the settlements
         updateSettlementLocations(grid, this.settlements);
         redrawSettlements(this.settlements, draw);
-        redrawRoads(this.roads, this.settlements);
+        redrawRoads(this);
+        const roadSelectors = this.draw.find('.road-selector');
+        if (roadSelectors.length > 0) {
+          roadSelectors.remove();
+          startRoadSelection(this);
+        }
+
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
 
@@ -290,7 +303,6 @@ export default {
         this.settlements = new Map(JSON.parse(updatedInfo.settlements));
         if (updatedInfo.player) {
           this.player = updatedInfo.player;
-          this.$emit('updatePlayer', this.player);
         }
 
         // Update the dimensions of the settlements
@@ -643,12 +655,37 @@ export default {
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.roads = boardInfo.roads;
-      this.turnNumber = boardInfo.turnNumber;
+      this.$emit('updateTurnNumber', boardInfo.turnNumber);
+      this.player = boardInfo.player;
       this.initializeBoard();
     },
     update_roads: function (newRoads) {
-      this.roads = newRoads;
+      if (newRoads.player) {
+        this.player = newRoads.player;
+      }
+      this.roads = newRoads.roads;
       renderRoads(this);
+    },
+    start_turn: function (playerName) {
+      if (playerName === this.player.name) {
+        const diceButton = document.getElementById('dice-button');
+        diceButton.classList.remove('end-turn');
+        if (this.turnNumber < 2) {
+          diceButton.classList.add('disabled');
+          diceButton.innerText = 'Place Settlement & Road';
+        } else {
+          diceButton.innerText = 'Roll Dice';
+        }
+      } else {
+        this.player.isTurn = false;
+      }
+    },
+    dice_result: function(result) {
+      const newPlayer = result.playerData.find(p => p.name === this.player.name);
+      if (newPlayer) {
+        this.player = newPlayer;
+      }
+      // TODO: Display dice roll to everyone
     }
   }
 }
@@ -670,10 +707,6 @@ export default {
 
 #drawSVG {
   display: none;
-}
-
-::v-deep .settlement-svg[state="settlement"] {
-  fill: url('#pattern1');
 }
 
 ::v-deep .hex[resource="brick"] {

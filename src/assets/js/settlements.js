@@ -1,3 +1,5 @@
+import {maxBuildings} from "@/assets/js/constants";
+
 /**
  * This is just for finding the correct x, y positions to draw settlements
  * @param grid
@@ -68,8 +70,15 @@ const settlementAvailable = (gameBoard, settlement) => {
     if (settlement.state !== 'empty') {
         return false;
     }
-    return true;
     // Check distance rule
+    for (const neighbourCoord of settlement.neighbours) {
+        const neighbour = gameBoard.settlements.get(JSON.stringify(neighbourCoord));
+        if (neighbour.state !== 'empty') {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -81,10 +90,11 @@ const settlementAvailable = (gameBoard, settlement) => {
 const canPlay = (gameBoard) => {
     const player = gameBoard.player;
     // All players get 2 settlements and 2 roads to begin
-    if (player.numSettlements === 5 && gameBoard.turnNumber === 0 || player.numSettlements === 4 && gameBoard.turnNumber === 1) {
+    if (player.numSettlements === maxBuildings.settlements && gameBoard.turnNumber === 0
+        || player.numSettlements === maxBuildings.settlements - 1 && gameBoard.turnNumber === 1) {
         return true;
     }
-    return player.clay >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
+    return player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
 }
 
 /**
@@ -97,8 +107,7 @@ const startBuildSettlements = (gameBoard) => {
     }
     for (const [, settlement] of gameBoard.settlements.entries()) {
         if (settlementAvailable(gameBoard, settlement)) {
-            let settlementSVG = addSettlementSelector(gameBoard, settlement);
-            Object.assign(settlement, {svg: settlementSVG});
+            settlement.svg = addSettlementSelector(gameBoard, settlement);
         }
     }
 }
@@ -130,19 +139,23 @@ const addSelectSettlementAnimation = (drawSVG, x, y, settlementRadius) => {
 }
 
 const renderSettlements = (settlements, drawSVG, settlementRadius) => {
+    drawSVG.find('.buildable').remove();
     for (const [, settlement] of settlements.entries()) {
         if (settlement.state !== 'empty' && !settlement.svg) {
-            const settlementSVG = renderBuildable(drawSVG,
+            const nested = renderBuildable(drawSVG,
                 settlement.point,
                 settlementRadius,
-                false).children()[0].node;
+                settlement.colour,
+                false);
+            const settlementSVG = nested.children()[0].node;
             settlementSVG.setAttribute('state', settlement.state);
             settlementSVG.classList.add('settlement-svg');
+            settlement.svg = nested;
         }
     }
 }
 
-const renderBuildable = (drawSVG, point, settlementRadius, isSelectable = true) => {
+const renderBuildable = (drawSVG, point, settlementRadius, fillColour, isSelectable = true) => {
     const {x, y} = point;
     // Create an element to nest settlement graphics in for easier transforming
     const nested = drawSVG.group();
@@ -151,10 +164,12 @@ const renderBuildable = (drawSVG, point, settlementRadius, isSelectable = true) 
         // Adds a pulsing circle animation
         addSelectSettlementAnimation(nested, x, y, settlementRadius);
     }
+    // Handle null fillColour
+    fillColour = fillColour ? fillColour : 'transparent';
 
     nested
         .circle(settlementRadius * 2)
-        .fill('transparent')
+        .fill(fillColour)
         .stroke({width: 4, color: 'white'})
         .translate(x - settlementRadius, y - settlementRadius);
 
@@ -171,7 +186,8 @@ const removeBuildSelectors = (drawSVG) => {
 const addSettlementSelector = (gameBoard, settlement) => {
     const nested = renderBuildable(gameBoard.draw,
         settlement.point,
-        gameBoard.graphics.settlementRadius);
+        gameBoard.graphics.settlementRadius,
+        'transparent');
 
     const settlementSVG = nested.children()[1].node;
     settlementSVG.classList.add('build-selector');
@@ -181,11 +197,13 @@ const addSettlementSelector = (gameBoard, settlement) => {
         settlementSVG.classList.remove('build-selector');
         settlementSVG.classList.add('settlement-svg');
         settlementSVG.setAttribute('state', 'settlement');
+        settlementSVG.setAttribute("fill", gameBoard.player.colour);
         // Remove all the settlement selection graphics, keep selected settlement
         removeBuildSelectors(gameBoard.draw);
         settlement.state = "settlement";
         settlement.player = gameBoard.player.name;
 
+        // TODO: handle upgrading to city
         console.log('emitting build')
         // Cannot JSON stringify DOM elements
         gameBoard.$socket.emit('build_settlement', {
