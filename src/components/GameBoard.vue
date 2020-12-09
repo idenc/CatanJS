@@ -112,6 +112,12 @@
         </pattern>
       </defs>
     </svg>
+    <b-toast id="game-toast" class="align-self-start" title="BootstrapVue" static auto-hide-delay=5000>
+      <template #toast-title>
+        <strong class="mr-2"> {{ toastTitle }} </strong>
+      </template>
+      {{ toastMessage }}
+    </b-toast>
   </div>
 </template>
 
@@ -128,10 +134,11 @@ import {
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS} from "@/assets/js/constants";
 import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
+import { BToast } from 'bootstrap-vue'
 
 export default {
   name: "GameBoard",
-  components: {},
+  components: {BToast},
   props: {
     turnNumber: Number(0)
   },
@@ -165,13 +172,16 @@ export default {
         numberTokenPercentOfHex: 0.16,
         shipTokenPercentOfHex: 0.24,
         shipTokenBorder: 3,
-      }
+      },
+      toastTitle: 'Put toast title here',
+      toastMessage: 'Put toast message here',
     }
   },
   created: function () {
 
   },
   mounted: function () {
+    // this.$bvToast.show(`game-toast`)
   },
   methods: {
     initializeBoard() {
