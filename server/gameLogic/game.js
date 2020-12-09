@@ -236,7 +236,11 @@ class Game {
                     console.log(player);
 
                     if (player) {
-                        player[tile.resource]++;
+                        if (settlement.state === 'city') {
+                            player[tile.resource] += 2;
+                        } else {
+                            player[tile.resource]++;
+                        }
                     }
                 }
             });
@@ -344,9 +348,19 @@ class Game {
             settlement.player = newSettlement.player;
             settlement.state = newSettlement.state;
 
-            const player = this.players.find((p) => p.name === settlement.player);
+            const playerIdx = this.turnNumber % this.players.length;
+            const player = this.players[playerIdx];
             settlement.colour = player.colour;
             player.numSettlements--;
+            const playerTurnNumber = this.turnNumber - playerIdx;
+            // Remove resources if it isn't the first two turns
+            if (playerTurnNumber > 1) {
+                player.brick--;
+                player.lumber--;
+                player.wool--;
+                player.grain--;
+            }
+
             // Get tiles adjacent to this settlement
             const adjacentTiles = this.tiles.filter((t) =>
                 t.settlements.some((s) => s.x === settlement.x && s.y === settlement.y));
@@ -358,7 +372,8 @@ class Game {
 
             const jsonSettlements = JSON.stringify(Array.from(this.settlements.entries()));
 
-            // Send the updated settlement to all players except the one who built
+            // Send the updated settlement to all players
+            // Send the updated settlements and player info to player who built
             socket.to(this.socketRoom).emit('update_settlements', {
                 settlements: jsonSettlements
             });
@@ -368,17 +383,44 @@ class Game {
             });
         });
 
+        socket.on('upgrade_settlement', (settlementCoord) => {
+            console.log('upgrading settlement');
+            const player = this.players[this.turnNumber % this.players.length];
+            // Give back settlement and remove city
+            player.numSettlements++;
+            player.numCities--;
+
+            player.ore -= 3;
+            player.grain -= 2;
+
+            const settlement = this.settlements.get(JSON.stringify(settlementCoord));
+            settlement.state = 'city';
+
+            socket.to(this.socketRoom).emit('update_city', {
+                city: settlementCoord
+            });
+            socket.emit('update_city', {
+                city: settlementCoord,
+                player: player
+            });
+        });
+
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
-            const player = this.players[this.turnNumber % this.players.length];
+            const playerIdx = this.turnNumber % this.players.length;
+            const player = this.players[playerIdx];
             player.numRoads--;
+            const playerTurnNumber = this.turnNumber - playerIdx;
             newRoad.colour = player.colour;
 
-            if ((this.turnNumber === 0
+            if (playerTurnNumber > 1) {
+                player.brick--;
+                player.lumber--;
+            } else if ((playerTurnNumber === 0
                 && player.numSettlements === maxBuildings.settlements - 1
                 && player.numRoads === maxBuildings.roads - 1)
-                || (this.turnNumber === 1
+                || (playerTurnNumber === 1
                     && player.numSettlements === maxBuildings.settlements - 2
                     && player.numRoads === maxBuildings.roads - 2)) {
                 console.log('updating end turn');

@@ -156,6 +156,7 @@ const startRoadSelection = (gameBoard) => {
                     y: (settlement.point.y + neighbour.point.y) / 2,
                 }
                 const nested = renderBuildable(gameBoard.draw,
+                    false,
                     point,
                     gameBoard.graphics.settlementRadius);
                 nested.addClass('road-selector');
