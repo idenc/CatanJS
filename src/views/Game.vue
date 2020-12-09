@@ -70,7 +70,6 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import DevCardModal from '@/components/DevCardModal';
 import Resources from "@/components/Resources";
 import BuildButton from "@/components/BuildButton";
-import { BToast } from 'bootstrap-vue'
 
 export default {
 
