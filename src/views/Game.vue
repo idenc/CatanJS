@@ -2,13 +2,25 @@
   <div id="game-container">
     <div id="board-container">
       <DevCardModal v-if="devModal === true" />
-      <GameBoard ref="gameBoard" />
+      <GameBoard
+        ref="gameBoard"
+        :turn-number="turnNumber"
+        @updatePlayer="updatePlayer"
+      />
       <button
+        v-if="turnNumber >= 2"
         id="dice-button"
         class="btn btn-primary btn-block"
         @click="rollDice"
       >
         Roll Dice
+      </button>
+      <button
+        v-else
+        id="dice-button"
+        class="btn btn-primary btn-block disabled"
+      >
+        Place Settlement & Road
       </button>
     </div>
     <div id="sidebar-container">
@@ -41,7 +53,7 @@
         </button>
       </div>
       <div id="sidebar-resources-container">
-        <Resources />
+        <Resources :player="player" />
       </div>
     </div>
   </div>
@@ -62,7 +74,15 @@ export default {
   components: {BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
   data() {
     return {
-      devModal: false
+      devModal: false,
+      turnNumber: 0,
+      player: Object({
+        brick: 0,
+        ore: 0,
+        wool: 0,
+        grain: 0,
+        lumber: 0,
+      }),
     }
   },
   mounted: function () {
@@ -76,6 +96,9 @@ export default {
     },
     passUsername(username) {
       this.$refs.gameBoard.setUsername(username);
+    },
+    updatePlayer(newPlayer) {
+      this.player = newPlayer;
     }
   }
 }

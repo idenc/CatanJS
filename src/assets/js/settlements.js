@@ -58,15 +58,45 @@ const locateSettlements = (grid, settlements) => {
     return settlements;
 }
 
-// TODO: Will need to determine when a space is available to build a settlement
-const settlementAvailable = (settlement) => {
+/**
+ * Checks whether a settlement can be built on a space
+ * @param gameBoard the GameBoard component
+ * @param settlement The settlement location to build at
+ * @returns {boolean} True if settlement can be built on else false
+ */
+const settlementAvailable = (gameBoard, settlement) => {
+    if (settlement.state !== 'empty') {
+        return false;
+    }
     return true;
+    // Check distance rule
 }
 
-// Draw the settlements
+/**
+ * Checks whether the player has the ability to build
+ * a settlement
+ * @param gameBoard the GameBoard component
+ * @returns {boolean} True if the player can build else false
+ */
+const canPlay = (gameBoard) => {
+    const player = gameBoard.player;
+    // All players get 2 settlements and 2 roads to begin
+    if (player.numSettlements === 5 && gameBoard.turnNumber === 0 || player.numSettlements === 4 && gameBoard.turnNumber === 1) {
+        return true;
+    }
+    return player.clay >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
+}
+
+/**
+ * Starts selection of where to build settlement
+ * @param gameBoard GameBoard component
+ */
 const startBuildSettlements = (gameBoard) => {
+    if (!canPlay(gameBoard)) {
+        return;
+    }
     for (const [, settlement] of gameBoard.settlements.entries()) {
-        if (settlementAvailable(settlement)) {
+        if (settlementAvailable(gameBoard, settlement)) {
             let settlementSVG = addSettlementSelector(gameBoard, settlement);
             Object.assign(settlement, {svg: settlementSVG});
         }
@@ -154,7 +184,7 @@ const addSettlementSelector = (gameBoard, settlement) => {
         // Remove all the settlement selection graphics, keep selected settlement
         removeBuildSelectors(gameBoard.draw);
         settlement.state = "settlement";
-        settlement.player = gameBoard.username;
+        settlement.player = gameBoard.player.name;
 
         console.log('emitting build')
         // Cannot JSON stringify DOM elements
@@ -190,21 +220,8 @@ const updateSettlementLocations = (grid, settlements) => {
     return locateSettlements(grid, settlements);
 }
 
-
-const getSettlementsMap = (settlementsArray) => {
-    const settlementsMap = new Map();
-    for (const settlement of settlementsArray) {
-        settlementsMap.set(
-            JSON.stringify({x: settlement.x, y: settlement.y}),
-            settlement
-        );
-    }
-    return settlementsMap;
-}
-
 export {
     locateSettlements,
-    getSettlementsMap,
     startBuildSettlements,
     addSettlementSelector,
     updateSettlementLocations,

@@ -154,7 +154,7 @@ const startRoadSelection = (gameBoard) => {
                     gameBoard.$socket.emit('build_road', {
                         to: {x: settlement.x, y: settlement.y},
                         from: {x: neighbour.x, y: neighbour.y},
-                        player: 'placeholder'
+                        player: gameBoard.player
                     });
                 });
             }

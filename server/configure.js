@@ -32,6 +32,7 @@ module.exports = app => {
     // Express session
     const sessionMiddleware = session({
         secret: 'secret',
+        cookie: {expires: new Date(2147483647000)}, // Expires in 2038
         resave: true,
         saveUninitialized: true,
         store: new MongoStore({

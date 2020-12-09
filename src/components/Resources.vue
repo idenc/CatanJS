@@ -1,48 +1,63 @@
 <template>
   <div class="resources-container">
-    <div class="resource" resource="clay">
-      <img 
-        class="resource-icon" 
+    <div
+      class="resource"
+      resource="clay"
+    >
+      <img
+        class="resource-icon"
         src="..\assets\svg\clay.svg"
       >
       <div>
-        <span class="resource-count">{{ resourceCount.clay }}</span>
+        <span class="resource-count">{{ player.brick }}</span>
       </div>
     </div>
-    <div class="resource" resource="wood">
-      <img 
-        class="resource-icon" 
+    <div
+      class="resource"
+      resource="wood"
+    >
+      <img
+        class="resource-icon"
         src="..\assets\svg\wood.svg"
       >
       <div>
-        <span class="resource-count">{{ resourceCount.wood }}</span>
+        <span class="resource-count">{{ player.lumber }}</span>
       </div>
     </div>
-    <div class="resource" resource="sheep">
-      <img 
-        class="resource-icon" 
+    <div
+      class="resource"
+      resource="sheep"
+    >
+      <img
+        class="resource-icon"
         src="..\assets\svg\sheep.svg"
       >
       <div>
-        <span class="resource-count">{{ resourceCount.sheep }}</span>
+        <span class="resource-count">{{ player.wool }}</span>
       </div>
     </div>
-    <div class="resource" resource="wheat">
-      <img 
-        class="resource-icon" 
+    <div
+      class="resource"
+      resource="wheat"
+    >
+      <img
+        class="resource-icon"
         src="..\assets\svg\wheat.svg"
       >
       <div>
-        <span class="resource-count">{{ resourceCount.wheat }}</span>
+        <span class="resource-count">{{ player.grain }}</span>
       </div>
     </div>
-    <div class="resource" resource="ore">
-      <img 
-        class="resource-icon" 
+    <div
+      class="resource"
+      resource="ore"
+    >
+      <img
+        class="resource-icon"
         src="..\assets\svg\ore.svg"
       >
       <div>
-        <span class="resource-count">{{ resourceCount.ore }}</span>
+        <span class="resource-count">{{ player.ore }}</span>
       </div>
     </div>
   </div>
@@ -54,21 +69,12 @@ export default {
 
   name: "Resources",
   components: {},
-  data() {
-    return {
-      resourceCount: {
-        clay: 0,
-        wood: 0,
-        sheep: 0,
-        wheat: 0,
-        ore: 0,
-      }
-    }
+  props: {
+    player: Object()
   },
   mounted: function () {
   },
-  methods: {
-  }
+  methods: {}
 }
 </script>
 

@@ -132,6 +132,9 @@ import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
 export default {
   name: "GameBoard",
   components: {},
+  props: {
+    turnNumber: Number(0)
+  },
   data() {
     return {
       hexagonRatio: 0.866025, // Hexagon ration, height to width
@@ -142,7 +145,17 @@ export default {
       draw: SVG(),
       settlements: [],
       roads: [],
-      username: '',
+      player: {
+        name: '',
+        brick: 0,
+        ore: 0,
+        wool: 0,
+        grain: 0,
+        lumber: 0,
+        numSettlements: 5,
+        numRoads: 15,
+        numCities: 4,
+      },
       graphics: {
         oceanGap: 8,
         roadGap: 8,
@@ -159,9 +172,6 @@ export default {
 
   },
   mounted: function () {
-    // Let the server know a player has connected
-    // TODO: Replace the placeholder username with the player's actual username
-    this.$socket.emit('player_joined', 'placeholder_username');
   },
   methods: {
     initializeBoard() {
@@ -265,9 +275,13 @@ export default {
       }
       console.log((maxHexSize.width) / (2 * this.hexagonRatio))
 
-      this.sockets.subscribe('update_settlements', (newSettlements) => {
+      this.sockets.subscribe('update_settlements', (updatedInfo) => {
         console.log('updating settlements');
-        this.settlements = new Map(JSON.parse(newSettlements));
+        this.settlements = new Map(JSON.parse(updatedInfo.settlements));
+        if (updatedInfo.player) {
+          this.player = updatedInfo.player;
+          this.$emit('updatePlayer', this.player);
+        }
 
         // Update the dimensions of the settlements
         updateSettlementLocations(grid, this.settlements);
@@ -605,13 +619,13 @@ export default {
       if (type === 'road') {
         startRoadSelection(this);
       } else if (type === 'settlement') {
-        // TODO: check if the player is able to build a settlement
         startBuildSettlements(this);
       }
-
     },
     setUsername(username) {
-      this.username = username;
+      // Let the server know a player has connected
+      this.$socket.emit('player_joined', username);
+      this.player.name = username;
     }
   },
   sockets: {
@@ -619,8 +633,7 @@ export default {
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.roads = boardInfo.roads;
-      console.log(`roads: `);
-      console.log(this.roads);
+      this.turnNumber = boardInfo.turnNumber;
       this.initializeBoard();
     },
     update_roads: function (newRoads) {
