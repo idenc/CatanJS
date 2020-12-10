@@ -16,6 +16,22 @@
         @rollDice="rollDice"
         @endTurn="endTurn"
       />
+      <div
+        id="building-info"
+        ref="buildingInfo"
+        v-resize-text="{minFontSize: '0px'}"
+        class="dice-button btn btn-primary btn-block disabled"
+      >
+        <div>
+          Roads - {{ player.numRoads }}
+        </div>
+        <div>
+          Settlements - {{ player.numSettlements }}
+        </div>
+        <div>
+          Cities - {{ player.numCities }}
+        </div>
+      </div>
     </div>
     <div id="sidebar-container">
       <div id="sidebar-players-container">
@@ -64,11 +80,15 @@ import DevCardModal from '@/components/DevCardModal';
 import Resources from "@/components/Resources";
 import BuildButton from "@/components/BuildButton";
 import DiceButton from "@/components/DiceButton";
+import ResizeText from 'vue-resize-text';
 
 export default {
 
   name: "Game",
   components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
+  directives: {
+    ResizeText
+  },
   data() {
     return {
       devModal: false,
@@ -83,7 +103,6 @@ export default {
     }
   },
   mounted: function () {
-
   },
   methods: {
     startBuild(type) {
@@ -203,6 +222,19 @@ export default {
   #sidebar-players-container {
     margin-bottom: 0.5rem;
   }
+
+  #building-info {
+    padding: 2px;
+    width: 15% !important;
+  }
+}
+
+#building-info {
+  margin: auto;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 25%;
 }
 
 </style>

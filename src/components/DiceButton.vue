@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-resize-text="{ratio: 1.6, minFontSize: '0px'}">
     <button
       v-if="!isTurn"
       class="dice-button btn btn-primary btn-block disabled"
@@ -30,8 +30,13 @@
 </template>
 
 <script>
+import ResizeText from 'vue-resize-text';
+
 export default {
   name: "DiceButton",
+  directives: {
+    ResizeText
+  },
   props: {
     turnNumber: Number(0),
     hasRolled: Boolean(false),
@@ -52,5 +57,12 @@ export default {
 
 .end-turn {
   background: red;
+}
+
+@media (max-width: 768px) {
+  .dice-button {
+    padding: 2px;
+    width: fit-content;
+  }
 }
 </style>
