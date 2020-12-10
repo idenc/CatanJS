@@ -9,6 +9,7 @@ class Player {
     grain = 0;
     lumber = 0;
     isTurn = false;
+    hasRolled = false;
     devCards = [];
     numKnights = 0;
     harbourBonuses = [];

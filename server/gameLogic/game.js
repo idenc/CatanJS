@@ -5,6 +5,7 @@ const Settlement = require("./settlement");
 const io = require('../socket').getio();
 const Player = require("./player");
 const Honeycomb = require('honeycomb-grid');
+const maxBuildings = require('../../src/assets/js/constants').maxBuildings;
 
 /**
  * Handles an instance of a game
@@ -13,6 +14,11 @@ const Honeycomb = require('honeycomb-grid');
  * Each game should have a Game class instance
  */
 class Game {
+    static MAX_ROADS = maxBuildings.roads;
+    static MAX_SETTLEMENTS = maxBuildings.settlements;
+    static MAX_CITIES = maxBuildings.cities;
+    static GAMEBOARD_RADIUS = 3;
+
     tiles = []
     // Initialize settlements as an array,
     // Once the settlements are populated,
@@ -29,8 +35,6 @@ class Game {
     turnNumber = 0;
     playerColours = ['#FF0000', '#008000', '#0000ff', '#FFA500'] // Red, green, blue, orange
 
-    static gameboardRadius = 3;
-
     // socketRoom should be a string to identify
     // which room the game should communicate with
     constructor(socketRoom) {
@@ -38,7 +42,7 @@ class Game {
         const Grid = Honeycomb.defineGrid();
         const Hex = Honeycomb.extendHex();
         this.grid = Grid.spiral({
-            radius: Game.gameboardRadius - 1,
+            radius: Game.GAMEBOARD_RADIUS - 1,
             center: Hex(2, 2),
         });
 
@@ -46,7 +50,7 @@ class Game {
         // Change this to be 0-indexed
         const topRow = this.grid.filter((t) => t.y === 0);
         topRow.map((t) => t.x--);
-        const bottomRow = this.grid.filter((t) => t.y === Game.gameboardRadius + 1);
+        const bottomRow = this.grid.filter((t) => t.y === Game.GAMEBOARD_RADIUS + 1);
         bottomRow.map((t) => t.x--);
 
         this.generateTiles();
@@ -74,7 +78,7 @@ class Game {
             tile.y = this.grid[i].y;
             // Get settlements for this
             let baseX = tile.x * 2;
-            const halfRow = Math.ceil((Game.gameboardRadius + 1) / 2);
+            const halfRow = Math.ceil((Game.GAMEBOARD_RADIUS + 1) / 2);
 
             if (tile.y < halfRow) {
                 baseX++;
@@ -117,8 +121,8 @@ class Game {
      * @returns {[]}
      */
     generateSettlements() {
-        const rowWidth = Game.gameboardRadius;
-        const maxRowWidth = (Game.gameboardRadius - 1) * 2 + 1;
+        const rowWidth = Game.GAMEBOARD_RADIUS;
+        const maxRowWidth = (Game.GAMEBOARD_RADIUS - 1) * 2 + 1;
         let rowNumTop = 0;
         let rowNumBottom = maxRowWidth;
         for (let i = rowWidth; i <= maxRowWidth; i++) {
@@ -219,17 +223,21 @@ class Game {
         return tempArray;
     }
 
-    //there has to be a more efficient way of doing this
     dealOutResources(diceRoll) {
-        let selectedTiles = this.tiles.filter(obj => obj.number.toString() === diceRoll);
+        let selectedTiles = this.tiles.filter(obj => obj.number === diceRoll.toString());
         //iterate through all selected tiles
         selectedTiles.forEach((tile) => {
             // Iterate through all settlement locations touching tile
             tile.settlements.forEach((settleCoord) => {
                 const settlement = this.settlements.get(JSON.stringify(settleCoord));
-                const player = this.players.find(p => p.name === settlement.player);
-                if (player.length) {
-                    player[tile.resource]++;
+                if (settlement.state !== 'empty') {
+                    const player = this.players.find(p => p.name === settlement.player);
+                    console.log('player');
+                    console.log(player);
+
+                    if (player) {
+                        player[tile.resource]++;
+                    }
                 }
             });
         });
@@ -266,16 +274,23 @@ class Game {
     configureSocketInteractions(socket) {
         socket.join(this.socketRoom);
         socket.on('player_joined', (username) => {
-            const newPlayer = new Player(username, this.playerColours.pop());
-            if (!this.players.some(p => p.name === username)) {
+            // See if we can find player
+            let newPlayer = this.players.find(p => p.name === username);
+            if (!newPlayer) {
+                // If not, create a new player
+                newPlayer = new Player(username, this.playerColours.pop());
                 this.players.push(newPlayer);
             }
+            const currentTurnPlayer = this.players[this.turnNumber % this.players.length];
+            newPlayer.isTurn = currentTurnPlayer.name === newPlayer.name;
+            console.log(this.players);
 
             socket.emit('board_info', {
                 tiles: this.tiles,
                 settlements: JSON.stringify(Array.from(this.settlements.entries())),
                 roads: this.roads,
                 turnNumber: this.turnNumber,
+                player: newPlayer
             });
         });
 
@@ -294,17 +309,17 @@ class Game {
             let roll = die1 + die2;
 
             console.log(`dice roll was ${roll}`)
+            this.player[this.turnNumber % this.players.length].hasRolled = true;
 
             if (roll === 7) {
                 this.robberEvent();
-                //Not sure how we want to update players
-                socket.to(this.socketRoom).emit('update_players', {playerData: this.players, diceRoll: roll});
+                // io.to emits to everyone in room, socket.to emits to everyone except sender
+                io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
                 //Somehow allow the player that rolled the 7 to move teh robber
                 socket.to(this.socketRoom).emit('handle_robber_event');
             } else {
                 this.dealOutResources(roll);
-                //Not sure how we want to update players
-                socket.to(this.socketRoom).emit('update_players', {playerData: this.players, diceRoll: roll});
+                io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
             }
         });
 
@@ -329,8 +344,8 @@ class Game {
             settlement.player = newSettlement.player;
             settlement.state = newSettlement.state;
 
-
             const player = this.players.find((p) => p.name === settlement.player);
+            settlement.colour = player.colour;
             player.numSettlements--;
             // Get tiles adjacent to this settlement
             const adjacentTiles = this.tiles.filter((t) =>
@@ -356,8 +371,28 @@ class Game {
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
+            const player = this.players[this.turnNumber % this.players.length];
+            player.numRoads--;
+            newRoad.colour = player.colour;
+
+            if ((this.turnNumber === 0
+                && player.numSettlements === maxBuildings.settlements - 1
+                && player.numRoads === maxBuildings.roads - 1)
+                || (this.turnNumber === 1
+                    && player.numSettlements === maxBuildings.settlements - 2
+                    && player.numRoads === maxBuildings.roads - 2)) {
+                console.log('updating end turn');
+                player.hasRolled = true;
+            }
+
             this.roads.push(newRoad);
-            io.to(this.socketRoom).emit('update_roads', this.roads);
+            socket.to(this.socketRoom).emit('update_roads', {
+                roads: this.roads
+            });
+            socket.emit('update_roads', {
+                roads: this.roads,
+                player: player
+            });
         });
 
         //Build Development Card
@@ -379,12 +414,14 @@ class Game {
 
         //End Turn
         socket.on('end_turn', () => {
-            if (this.currentTurnIndex === this.players.length - 1) {
-                this.currentTurnIndex = 0;
-            } else {
-                this.currentTurnIndex += 1;
-            }
-            socket.to(this.socketRoom).emit('change_isTurn', this.players[this.currentTurnIndex].name);
+            const playerEndingTurn = this.players[this.turnNumber % this.players.length];
+            playerEndingTurn.isTurn = false;
+            playerEndingTurn.hasRolled = false;
+            this.turnNumber++;
+            const playerStartingTurn = this.players[this.turnNumber % this.players.length];
+            playerStartingTurn.isTurn = true;
+
+            io.to(this.socketRoom).emit('start_turn', this.players);
         });
 
         socket.on('robber_moved', (tile) => {

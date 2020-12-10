@@ -6,22 +6,16 @@
         ref="gameBoard"
         :turn-number="turnNumber"
         @updatePlayer="updatePlayer"
+        @displayEndTurnBtn="displayEndTurnBtn"
+        @updateTurnNumber="updateTurnNumber"
       />
-      <button
-        v-if="turnNumber >= 2"
-        id="dice-button"
-        class="btn btn-primary btn-block"
-        @click="rollDice"
-      >
-        Roll Dice
-      </button>
-      <button
-        v-else
-        id="dice-button"
-        class="btn btn-primary btn-block disabled"
-      >
-        Place Settlement & Road
-      </button>
+      <DiceButton
+        :has-rolled="player.hasRolled"
+        :turn-number="turnNumber"
+        :is-turn="player.isTurn"
+        @rollDice="rollDice"
+        @endTurn="endTurn"
+      />
     </div>
     <div id="sidebar-container">
       <div id="sidebar-players-container">
@@ -39,14 +33,16 @@
       <div id="sidebar-buttons-container">
         <BuildButton
           id="build-button"
+          class="button-component"
           style="width: 30%;"
+          :is-turn="player.isTurn"
           @buildStarted="startBuild"
         />
-        <button class="btn btn-primary btn-block">
+        <button class="btn btn-primary btn-block sidebar-main-button">
           Trade
         </button>
         <button
-          class="btn btn-primary btn-block"
+          class="btn btn-primary btn-block sidebar-main-button"
           @click="devModal=!devModal"
         >
           Dev Cards
@@ -67,11 +63,12 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import DevCardModal from '@/components/DevCardModal';
 import Resources from "@/components/Resources";
 import BuildButton from "@/components/BuildButton";
+import DiceButton from "@/components/DiceButton";
 
 export default {
 
   name: "Game",
-  components: {BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
+  components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
   data() {
     return {
       devModal: false,
@@ -86,21 +83,34 @@ export default {
     }
   },
   mounted: function () {
+
   },
   methods: {
     startBuild(type) {
       this.$refs.gameBoard.startBuild(type);
     },
     rollDice() {
-      this.$socket.emit('roll_dice')
+      this.$socket.emit('roll_dice');
     },
     passUsername(username) {
       this.$refs.gameBoard.setUsername(username);
     },
     updatePlayer(newPlayer) {
       this.player = newPlayer;
+    },
+    updateTurnNumber(newTurnNumber) {
+      this.turnNumber = newTurnNumber;
+    },
+    displayEndTurnBtn() {
+      console.log('displaying end turn');
+      this.player.hasRolled = true;
+    },
+    endTurn() {
+      this.turnNumber++;
+      console.log('emitting end turn');
+      this.$socket.emit('end_turn');
     }
-  }
+  },
 }
 </script>
 
@@ -117,15 +127,6 @@ export default {
   background-color: #1b75bb;
   background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237abbdf' fill-opacity='0.61'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   position: relative;
-}
-
-#dice-button {
-  margin: auto;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: 25%;
 }
 
 #sidebar-container {
@@ -159,9 +160,13 @@ export default {
   margin-bottom: 1rem;
 }
 
-#sidebar-buttons-container button {
+#sidebar-buttons-container button,
+#sidebar-buttons-container .button-component {
+  width: 30%
+}
+
+::v-deep .sidebar-main-button {
   margin: 0;
-  width: 30%;
   padding: 0.5rem 1rem;
 }
 
@@ -173,6 +178,31 @@ export default {
 #user-list, #chat {
   height: 100%;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  ::v-deep .sidebar-main-button {
+    margin: 0;
+    padding: 0.25rem 0.25rem;
+    height: 2rem;
+    font-size: 0.5rem;
+  }
+
+  #sidebar-container {
+    padding: 0.5rem;
+  }
+
+  #sidebar-buttons-container {
+    margin-bottom: 0.5rem;
+  }
+
+  #sidebar-chat-container {
+    margin-bottom: 0.5rem;
+  }
+
+  #sidebar-players-container {
+    margin-bottom: 0.5rem;
+  }
 }
 
 </style>

@@ -93,7 +93,6 @@ export default {
   max-width: 20%;
   padding: 0.5em;
   margin: 0.125em;
-  /* background: red; */
   border-radius: 1rem;
   align-items: center;
 }
@@ -128,6 +127,27 @@ export default {
   color: white;
   height: 2rem;
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .resources-container {
+    padding: 0.25rem;
+  }
+
+  .resource {
+    display: flex;
+    flex-direction: row;
+    max-width: 20%;
+    padding: 0.125em 0.25em;
+    margin: 0.05em 0.175em;
+    border-radius: 0.75rem;
+  }
+
+  .resource-icon {
+    height: 1.25em;
+    width: 1.25em;
+    margin-right: 0.25em;
+  }
 }
 
 </style>
