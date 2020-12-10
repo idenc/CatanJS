@@ -52,7 +52,7 @@ module.exports = app => {
     app.use(passport.session());
 
     // TODO: Integrate this to be created with a lobby
-    //const debugGame = new Game('placeholderRoom');
+    const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
         if (socket.request.session.passport && socket.request.session.passport.user) {
@@ -60,7 +60,7 @@ module.exports = app => {
         }
         console.log('user connected');
 
-        //debugGame.configureSocketInteractions(socket);
+        debugGame.configureSocketInteractions(socket);
         configureChat(socket);
         configureLobby(socket);
     });

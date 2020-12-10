@@ -1,4 +1,6 @@
-import {maxBuildings} from "@/assets/js/constants";
+import {maxBuildings} from "../js/constants";
+
+const arrowImg = require('../img/arrow.svg');
 
 /**
  * This is just for finding the correct x, y positions to draw settlements
@@ -82,32 +84,28 @@ const settlementAvailable = (gameBoard, settlement) => {
 }
 
 /**
- * Checks whether the player has the ability to build
- * a settlement
- * @param gameBoard the GameBoard component
- * @returns {boolean} True if the player can build else false
- */
-const canPlay = (gameBoard) => {
-    const player = gameBoard.player;
-    // All players get 2 settlements and 2 roads to begin
-    if (player.numSettlements === maxBuildings.settlements && gameBoard.turnNumber === 0
-        || player.numSettlements === maxBuildings.settlements - 1 && gameBoard.turnNumber === 1) {
-        return true;
-    }
-    return player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
-}
-
-/**
  * Starts selection of where to build settlement
  * @param gameBoard GameBoard component
  */
 const startBuildSettlements = (gameBoard) => {
-    if (!canPlay(gameBoard)) {
-        return;
+    // Need to check if player is eligible to build any settlements/cities
+    const player = gameBoard.player;
+    console.log(maxBuildings);
+    const canBuildSettlement = player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
+    const canUpgrade = player.ore >= 3 && player.grain >= 2;
+    // All players get 2 settlements and 2 roads to begin
+    if (!(player.numSettlements === maxBuildings.settlements && gameBoard.turnNumber === 0
+        || player.numSettlements === maxBuildings.settlements - 1 && gameBoard.turnNumber === 1)) {
+        if (!canBuildSettlement && !canUpgrade) {
+            return;
+        }
     }
+
     for (const [, settlement] of gameBoard.settlements.entries()) {
         if (settlementAvailable(gameBoard, settlement)) {
             settlement.svg = addSettlementSelector(gameBoard, settlement);
+        } else if (canUpgrade && settlement.state === 'settlement') {
+            addUpgradeSelector(gameBoard, settlement);
         }
     }
 }
@@ -143,6 +141,7 @@ const renderSettlements = (settlements, drawSVG, settlementRadius) => {
     for (const [, settlement] of settlements.entries()) {
         if (settlement.state !== 'empty' && !settlement.svg) {
             const nested = renderBuildable(drawSVG,
+                settlement.state === 'city',
                 settlement.point,
                 settlementRadius,
                 settlement.colour,
@@ -155,7 +154,7 @@ const renderSettlements = (settlements, drawSVG, settlementRadius) => {
     }
 }
 
-const renderBuildable = (drawSVG, point, settlementRadius, fillColour, isSelectable = true) => {
+const renderBuildable = (drawSVG, isCity, point, settlementRadius, fillColour, isSelectable = true) => {
     const {x, y} = point;
     // Create an element to nest settlement graphics in for easier transforming
     const nested = drawSVG.group();
@@ -166,9 +165,12 @@ const renderBuildable = (drawSVG, point, settlementRadius, fillColour, isSelecta
     }
     // Handle null fillColour
     fillColour = fillColour ? fillColour : 'transparent';
+    const size = settlementRadius * 2;
 
     nested
-        .circle(settlementRadius * 2)
+        .rect(size, size)
+        .rotate(45)
+        .radius(isCity ? 0 : settlementRadius)
         .fill(fillColour)
         .stroke({width: 4, color: 'white'})
         .translate(x - settlementRadius, y - settlementRadius);
@@ -183,8 +185,39 @@ const removeBuildSelectors = (drawSVG) => {
         .forEach((s) => s.remove());
 }
 
+const upgradeSettlement = (settlement) => {
+    const settlementSVG = settlement.svg.children()[0];
+    settlementSVG.animate(100).attr({rx: 0, ry: 0});
+}
+
+const addUpgradeSelector = (gameBoard, settlement) => {
+    const size = gameBoard.graphics.settlementRadius * 2 - 10;
+    settlement.svg
+        .image(arrowImg)
+        .size(size, size)
+        .transform({
+            position: [settlement.point.x, settlement.point.y],
+            origin: 'center'
+        })
+        .addClass('settlement-upgrade');
+
+    const settlementGroup = settlement.svg.node;
+    settlementGroup.addEventListener('click', () => {
+        settlement.svg.find('.settlement-upgrade').remove();
+
+        upgradeSettlement(settlement);
+
+        removeBuildSelectors(gameBoard.draw);
+        gameBoard.$socket.emit('upgrade_settlement', {
+            x: settlement.x,
+            y: settlement.y
+        });
+    });
+}
+
 const addSettlementSelector = (gameBoard, settlement) => {
     const nested = renderBuildable(gameBoard.draw,
+        settlement.state === 'city',
         settlement.point,
         gameBoard.graphics.settlementRadius,
         'transparent');
@@ -247,5 +280,6 @@ export {
     redrawSettlement,
     renderBuildable,
     removeBuildSelectors,
-    renderSettlements
+    renderSettlements,
+    upgradeSettlement
 }
