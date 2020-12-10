@@ -53,6 +53,7 @@ export default {
       users: [],
       color: '',
       chat_messages: [],
+      mute_list: [],
     }
   },
   mounted: function () {
@@ -104,6 +105,25 @@ export default {
       }
     });
 
+    this.sockets.subscribe('mute player', (user) => {
+      console.log(user.username);
+      console.log(this.username);
+      console.log(this.username === user.username);
+      if (this.mute_list.includes(user.username)) {
+        if (this.username === user.username) {
+          alert("You have been unmuted!");
+        }
+        this.mute_list = this.mute_list.filter(u => u !== user.username);
+      } else {
+        
+        if (this.username === user.username) {
+          alert("You have been muted by the host.");
+        }
+        this.mute_list.push(user.username);
+      }
+      
+    });
+
     this.sockets.subscribe('user changed', (info) => {
       for (let i = 0; i < this.chat_messages.length; i++) {
         if (this.chat_messages[i].user === info.old_name) {
@@ -118,7 +138,12 @@ export default {
       if (this.message === '') {
         return;
       }
-      this.$socket.emit('chat message', this.message);
+      if (!this.mute_list.includes(this.username)) {
+        this.$socket.emit('chat message', this.message);
+      }
+      else {
+        alert("You are muted!");
+      }
       this.message = '';
     }
   }

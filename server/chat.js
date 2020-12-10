@@ -161,8 +161,16 @@ module.exports = socket => {
     });
 
     socket.on('got kicked', (user) => {
-        console.log('wooooooooo');
         io.emit('got kicked', user);
+        users = users.filter(u => u.username !== user.username);
+        io.emit('user left', user.username);
+        if (users.length >= 1 && users[0].isHost === false) {
+            users[0].isHost = true;
+        }
+    });
+
+    socket.on('mute player', (user) => {
+        io.emit('mute player', user);
     });
 
 

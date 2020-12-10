@@ -93,22 +93,30 @@ export default {
 
   mounted: function () {
     
-    this.sockets.subscribe('set host', name => {
-      if (this.$socket.username == name) {
-        document.getElementById('kick-button').disabled = false;
-        
-      }
-    });
+    // this.sockets.subscribe('set host', name => {
+    //   if (this.$socket.username == name) {
+    //     document.getElementById('kick-button').disabled = false;
+    //   }
+    // });
 
     this.sockets.subscribe('got kicked', (user) => {
-      console.log('hey it tried');
-      console.log(this.$socket.username);
-      console.log(user.username);
+      // console.log(this.$socket.username);
+      // console.log(user.username);
       if (this.$socket.username === user.username) {
         alert('You have been kicked');
         this.$router.push('/');
-        console.log('it is working, sort of');
-      }
+        this.$socket.unsubscribe('got kicked');
+        this.$socket.unsubscribe('user list');
+        this.$socket.unsubscribe('user info');
+        this.$socket.unsubscribe('user joined');
+        this.$socket.unsubscribe('user left');
+        this.$socket.unsubscribe('user changed');
+        this.$socket.unsubscribe('color change');
+        this.$socket.unsubscribe('chat message');
+        this.$socket.unsubscribe('chat info');
+        this.$socket.unsubscribe('mute player');
+      } 
+      
       
     });
 
@@ -156,12 +164,7 @@ export default {
         }
       }
       // console.log(`user left: ${user}`)
-      // for (var i =0; i < this.users.length; i++ ) {
-      //   if (this.users[i].username == user) {
-      //     delete this.users[i];
-      //     delete this.socketList[i];
-      //   }
-      // }
+      
       this.users = this.users.filter(u => u.username !== user);
       // this.socketList = this.socketList.filter(u => u)
     });
@@ -193,30 +196,25 @@ export default {
   },
   methods: {
     kick: function (user) {
-      console.log('this is running');
-      console.log(this.$socket.isHost);
+      
+      // console.log(this.$socket.isHost);
       if (this.$socket.isHost) {
         console.log(this.$socket);
         this.$socket.emit('got kicked', user);
+      } else {
+        alert("Sorry, these options are for the host!");
       }
-      // console.log(this.host);
-      // if (username === this.host){
-      //   // console.log(player);
-      // }
-      // console.log(host + " passed in");
-      // console.log(this.username + " username");
-      // player.$router.push('/home');
-      // console.log(player);
-      // for (let i = 0; i < this.users.length; i++) {
-      //   if (this.users[i].username === player) {
-      //     this.users[i].id.emit('got kicked');
-      //   }
-      
       
     },
 
 
-    mute(user) {
+    mute: function (user) {
+      if (this.$socket.isHost) {
+        this.$socket.emit('mute player', user);
+      } else {
+        alert("Sorry, these options are for the host!");
+      }
+      
 
     }
   }
