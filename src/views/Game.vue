@@ -81,6 +81,7 @@ import Resources from "@/components/Resources";
 import BuildButton from "@/components/BuildButton";
 import DiceButton from "@/components/DiceButton";
 import ResizeText from 'vue-resize-text';
+import {maxBuildings} from "@/assets/js/constants";
 
 export default {
 
@@ -93,13 +94,19 @@ export default {
     return {
       devModal: false,
       turnNumber: 0,
-      player: Object({
+      player: {
+        name: '',
         brick: 0,
         ore: 0,
         wool: 0,
         grain: 0,
         lumber: 0,
-      }),
+        numSettlements: maxBuildings.settlements,
+        numRoads: maxBuildings.roads,
+        numCities: maxBuildings.cities,
+        colour: '',
+        isTurn: false,
+      },
     }
   },
   mounted: function () {
@@ -234,7 +241,7 @@ export default {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 25%;
+  width: fit-content;
 }
 
 </style>
