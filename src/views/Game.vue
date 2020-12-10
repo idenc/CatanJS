@@ -7,7 +7,7 @@
       <div id="sidebar-players-container">
         <UserList
           id="user-list"
-          :username="'test'"
+          username=""
         />
       </div>
       <div id="sidebar-chat-container">
@@ -41,11 +41,14 @@ import UserList from "@/components/chat/UserList";
 import ChatWindow from "@/components/chat/ChatWindow";
 import Resources from "@/components/Resources";
 
+
+
 export default {
 
   name: "Game",
   components: {ChatWindow, UserList, GameBoard, Resources},
   mounted: function () {
+
   },
   methods: {
     startBuild() {

@@ -85,7 +85,10 @@ function isHexColor(hex) {
         && !isNaN(Number('0x' + hex))
 }
 
+const messages = [];
+let users = [];
 module.exports = socket => {
+    
     function commandError(socket, error) {
         socket.emit('command error', {message: error, id: uuidv4()})
     }
@@ -121,13 +124,16 @@ module.exports = socket => {
 
     }
 
-    const messages = [];
-    let users = [];
+    
+
 
     socket.on('disconnect', () => {
         console.log(`${socket.username} left`)
         users = users.filter(u => u.username !== socket.username);
         io.emit('user left', socket.username);
+        if (users.length >= 1 && users[0].isHost === false) {
+            users[0].isHost = true;
+        }
     });
     socket.on('chat message', (msg) => {
         // Keep 200 most recent messages
@@ -154,6 +160,13 @@ module.exports = socket => {
         }
     });
 
+    socket.on('got kicked', (user) => {
+        console.log('wooooooooo');
+        io.emit('got kicked', user);
+    });
+
+
+
     socket.on('user info', (userInfo) => {
         if (!userInfo) {
             // Assign a new color if the client does not have one stored
@@ -167,13 +180,24 @@ module.exports = socket => {
                     // Let client know what their username/color is
                     socket.username = user.name;
                     userInfo.username = user.name;
+                    userInfo.isHost = false;
                     socket.color = userInfo.color;
-                    socket.emit('user info', userInfo);
-                    users.push(userInfo);
-                    console.log('a user connected with username ' + socket.username);
-                    socket.broadcast.emit('user joined', userInfo);
-                    socket.emit('chat info', {current_users: users, messages: messages});
+                    // socket.emit('user info', userInfo);
+                    if (users.length == 0) {
+                        userInfo.isHost = true;
+                    }
+                    socket.isHost = userInfo.isHost;
+                    if (!users.some(u => u.username === user.name)) {
+                        users.push(userInfo);
+                        socket.broadcast.emit('user joined', userInfo);
+                    }
+                    console.log("users below");
                     console.log(users);
+                    socket.emit('user list', users );
+                    socket.emit('user info', userInfo);                              
+                    console.log('a user connected with username ' + socket.username);
+                    // socket.broadcast.emit('user joined', userInfo);
+                    socket.emit('chat info', {current_users: users, messages: messages});
                 })
                 .catch((e) => console.log(e))
         }

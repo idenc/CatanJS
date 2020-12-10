@@ -65,6 +65,10 @@ export default {
       this.$socket.emit('user info', null);
     }
 
+    // if (this.users.length === 1) {
+    //   this.$socket.emit('set host', this.user);
+    // }
+
     this.sockets.subscribe('chat message', (msg) => {
       const messageBox = this.$refs.message_box;
       this.chat_messages.push(msg);
