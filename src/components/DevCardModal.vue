@@ -23,6 +23,11 @@
               <span class="resource-count">1</span>
             </div>
           </div>
+          <div class='requires' resource='count'>
+            <div>
+              <span>Cards Available: {{devCardCount.totalCards}}</span>
+            </div>
+          </div>
         </div>
       </header>
       <section class="modal-body">
@@ -87,11 +92,12 @@ export default {
   data(){
     return{
       devCardCount: {
-        'knight': 14,
-        'roadBuilding': 2,
-        'yearOfPlenty': 2,
-        'monopoly': 2,
-        'victoryPoint': 5
+        'knight': 0,
+        'roadBuilding': 0,
+        'yearOfPlenty': 0,
+        'monopoly': 0,
+        'victoryPoint': 0,
+        'totalCards': 25
       }
     }
   },
@@ -104,7 +110,11 @@ export default {
   sockets: {
     dev_card_update: function (card){
       //update devCardCount
+      this.devCardCount[card]++;
       console.log("dev cards updating")
+    },
+    dev_card_count: function(cardCount){
+      this.devCardCount['totalCards'] = cardCount;
     }
   }
 }
@@ -182,6 +192,10 @@ export default {
 
   .requires[resource='wheat']{
     background: #cf9800;
+  }
+
+  .requires[resource='count']{
+    background: purple;
   }
 
   .requires-icon{

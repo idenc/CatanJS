@@ -444,8 +444,8 @@ class Game {
             io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
 
             //Add dev card to players dev card array
-
-            io.to(this.socketRoom).emit('dev_card_update', card) //Send info to all players to update dev card counts
+            socket.emit('dev_card_update', card); //Send dev card to player that drew the card
+            io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length); //Send info to all players to update overall dev card count
         });
 
         //Play Development Card
