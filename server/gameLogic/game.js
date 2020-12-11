@@ -434,14 +434,18 @@ class Game {
 
         //Build Development Card
         socket.on('build_dev_card', () => {
-            console.log("dev card build")
-            //index between 0 and length-1
+
+            //Need to check resources of player first
+
+            if(this.availableDevCards.length === 0) return;
+
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
-            socket.emit('dev_card_selected', card); //Dont know where this would go
+            io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
 
-            //May need to send new length and counts to users to update dev card modal??
+            //Add dev card to players dev card array
 
+            io.to(this.socketRoom).emit('dev_card_update', card) //Send info to all players to update dev card counts
         });
 
         //Play Development Card

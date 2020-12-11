@@ -83,23 +83,30 @@
 
 <script>
 export default {
-    name: 'DevCardModal',
-    data(){
-      return{
-        devCardCount: {
-          knight: 0,
-          roadBuilding: 0,
-          yearOfPlenty: 0,
-          monopoly: 0,
-          victoryPoint: 0
-        }
-      }
-    },
-    methods: {
-      buyDevCard(){
-        this.$emit('build_dev_card');
+  name: 'DevCardModal',
+  data(){
+    return{
+      devCardCount: {
+        'knight': 14,
+        'roadBuilding': 2,
+        'yearOfPlenty': 2,
+        'monopoly': 2,
+        'victoryPoint': 5
       }
     }
+  },
+  methods: {
+    buyDevCard(){
+      this.$socket.emit('build_dev_card');
+    }
+
+  },
+  sockets: {
+    dev_card_update: function (card){
+      //update devCardCount
+      console.log("dev cards updating")
+    }
+  }
 }
 </script>
 
@@ -108,10 +115,9 @@ export default {
     background: #1b75bb;
     top: 0;
     left: 0;
-    width: 71%;
+    width: 75.2%;
     height: 100%;
     
-    box-shadow: 2px 2px 20px 1px;
     overflow-x: auto;
     display: flex;
     flex-direction: column;
