@@ -434,19 +434,34 @@ class Game {
 
         //Build Development Card
         socket.on('build_dev_card', () => {
-            console.log("dev card build")
-            //index between 0 and length-1
+            //Need to check resources of player first
+
+            if(this.availableDevCards.length === 0) return;
+            
+            const playerIdx = this.turnNumber % this.players.length;
+
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
-            socket.emit('dev_card_selected', card); //Dont know where this would go
+            this.players[playerIdx].devCards.push(card);
 
-            //May need to send new length and counts to users to update dev card modal??
+            //io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
 
+            //Add dev card to players dev card array
+            socket.emit('dev_card_update', card); //Send dev card to player that drew the card
+            io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length); //Send info to all players to update overall dev card count
         });
 
         //Play Development Card
         socket.on('dev_card_played', (cardPlayed) => {
 
+        });
+
+        //Fill out devCardCounts in DevCardModel.vue when the vue is created
+        socket.on('dev_card_info', (playerName) => {
+            const player = this.players.find(p => p.name === playerName);
+            let devCards = player.devCards;
+            socket.emit('fill_dev_cards', devCards);
+            socket.emit('dev_card_count', this.availableDevCards.length);
         });
 
         //End Turn
