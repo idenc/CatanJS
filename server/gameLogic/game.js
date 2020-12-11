@@ -456,11 +456,12 @@ class Game {
 
         });
 
+        //Fill out devCardCounts in DevCardModel.vue when the vue is created
         socket.on('dev_card_info', (playerName) => {
             const player = this.players.find(p => p.name === playerName);
             let devCards = player.devCards;
             socket.emit('fill_dev_cards', devCards);
-            io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length);
+            socket.emit('dev_card_count', this.availableDevCards.length);
         });
 
         //End Turn
