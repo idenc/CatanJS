@@ -250,15 +250,15 @@ export default {
         console.log(offsetX, offsetY)
         const hex = grid.get(hexCoordinates)
         console.log(hex)
-        console.log(hex.hexPolygon.node.getAttribute('index'));
         //If it is this players turn and the robber event is true move the robber to the clicked tile
         if(this.player.isTurn && this.robberEvent){
           let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
           let newRobber = hex.hexPolygon.node.getAttribute('index');
-          console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
+          //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
           this.tiles[fomerRobber].isRobber = false;
           this.tiles[newRobber].isRobber = true;
           this.robberEvent = false;
+          this.$emit('updateRobberEvent', this.robberEvent);
           this.$socket.emit('robber_moved', newRobber);
         }
         // if (hex) {
@@ -705,6 +705,7 @@ export default {
       }
       if(result.diceRoll === 7 && this.player.isTurn){
         this.robberEvent = true;
+        this.$emit('updateRobberEvent', this.robberEvent);
         this.toastTitle = "Rolled";
         this.toastMessage = `${result.diceRoll}: Click on a tile to move the robber`;
         this.$bvToast.show('game-toast');
