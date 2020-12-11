@@ -313,7 +313,7 @@ class Game {
             let roll = die1 + die2;
 
             console.log(`dice roll was ${roll}`)
-            this.player[this.turnNumber % this.players.length].hasRolled = true;
+            this.players[this.turnNumber % this.players.length].hasRolled = true;
 
             if (roll === 7) {
                 this.robberEvent();
@@ -354,7 +354,7 @@ class Game {
             player.numSettlements--;
             const playerTurnNumber = this.turnNumber - playerIdx;
             // Remove resources if it isn't the first two turns
-            if (playerTurnNumber > 1) {
+            if (this.turnNumber >= (this.players.length*2)) {
                 player.brick--;
                 player.lumber--;
                 player.wool--;
@@ -414,15 +414,10 @@ class Game {
             const playerTurnNumber = this.turnNumber - playerIdx;
             newRoad.colour = player.colour;
 
-            if (playerTurnNumber > 1) {
+            if (this.turnNumber >= (this.players.length*2)) {
                 player.brick--;
                 player.lumber--;
-            } else if ((playerTurnNumber === 0
-                && player.numSettlements === maxBuildings.settlements - 1
-                && player.numRoads === maxBuildings.roads - 1)
-                || (playerTurnNumber === 1
-                    && player.numSettlements === maxBuildings.settlements - 2
-                    && player.numRoads === maxBuildings.roads - 2)) {
+            } else{
                 console.log('updating end turn');
                 player.hasRolled = true;
             }
