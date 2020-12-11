@@ -111,13 +111,13 @@ export default {
       console.log(this.username === user.username);
       if (this.mute_list.includes(user.username)) {
         if (this.username === user.username) {
-          alert("You have been unmuted!");
+          this.muteAlert(user, false);
         }
         this.mute_list = this.mute_list.filter(u => u !== user.username);
       } else {
         
         if (this.username === user.username) {
-          alert("You have been muted by the host.");
+          this.muteAlert(user, true);
         }
         this.mute_list.push(user.username);
       }
@@ -141,10 +141,29 @@ export default {
       if (!this.mute_list.includes(this.username)) {
         this.$socket.emit('chat message', this.message);
       }
-      else {
-        alert("You are muted!");
-      }
       this.message = '';
+    },
+
+    muteAlert(user, check) {
+      var docStr = '';
+      var msgStr = '';
+      if (check) {
+        msgStr = user.username + " has been muted!";
+
+        docStr = "#overlayin.mute";
+      } else {
+        msgStr = user.username + " has been unmuted!";
+        docStr = "#overlayin.unmute";
+      }
+      this.$socket.emit('alert message', msgStr);
+
+      document.querySelector("#overlay.alert").classList.add("active");
+      document.querySelector(docStr).classList.add("active");
+      document.querySelector("#overlay.alert").addEventListener("click", () => {
+        document.querySelector("#overlay.alert").classList.remove("active");
+        document.querySelector(docStr).classList.remove("active");
+      });
+      
     }
   }
 }

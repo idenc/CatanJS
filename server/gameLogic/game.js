@@ -208,8 +208,20 @@ class Game {
         });
 
         //Trade
-        socket.on('trade_offer', (dealer, customer) => {
+        socket.on('trade_offer', (users) => {
+            var dealer = users[0];
+            var customer = users[1];
+            console.log(customer);
+            io.emit('trade_request', dealer, customer); 
+            // this needs to be changed to the room thing!! **********************
+        });
 
+        socket.on('trade_accept', (dealer, customer) => {
+            socket.to(this.socketRoom).emit('alert message', dealer + " and " + customer + " are trading...");
+        });
+
+        socket.on('trade_refuse', (dealer) => {
+            socket.to(this.socketRoom.emit('trade_refuse', dealer));
         });
 
         socket.on('trade_outcome', (dealer, customer) => {

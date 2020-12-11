@@ -135,6 +135,19 @@ module.exports = socket => {
             users[0].isHost = true;
         }
     });
+
+    socket.on('alert message', (msg) => {
+        const message = {
+            'user': "Server",
+            'message': msg,
+            'timestamp': Date.now(),
+            'color': 'white',
+            'id': uuidv4(),
+        };
+        messages.push(message);
+        io.emit('chat message', message);
+    });
+
     socket.on('chat message', (msg) => {
         // Keep 200 most recent messages
         if (messages.length >= 200) {

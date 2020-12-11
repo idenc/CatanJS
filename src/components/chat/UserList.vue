@@ -50,25 +50,6 @@
                   Mute
                 </button>
               </div>
-              <!-- <div
-                v-else
-                :id="player-buttons"
-              >
-                <button disabled
-                  :id="'kick-button'" 
-                  :class="'btn btn-primary btn-block'"
-                  
-                >
-                  Kick
-                </button>
-                <button disabled
-                  :id="'mute-button'" 
-                  :class="'btn btn-primary btn-block'"
-                  
-                >
-                  Mute
-                </button>
-              </div>  -->
             </div>
           </li>
         </template>
@@ -93,18 +74,20 @@ export default {
 
   mounted: function () {
     
-    // this.sockets.subscribe('set host', name => {
-    //   if (this.$socket.username == name) {
-    //     document.getElementById('kick-button').disabled = false;
-    //   }
-    // });
 
     this.sockets.subscribe('got kicked', (user) => {
       // console.log(this.$socket.username);
       // console.log(user.username);
       if (this.$socket.username === user.username) {
-        alert('You have been kicked');
-        this.$router.push('/');
+        
+        document.querySelector("#overlay.alert").classList.add("active");
+        document.querySelector("#overlayin.kicked").classList.add("active");
+        document.querySelector("#overlay.alert").addEventListener("click", () => {
+          document.querySelector("#overlay.alert").classList.remove("active");
+          document.querySelector("#overlayin.kicked").classList.remove("active");
+          this.$router.push('/');
+        });
+        
         this.$socket.unsubscribe('got kicked');
         this.$socket.unsubscribe('user list');
         this.$socket.unsubscribe('user info');
@@ -122,6 +105,7 @@ export default {
 
     this.sockets.subscribe('user list', (userList) => {
       this.users = userList;
+      this.$socket.users = userList;
       console.log(this.$socket);
       
     });
@@ -134,26 +118,27 @@ export default {
     });
 
     this.sockets.subscribe('user joined', (user) => {
-      console.log(this.users.length);
+      // console.log(this.users.length);
       // console.log(`user joined: ${user}`)
       // if (!this.users.some(u => u.username === user.username)) {
       if (this.users.length == 1) {
         this.users[0].isHost = true;
         this.$socket.isHost = true;
       } 
-      if (username == undefined) {
-        console.log("it works!");
-        username 
-      }
+      // if (username == undefined) {
+      //   // console.log("it works!");
+      //   username 
+      // }
     
-      console.log(this.$socket.username);
+      // console.log(this.$socket.username);
       
       // this.sockets.broadcast.emit('set host', user.username);
       // this.$socket.username = user.username;
       this.users.push(user);
+      // this.$socket.users.push(user);
       // this.socketList.push(this.$socket);
       // }
-      console.log(this);
+      // console.log(this);
     });
 
     this.sockets.subscribe('user left', (user) => {
@@ -164,8 +149,8 @@ export default {
         }
       }
       // console.log(`user left: ${user}`)
-      
       this.users = this.users.filter(u => u.username !== user);
+      this.$socket.users = this.users;
       // this.socketList = this.socketList.filter(u => u)
     });
 
@@ -180,6 +165,7 @@ export default {
           this.users[i].username = info.new_name;
         }
       }
+      this.$socket.users = this.users;
     });
 
     this.sockets.subscribe('color change', (color_info) => {
@@ -190,6 +176,7 @@ export default {
           break;
         }
       }
+      this.$socket.users = this.users;
     });
 
 
@@ -201,8 +188,9 @@ export default {
       if (this.$socket.isHost) {
         console.log(this.$socket);
         this.$socket.emit('got kicked', user);
+        this.$socket.emit('alert message', user.username + " has been kicked!");
       } else {
-        alert("Sorry, these options are for the host!");
+        this.playerAlert();
       }
       
     },
@@ -212,10 +200,18 @@ export default {
       if (this.$socket.isHost) {
         this.$socket.emit('mute player', user);
       } else {
-        alert("Sorry, these options are for the host!");
+        this.playerAlert();
       }
-      
+    },
 
+
+    playerAlert: function () {
+      document.querySelector("#overlay.alert").classList.add("active");
+        document.querySelector("#overlayin.player").classList.add("active");
+        document.querySelector("#overlay.alert").addEventListener("click", () => {
+          document.querySelector("#overlay.alert").classList.remove("active");
+          document.querySelector("#overlayin.player").classList.remove("active");
+      });
     }
   }
 
@@ -252,7 +248,11 @@ h1 {
   
 }
 
+p.mute {
+  display: none;
+  color: red;
 
+}
 
 
 #user-rows {
@@ -264,9 +264,6 @@ h1 {
 }
 
 #user-row div { 
-
-
-
   align-self: center;
   align-content: space-between;
   margin: auto; 
