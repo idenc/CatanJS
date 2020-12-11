@@ -23,6 +23,11 @@
               <span class="resource-count">1</span>
             </div>
           </div>
+          <div class='requires' resource='count'>
+            <div>
+              <span>Cards Available: {{devCardCount.totalCards}}</span>
+            </div>
+          </div>
         </div>
       </header>
       <section class="modal-body">
@@ -83,23 +88,48 @@
 
 <script>
 export default {
-    name: 'DevCardModal',
-    data(){
-      return{
-        devCardCount: {
-          knight: 0,
-          roadBuilding: 0,
-          yearOfPlenty: 0,
-          monopoly: 0,
-          victoryPoint: 0
-        }
-      }
-    },
-    methods: {
-      buyDevCard(){
-        this.$emit('build_dev_card');
+  name: 'DevCardModal',
+  props: {
+    player: {},
+  },
+  data(){
+    return{
+      devCardCount: {
+        'knight': 0,
+        'roadBuilding': 0,
+        'yearOfPlenty': 0,
+        'monopoly': 0,
+        'victoryPoint': 0,
+        'totalCards': 25
       }
     }
+  },
+  created(){
+    console.log(`Player: ${this.player.name} has opened the dev card vue`)
+    this.$socket.emit('dev_card_info', this.player.name);
+  },
+  methods: {
+    buyDevCard(){
+      if(this.player.isTurn){
+        this.$socket.emit('build_dev_card');
+      }
+    }
+  },
+  sockets: {
+    dev_card_update: function (card){
+      //update devCardCount
+      console.log("dev cards updating")
+      this.devCardCount[card]++;
+    },
+    dev_card_count: function(cardCount){
+      this.devCardCount['totalCards'] = cardCount;
+    },
+    fill_dev_cards: function(cards){
+      for(let i = 0; i < cards.length; i++){
+        this.devCardCount[cards[i]]++;
+      }
+    }
+  }
 }
 </script>
 
@@ -108,10 +138,9 @@ export default {
     background: #1b75bb;
     top: 0;
     left: 0;
-    width: 71%;
+    width: 75.2%;
     height: 100%;
     
-    box-shadow: 2px 2px 20px 1px;
     overflow-x: auto;
     display: flex;
     flex-direction: column;
@@ -176,6 +205,10 @@ export default {
 
   .requires[resource='wheat']{
     background: #cf9800;
+  }
+
+  .requires[resource='count']{
+    background: purple;
   }
 
   .requires-icon{
