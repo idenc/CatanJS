@@ -693,6 +693,9 @@ export default {
         this.player = newPlayer;
       }
       // TODO: Display dice roll to everyone
+      this.toastTitle = "Rolled";
+      this.toastMessage = result.diceRoll;
+      this.$bvToast.show('game-toast');
     }
   }
 }
