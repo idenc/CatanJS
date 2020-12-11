@@ -11,11 +11,13 @@
         @updatePlayer="updatePlayer"
         @displayEndTurnBtn="displayEndTurnBtn"
         @updateTurnNumber="updateTurnNumber"
+        @updateRobberEvent="updateRobberEvent"
       />
       <DiceButton
         :has-rolled="player.hasRolled"
         :turn-number="turnNumber"
         :is-turn="player.isTurn"
+        :robber-event="robberEvent"
         @rollDice="rollDice"
         @endTurn="endTurn"
       />
@@ -110,6 +112,7 @@ export default {
         colour: '',
         isTurn: false,
       },
+      robberEvent: false,
     }
   },
   mounted: function () {
@@ -138,7 +141,11 @@ export default {
       this.turnNumber++;
       console.log('emitting end turn');
       this.$socket.emit('end_turn');
-    }
+    },
+    updateRobberEvent(eventUpdate) {
+      this.robberEvent = eventUpdate;
+      console.log(`Updating Robber Event in Game.vue  ${this.robberEvent}`);
+    },
   },
 }
 </script>

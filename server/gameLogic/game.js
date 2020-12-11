@@ -69,6 +69,7 @@ class Game {
             let tile = {};
             if (tileResources[i] === 'desert') {
                 tile = new Tile(tileResources[i], 0);
+                tile.isRobber = true;
             } else {
                 tile = new Tile(tileResources[i], tileNumbers[numberIndex]);
                 numberIndex++;
@@ -227,23 +228,25 @@ class Game {
         let selectedTiles = this.tiles.filter(obj => obj.number === diceRoll.toString());
         //iterate through all selected tiles
         selectedTiles.forEach((tile) => {
-            // Iterate through all settlement locations touching tile
-            tile.settlements.forEach((settleCoord) => {
-                const settlement = this.settlements.get(JSON.stringify(settleCoord));
-                if (settlement.state !== 'empty') {
-                    const player = this.players.find(p => p.name === settlement.player);
-                    console.log('player');
-                    console.log(player);
+            if(tile.isRobber === false){
+                // Iterate through all settlement locations touching tile
+                tile.settlements.forEach((settleCoord) => {
+                    const settlement = this.settlements.get(JSON.stringify(settleCoord));
+                    if (settlement.state !== 'empty') {
+                        const player = this.players.find(p => p.name === settlement.player);
+                        console.log('player');
+                        console.log(player);
 
-                    if (player) {
-                        if (settlement.state === 'city') {
-                            player[tile.resource] += 2;
-                        } else {
-                            player[tile.resource]++;
+                        if (player) {
+                            if (settlement.state === 'city') {
+                                player[tile.resource] += 2;
+                            } else {
+                                player[tile.resource]++;
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         });
     }
 
@@ -319,12 +322,18 @@ class Game {
                 this.robberEvent();
                 // io.to emits to everyone in room, socket.to emits to everyone except sender
                 io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
-                //Somehow allow the player that rolled the 7 to move teh robber
-                socket.to(this.socketRoom).emit('handle_robber_event');
             } else {
                 this.dealOutResources(roll);
                 io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
             }
+        });
+
+        socket.on('robber_moved', (robberIndex) => {
+            let formerRobber = this.tiles.findIndex((t) => t.isRobber === true);
+            console.log(`robber has moved to ${robberIndex}`);
+            this.tiles[formerRobber].isRobber = false;
+            this.tiles[robberIndex].isRobber = true;
+            io.to(this.socketRoom).emit('update_robber_location', robberIndex);
         });
 
         //Trade

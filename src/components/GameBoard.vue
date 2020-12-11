@@ -184,6 +184,7 @@ export default {
       },
       toastTitle: 'Put toast title here',
       toastMessage: 'Put toast message here',
+      robberEvent: false,
     }
   },
   watch: {
@@ -249,7 +250,17 @@ export default {
         console.log(offsetX, offsetY)
         const hex = grid.get(hexCoordinates)
         console.log(hex)
-
+        //If it is this players turn and the robber event is true move the robber to the clicked tile
+        if(this.player.isTurn && this.robberEvent){
+          let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
+          let newRobber = hex.hexPolygon.node.getAttribute('index');
+          //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
+          this.tiles[fomerRobber].isRobber = false;
+          this.tiles[newRobber].isRobber = true;
+          this.robberEvent = false;
+          this.$emit('updateRobberEvent', this.robberEvent);
+          this.$socket.emit('robber_moved', newRobber);
+        }
         // if (hex) {
         //   hex.highlight()
         // }
@@ -365,7 +376,7 @@ export default {
             gridX--;
           }
           const tile = tiles.find((t) => t.x === gridX && t.y === gridY);
-
+          const tileIndex = tiles.findIndex((t) => t.x === gridX && t.y === gridY);
 
           this.hexPolygon = draw
               .polygon(corners.map(({x, y}) => `${x},${y}`))
@@ -381,7 +392,7 @@ export default {
           }
 
           this.hexPolygon.node.setAttribute('resource', tile.resource);
-
+          this.hexPolygon.node.setAttribute('index', tileIndex);
           //If the current resource is not a desert assign it a number
           //Store the assigned number in 'numberToken' attribute
           if (tile.resource !== 'desert') {
@@ -692,11 +703,25 @@ export default {
       if (newPlayer) {
         this.player = newPlayer;
       }
-      // TODO: Display dice roll to everyone
-      this.toastTitle = "Rolled";
-      this.toastMessage = result.diceRoll;
-      this.$bvToast.show('game-toast');
-    }
+      if(result.diceRoll === 7 && this.player.isTurn){
+        this.robberEvent = true;
+        this.$emit('updateRobberEvent', this.robberEvent);
+        this.toastTitle = "Rolled";
+        this.toastMessage = `${result.diceRoll}: Click on a tile to move the robber`;
+        this.$bvToast.show('game-toast');
+      }
+      else{
+        this.toastTitle = "Rolled";
+        this.toastMessage = result.diceRoll;
+        this.$bvToast.show('game-toast');
+      }
+    },
+    update_robber_location: function(robberIndex){
+      let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
+      
+      this.tiles[fomerRobber].isRobber = false;
+      this.tiles[robberIndex].isRobber = true;
+    },
   }
 }
 
