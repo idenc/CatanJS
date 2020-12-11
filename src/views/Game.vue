@@ -1,7 +1,10 @@
 <template>
   <div id="game-container">
     <div id="board-container">
-      <DevCardModal v-if="devModal === true" />
+      <DevCardModal 
+        v-if="devModal === true" 
+        :player="player"
+      />
       <GameBoard
         ref="gameBoard"
         :turn-number="turnNumber"

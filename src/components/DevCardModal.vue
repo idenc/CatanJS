@@ -89,6 +89,9 @@
 <script>
 export default {
   name: 'DevCardModal',
+  props: {
+    player: {},
+  },
   data(){
     return{
       devCardCount: {
@@ -101,20 +104,30 @@ export default {
       }
     }
   },
+  created(){
+    console.log(`Player: ${this.player.name} has opened the dev card vue`)
+    this.$socket.emit('dev_card_info', this.player.name);
+  },
   methods: {
     buyDevCard(){
-      this.$socket.emit('build_dev_card');
+      if(this.player.isTurn){
+        this.$socket.emit('build_dev_card');
+      }
     }
-
   },
   sockets: {
     dev_card_update: function (card){
       //update devCardCount
-      this.devCardCount[card]++;
       console.log("dev cards updating")
+      this.devCardCount[card]++;
     },
     dev_card_count: function(cardCount){
       this.devCardCount['totalCards'] = cardCount;
+    },
+    fill_dev_cards: function(cards){
+      for(let i = 0; i < cards.length; i++){
+        this.devCardCount[cards[i]]++;
+      }
     }
   }
 }

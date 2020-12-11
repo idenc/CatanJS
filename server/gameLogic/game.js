@@ -434,14 +434,17 @@ class Game {
 
         //Build Development Card
         socket.on('build_dev_card', () => {
-
             //Need to check resources of player first
 
             if(this.availableDevCards.length === 0) return;
+            
+            const playerIdx = this.turnNumber % this.players.length;
 
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
-            io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
+            this.players[playerIdx].devCards.push(card);
+
+            //io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
 
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
@@ -451,6 +454,13 @@ class Game {
         //Play Development Card
         socket.on('dev_card_played', (cardPlayed) => {
 
+        });
+
+        socket.on('dev_card_info', (playerName) => {
+            const player = this.players.find(p => p.name === playerName);
+            let devCards = player.devCards;
+            socket.emit('fill_dev_cards', devCards);
+            io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length);
         });
 
         //End Turn
