@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const mongoose = require('mongoose');
+const User = require('./models/User');
 const io = require('./socket').init(http);
 const passport = require('passport');
 const session = require('express-session');
@@ -52,7 +53,7 @@ module.exports = app => {
     app.use(passport.session());
 
     // TODO: Integrate this to be created with a lobby
-    const debugGame = new Game('placeholderRoom');
+    //const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
         if (socket.request.session.passport && socket.request.session.passport.user) {
@@ -60,7 +61,7 @@ module.exports = app => {
         }
         console.log('user connected');
 
-        debugGame.configureSocketInteractions(socket);
+        //debugGame.configureSocketInteractions(socket);
         configureChat(socket);
         configureLobby(socket);
     });
@@ -92,8 +93,67 @@ module.exports = app => {
         console.log([req.user, req.session])
 
         res.send({user: req.user})
-    })
+    });
 
+    // Security wise this is bad
+    app.get('/user_list', (req, res) => {
+        let users = [];
+
+        User.find({}, function(err, docs) {
+            if (!err) {
+                for (let i = 0; i < docs.length; i++) {
+                    let user = {};
+                    user.email = docs[i]["email"];
+                    user.name = docs[i]["name"];
+                    user.isAdmin = docs[i]["isAdmin"];
+                    //console.log(user);
+                    users.push(user);
+                }
+            } else {
+                console.log(err);
+            }
+
+            res.send(users)
+        });
+    });
+
+    // Security wise this is bad
+    app.post('/make_admin', (req, res) => {
+        User.updateOne(
+            { email: req.body.email }, 
+            { isAdmin : true },
+            function(err, res) {
+
+            }
+        );
+
+        res.send();
+    });
+
+    // Security wise this is bad
+    app.post('/demote_admin', (req, res) => {
+        User.updateOne(
+            { email: req.body.email }, 
+            { isAdmin : false },
+            function(err, res) {
+
+            }
+        );
+
+        res.send();
+    });
+
+    // Security wise this is bad
+    app.post('/delete_user', (req, res, post_email) => {
+        User.deleteOne(
+            { email: req.body.email }, 
+            function(err, res) {
+
+            }
+        );
+
+        res.send();
+    });
 
     app.get('/logout', (req, res) => {
         req.logout();

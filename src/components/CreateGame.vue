@@ -3,7 +3,7 @@
     <div 
       id="errorModal"
       v-show="showError"
-      class="modal"
+      class="modal fade"
       aria-hidden="false"
     >
       <div class="modal-dialog">
@@ -208,3 +208,12 @@ export default {
 }
 
 </script>
+
+<style>
+
+.modal {
+  background: none;
+  width: 100%;
+}
+
+</style>

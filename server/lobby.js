@@ -59,8 +59,27 @@ module.exports = socket => {
                 games[key].players.push(new Player());
                 socket.emit("create_game", "success"); // Temporary hack
             } else {
-                // socket.emit("enter_password", name);
+                socket.emit("enter_password", name);
             }
+        }
+    });
+
+    socket.on("join_game_passworded", (bundle) => {
+        const name = bundle.name;
+        const password = bundle.password;
+
+        const key = name.toLowerCase();
+
+        if (password == lobbies[key]["password"]) {
+            if (lobbies[key]["numPlayers"] < lobbies[key]["playerCap"]) {
+                lobbies[key]["numPlayers"] += 1;
+                lobbies[key]["players"].push(socket);
+                games[key].configureSocketInteractions(socket);
+                games[key].players.push(new Player());
+                socket.emit("create_game", "success"); // Temporary hack
+            }
+        } else {
+            socket.emit("lobby_error", "Wrong Password");
         }
     });
 

@@ -10,15 +10,22 @@
         </h2>
         <button
           class="btn btn-secondary mb-2"
-          @click="showCreateScreen = true"
+          @click="showCreateScreen = true; showAdmin = false;"
         >
           Create Game
         </button>
         <button
           class="btn btn-secondary"
-          @click="showCreateScreen = false; getGames();"
+          @click="showCreateScreen = false; showAdmin = false; getGames();"
         >
           Join Game
+        </button>
+        <button
+          v-if="isAdmin"
+          class="btn btn-secondary"
+          @click="showAdmin = true;"
+        >
+          Admin Panel
         </button>
         <button
           class="btn btn-secondary"
@@ -28,8 +35,9 @@
         </button>
       </div>
       <div class="col">
-        <CreateGame v-show="showCreateScreen" />
-        <JoinGame v-show="!showCreateScreen" />
+        <CreateGame v-show="showCreateScreen && !showAdmin" />
+        <JoinGame v-show="!showCreateScreen && !showAdmin" />
+        <AdminPanel v-show="showAdmin" />
       </div>
     </div>
   </div>
@@ -38,17 +46,20 @@
 <script>
 import CreateGame from "@/components/CreateGame";
 import JoinGame from "@/components/JoinGame";
+import AdminPanel from "@/components/AdminPanel";
 import axios from 'axios';
 
 export default {
   name: 'Lobby',
-  components: {CreateGame, JoinGame},
+  components: {CreateGame, JoinGame, AdminPanel},
 
   data() {
     return {
       showCreateScreen: true,
       showUsername: false,
-      username: ''
+      username: '',
+      showAdmin: false,
+      isAdmin: true // Super Secure Setting™
     }
   },
   mounted() {
@@ -73,6 +84,7 @@ export default {
             console.log(response)
             this.username = response.data.user.name;
             this.showUsername = true;
+            //this.isAdmin = response.data.user.isAdmin;
           })
           .catch((error) => {
             console.log('error')
