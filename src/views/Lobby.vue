@@ -84,7 +84,7 @@ export default {
             console.log(response)
             this.username = response.data.user.name;
             this.showUsername = true;
-            //this.isAdmin = response.data.user.isAdmin;
+            this.isAdmin = response.data.user.isAdmin;
           })
           .catch((error) => {
             console.log('error')
