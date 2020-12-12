@@ -602,7 +602,8 @@ export default {
       console.log(numberTokenSVGs)
     },
     renderNumberToken(drawSVG, hex) {
-      let number = hex.hexPolygon.node.getAttribute('numberToken')
+      let number = hex.hexPolygon.node.getAttribute('numberToken');
+      let resource = hex.hexPolygon.node.getAttribute('resource');
       if (!number) {
         return;
       }
@@ -621,6 +622,7 @@ export default {
       number === '10' ? numberTokenURL = require('../assets/svg/token-10.svg') : '';
       number === '11' ? numberTokenURL = require('../assets/svg/token-11.svg') : '';
       number === '12' ? numberTokenURL = require('../assets/svg/token-12.svg') : '';
+      resource === 'desert' ? numberTokenURL = require('../assets/svg/token-robber.svg') : '';
       if (numberTokenURL !== '') {
         const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
 
