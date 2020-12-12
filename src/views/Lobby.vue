@@ -59,7 +59,7 @@ export default {
       showUsername: false,
       username: '',
       showAdmin: false,
-      isAdmin: true // Super Secure Setting™
+      isAdmin: false // Super Secure Setting™
     }
   },
   mounted() {
