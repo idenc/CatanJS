@@ -252,15 +252,19 @@ export default {
         console.log(hex)
         //If it is this players turn and the robber event is true move the robber to the clicked tile
         if(this.player.isTurn && this.robberEvent){
-          let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
           let newRobber = hex.hexPolygon.node.getAttribute('index');
           //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
-          this.tiles[fomerRobber].isRobber = false;
-          this.tiles[newRobber].isRobber = true;
           this.robberEvent = false;
           this.$emit('updateRobberEvent', this.robberEvent);
           this.$socket.emit('robber_moved', newRobber);
         }
+        /*if(this.player.isTurn){
+          let newRobber = hex.hexPolygon.node.getAttribute('index');
+          //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
+          this.robberEvent = false;
+          this.$emit('updateRobberEvent', this.robberEvent);
+          this.$socket.emit('robber_moved', newRobber);
+        }*/
         // if (hex) {
         //   hex.highlight()
         // }
@@ -604,9 +608,6 @@ export default {
     renderNumberToken(drawSVG, hex) {
       let number = hex.hexPolygon.node.getAttribute('numberToken');
       let resource = hex.hexPolygon.node.getAttribute('resource');
-      if (!number) {
-        return;
-      }
       const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
       const center = hex.center();
       const {x, y} = hex.toPoint();
@@ -640,10 +641,6 @@ export default {
     },
     redrawNumberToken(drawSVG, hex) {
       let number = hex.hexPolygon.node.getAttribute('numberToken')
-      if (!number) {
-        return;
-      }
-
       const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
       const center = hex.center();
       const {x, y} = hex.toPoint();
@@ -656,6 +653,9 @@ export default {
           .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
           .transform(0)
           .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
+    },
+    redrawRobberToken(drawSVG, oldHexCoordinates, newHexCoordinates){
+      console.log('drawing robber');
     },
     startBuild(type) {
       if (type === 'road') {
@@ -723,6 +723,11 @@ export default {
       
       this.tiles[fomerRobber].isRobber = false;
       this.tiles[robberIndex].isRobber = true;
+      const oldCoordinates = [this.tiles[fomerRobber].x, this.tiles[fomerRobber].y];
+      const newCoordinates = [this.tiles[robberIndex].x, this.tiles[robberIndex].y];
+      //console.log(`Old robber coordinates X:${oldCoordinates[0]}, Y:${oldCoordinates[1]}`);
+      //console.log(`New robber coordinates X:${newCoordinates[0]}, Y:${newCoordinates[1]}`);
+      this.redrawRobberToken(this.draw, oldCoordinates, newCoordinates);
     },
   }
 }
