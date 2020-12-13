@@ -251,22 +251,22 @@ export default {
         const hex = grid.get(hexCoordinates)
         console.log(hex)
         //If it is this players turn and the robber event is true move the robber to the clicked tile
-        /*if(this.player.isTurn && this.robberEvent){
-          let newRobber = hex.hexPolygon.node.getAttribute('index');
-          //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
-          this.robberEvent = false;
-          this.$emit('updateRobberEvent', this.robberEvent);
-          this.$socket.emit('robber_moved', newRobber);
-        }*/
-
-        //ForTesting
-        if(this.player.isTurn){
+        if(this.player.isTurn && this.robberEvent){
           let newRobber = hex.hexPolygon.node.getAttribute('index');
           //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
           this.robberEvent = false;
           this.$emit('updateRobberEvent', this.robberEvent);
           this.$socket.emit('robber_moved', newRobber);
         }
+
+        //ForTesting
+        /*if(this.player.isTurn){
+          let newRobber = hex.hexPolygon.node.getAttribute('index');
+          //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
+          this.robberEvent = false;
+          this.$emit('updateRobberEvent', this.robberEvent);
+          this.$socket.emit('robber_moved', newRobber);
+        }*/
         // if (hex) {
         //   hex.highlight()
         // }
