@@ -281,7 +281,7 @@ class Game {
      */
     testLargestArmy() {
         let largest; // the size of the largest army
-        let player_i; = null; // tracks current record holder
+        let player_i = null; // tracks current record holder
         let new_i = null; // index of player whose army size = largest (if this is not -1)
 
         if (this.largestArmy == null) {
