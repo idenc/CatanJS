@@ -1,13 +1,13 @@
 <template>
   <div class="container">
-    <div class="row mt-5">
-      <div class="col-2">
         <h2
           v-if="showUsername"
-          class="h2"
+          class="h2 pt-5"
         >
           Welcome {{ username }}
         </h2>
+    <div class="row mt-5">
+      <div class="col-2">
         <button
           class="btn btn-secondary mb-2"
           @click="showCreateScreen = true; showAdmin = false;"
