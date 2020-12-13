@@ -1,6 +1,6 @@
 <template>
     <div class="dev-modal">
-      <header class="modal-header">
+      <header class="dev-modal-header">
         <div class='buy-button'>
           <div class='buy' @click="buyDevCard()">Buy</div>
         </div>

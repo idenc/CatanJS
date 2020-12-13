@@ -495,7 +495,7 @@ class Game {
                 player.lumber--;
                 player.wool--;
                 player.grain--;
-                this.availableResources[brick]++;
+                this.availableResources.brick++;
                 this.availableResources[lumber]++;
                 this.availableResources[wool]++;
                 this.availableResources[grain]++;
@@ -591,6 +591,12 @@ class Game {
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
+            this.players[playerIdx].ore--;
+            this.players[playerIdx].lumber--;
+            this.players[playerIdx].grain--;
+            this.availableResources.ore++;
+            this.availableResources.lumber++;
+            this.availableResources.grain++;
 
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
