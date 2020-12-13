@@ -106,9 +106,9 @@ export default {
     });
 
     this.sockets.subscribe('mute player', (user) => {
-      console.log(user.username);
-      console.log(this.username);
-      console.log(this.username === user.username);
+      // console.log(user.username);
+      // console.log(this.username);
+      // console.log(this.username === user.username);
       if (this.mute_list.includes(user.username)) {
         if (this.username === user.username) {
           this.muteAlert(user, false);
@@ -157,10 +157,10 @@ export default {
       }
       this.$socket.emit('alert message', msgStr);
 
-      document.querySelector("#overlay.alert").classList.add("active");
+      document.querySelector("#overlay.main").classList.add("active");
       document.querySelector(docStr).classList.add("active");
-      document.querySelector("#overlay.alert").addEventListener("click", () => {
-        document.querySelector("#overlay.alert").classList.remove("active");
+      document.querySelector("#overlay.main").addEventListener("click", () => {
+        document.querySelector("#overlay.main").classList.remove("active");
         document.querySelector(docStr).classList.remove("active");
       });
       

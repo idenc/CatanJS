@@ -80,10 +80,10 @@ export default {
       // console.log(user.username);
       if (this.$socket.username === user.username) {
         
-        document.querySelector("#overlay.alert").classList.add("active");
+        document.querySelector("#overlay.main").classList.add("active");
         document.querySelector("#overlayin.kicked").classList.add("active");
-        document.querySelector("#overlay.alert").addEventListener("click", () => {
-          document.querySelector("#overlay.alert").classList.remove("active");
+        document.querySelector("#overlay.main").addEventListener("click", () => {
+          document.querySelector("#overlay.main").classList.remove("active");
           document.querySelector("#overlayin.kicked").classList.remove("active");
           this.$router.push('/');
         });
@@ -206,10 +206,10 @@ export default {
 
 
     playerAlert: function () {
-      document.querySelector("#overlay.alert").classList.add("active");
+      document.querySelector("#overlay.main").classList.add("active");
         document.querySelector("#overlayin.player").classList.add("active");
-        document.querySelector("#overlay.alert").addEventListener("click", () => {
-          document.querySelector("#overlay.alert").classList.remove("active");
+        document.querySelector("#overlay.main").addEventListener("click", () => {
+          document.querySelector("#overlay.main").classList.remove("active");
           document.querySelector("#overlayin.player").classList.remove("active");
       });
     }
