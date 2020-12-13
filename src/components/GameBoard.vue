@@ -696,7 +696,7 @@ export default {
       let oldHex = grid.get(oldTileIndex);
       let newHex = grid.get(newTileIndex);
 
-      const center = oldHex.center();
+      const center = newHex.center();
       const {x, y} = newHex.toPoint();
       const numberTokenRadius = newHex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
 
