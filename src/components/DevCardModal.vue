@@ -1,6 +1,6 @@
 <template>
-    <div class="modal">
-      <header class="modal-header">
+    <div class="dev-modal">
+      <header class="dev-modal-header">
         <div class='buy-button'>
           <div class='buy' @click="buyDevCard()">Buy</div>
         </div>
@@ -140,11 +140,11 @@ export default {
 </script>
 
 <style>
-  .modal {
+  .dev-modal {
     background: #1b75bb;
     top: 0;
     left: 0;
-    width: 75.2%;
+    width: 100%;
     height: 100%;
     
     overflow-x: auto;
@@ -152,7 +152,7 @@ export default {
     flex-direction: column;
   }
 
-  .modal-header{
+  .dev-modal-header{
     position: relative;
     padding: 40px;
     display: flex;
