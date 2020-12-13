@@ -440,11 +440,11 @@ class Game {
             
             const playerIdx = this.turnNumber % this.players.length;
 
+            if (this.players[playerIdx].ore === 0 || this.players[playerIdx].lumber === 0 || this.players[playerIdx].grain === 0) return;
+
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
-
-            //io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
 
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
@@ -453,7 +453,24 @@ class Game {
 
         //Play Development Card
         socket.on('dev_card_played', (cardPlayed) => {
+            const playerIdx = this.turnNumber % this.players.length;
 
+            if(cardPlayed === 'knight'){
+                this.robberEvent();
+                socket.to(this.socketRoom).emit('handle_robber_event');
+            }
+            else if(cardPlayed === 'roadBuilding'){
+                
+            }
+            else if(cardPlayed === 'yearOfPlenty'){
+                //display modal for picking 2 resources
+            }
+            else if(cardPlayed === 'monopoly'){
+                //when resources are limited, deal all of one type to this player
+            }
+            else if(cardPlayed === 'victoryPoint'){
+                this.players[playerIdx].victoryPoints++;
+            }
         });
 
         //Fill out devCardCounts in DevCardModel.vue when the vue is created

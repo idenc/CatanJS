@@ -33,7 +33,7 @@
       <section class="modal-body">
         <div>
           <div class="flex-container">
-            <div class='knight-card'>
+            <div class='knight-card' @click="useDevCard('knight')">
               <h5><b>Knight</b></h5>
               <div class='knight-des'>
                 Move the robber. Steal 1 resource from the owner of a settlement or city adjacent
@@ -43,7 +43,7 @@
                 {{devCardCount.knight}}x
               </div>
             </div>
-            <div class='road-building-card'>
+            <div class='road-building-card' @click="useDevCard('roadBuilding')">
               <h5><b>Road Building</b></h5>
               <div>
                 Place 2 roads.
@@ -52,7 +52,7 @@
                 {{devCardCount.roadBuilding}}x
               </div>
             </div>
-            <div class='year-of-plenty-card'>
+            <div class='year-of-plenty-card' @click="useDevCard('yearOfPlenty')">
               <h5><b>Year of Plenty</b></h5>
               <div>
                 Draw 2 resource cards.
@@ -61,7 +61,7 @@
                 {{devCardCount.yearOfPlenty}}x
               </div>
             </div>
-            <div class='monopoly-card'>
+            <div class='monopoly-card' @click="useDevCard('monopoly')">
               <h5><b>Monopoly</b></h5>
               <div>
                 Steal 1 type of resource from all.
@@ -70,7 +70,7 @@
                 {{devCardCount.monopoly}}x
               </div>
             </div>
-            <div class='victory-point-card'>
+            <div class='victory-point-card' @click="useDevCard('victoryPoint')">
               <h5><b>Victory Point Cards</b></h5>
               <h6><b>1 Victory Point!</b></h6>
               <div>
@@ -112,6 +112,12 @@ export default {
     buyDevCard(){
       if(this.player.isTurn){
         this.$socket.emit('build_dev_card');
+      }
+    },
+    useDevCard(card){
+      if(this.player.isTurn){
+        this.$socket.emit('dev_card_played', card);
+        if(this.devCardCount[card] > 0) this.devCardCount[card]--;
       }
     }
   },
