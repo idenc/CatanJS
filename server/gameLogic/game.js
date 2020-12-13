@@ -30,6 +30,7 @@ class Game {
     largestArmy = null;
     players = [];
     availableDevCards = [];
+    availableResources = {};
     socketRoom = 'room';
     grid;
     turnNumber = 0;
@@ -56,6 +57,17 @@ class Game {
         this.generateTiles();
         this.generateSettlements();
         this.generateDevCards();
+        this.generateResources();
+    }
+
+    generateResources(){
+        this.availableResources = {
+            'brick': 19,
+            'ore': 19,
+            'wool': 19,
+            'grain': 19,
+            'lumber': 19
+        }
     }
 
     generateTiles() {
@@ -238,8 +250,10 @@ class Game {
                     if (player) {
                         if (settlement.state === 'city') {
                             player[tile.resource] += 2;
+                            this.availableResources[tile.resource] -= 2;
                         } else {
                             player[tile.resource]++;
+                            this.availableResources[tile.resource]--;
                         }
                     }
                 }
@@ -261,6 +275,7 @@ class Game {
                     let index = Math.floor(Math.random() * removalArray.length);
                     if (player[removalArray[index]] > 0) {
                         player[removalArray[index]]--;
+                        this.availableResources[removalArray[index]]++;
                         removed++;
                     } else {
                         removalArray.splice(index, 1);
@@ -359,6 +374,10 @@ class Game {
                 player.lumber--;
                 player.wool--;
                 player.grain--;
+                this.availableResources['brick']++;
+                this.availableResources['lumber']++;
+                this.availableResources['wool']++;
+                this.availableResources['grain']++;
             }
 
             // Get tiles adjacent to this settlement
@@ -368,6 +387,7 @@ class Game {
             // Give the player one resource for each adjacent tile
             adjacentTiles.forEach((tile) => {
                 player[tile.resource]++;
+                this.availableResources[tile.resource]--;
             });
 
             const jsonSettlements = JSON.stringify(Array.from(this.settlements.entries()));
@@ -392,6 +412,8 @@ class Game {
 
             player.ore -= 3;
             player.grain -= 2;
+            this.availableResources['ore'] += 3;
+            this.availableResources['grain'] += 2;
 
             const settlement = this.settlements.get(JSON.stringify(settlementCoord));
             settlement.state = 'city';
@@ -417,6 +439,8 @@ class Game {
             if (this.turnNumber >= (this.players.length*2)) {
                 player.brick--;
                 player.lumber--;
+                this.availableResources['brick']++;
+                this.availableResources['lumber']++;
             } else{
                 console.log('updating end turn');
                 player.hasRolled = true;
