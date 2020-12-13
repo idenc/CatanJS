@@ -273,6 +273,10 @@ class Game {
         }
     }
 
+    checkLongestRoad(){
+        
+    }
+
     /**
      * Probably this method should be called when a room is created
      * for each player in the room
@@ -361,6 +365,7 @@ class Game {
             const player = this.players[playerIdx];
             settlement.colour = player.colour;
             player.numSettlements--;
+            player.victoryPoints++;
             const playerTurnNumber = this.turnNumber - playerIdx;
             // Remove resources if it isn't the first two turns
             if (this.turnNumber >= (this.players.length*2)) {
@@ -390,6 +395,7 @@ class Game {
                 settlements: jsonSettlements,
                 player: player
             });
+            io.to(this.socketRoom).emit('update_victory_points', player);
         });
 
         socket.on('upgrade_settlement', (settlementCoord) => {
@@ -398,7 +404,7 @@ class Game {
             // Give back settlement and remove city
             player.numSettlements++;
             player.numCities--;
-
+            player.victoryPoints++;
             player.ore -= 3;
             player.grain -= 2;
 
@@ -412,6 +418,7 @@ class Game {
                 city: settlementCoord,
                 player: player
             });
+            io.to(this.socketRoom).emit('update_victory_points', player);
         });
 
         //Build Road
@@ -432,6 +439,7 @@ class Game {
             }
 
             this.roads.push(newRoad);
+            let owner = checkLongestRoad();
             socket.to(this.socketRoom).emit('update_roads', {
                 roads: this.roads
             });
