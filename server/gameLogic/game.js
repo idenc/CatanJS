@@ -307,7 +307,6 @@ class Game {
                             }
                         }
                     }
-                    console.log(stack.length);
                 }
                 if(stack.length > maxSize){
                     maxSize = stack.length;
