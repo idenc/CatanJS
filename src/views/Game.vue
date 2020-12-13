@@ -40,7 +40,10 @@
           Cities - {{ player.numCities }}
         </div>
       </div>
-      <Overlay ref="overlay" />
+      <Overlay
+        ref="overlay"
+        :username="player.name"
+      />
     </div>
     <div id="sidebar-container">
       <div id="sidebar-players-container">
