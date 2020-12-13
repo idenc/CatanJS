@@ -850,6 +850,7 @@ export default {
 
 ::v-deep .build-selector:hover {
   fill: green;
+  cursor: pointer;
 }
 
 </style>
