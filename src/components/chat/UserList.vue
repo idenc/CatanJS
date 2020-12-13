@@ -139,6 +139,18 @@ export default {
         }
       }
     });
+
+    this.sockets.subscribe('update_victory_points', (player) => {
+      let user = this.users.find(u => u.username === player.name);
+      if(!user){
+        return;
+      }
+      console.log(`${player.name} VP: ${player.victoryPoints}`);
+      let container = document.getElementsByClassName(user.username);
+      let victoryPoints = container[0].children[1];
+      victoryPoints.innerHTML = `# VP:<br> ${player.victoryPoints}`;
+
+    });
   }
 }
 </script>
