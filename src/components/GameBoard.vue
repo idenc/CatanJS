@@ -185,6 +185,10 @@ export default {
       toastTitle: 'Put toast title here',
       toastMessage: 'Put toast message here',
       robberEvent: false,
+      robber: {
+        token: null,
+        gridIndex: null
+      },
     }
   },
   watch: {
@@ -309,6 +313,7 @@ export default {
           hex.redrawOcean(maxHexSize);
         })
         this.redrawNumberTokens(draw, grid);
+        this.redrawRobberToken(draw, grid);
         // Update the dimensions of the settlements
         updateSettlementLocations(grid, this.settlements);
         redrawSettlements(this.settlements, draw);
@@ -344,7 +349,8 @@ export default {
         //const newCoordinates = [this.tiles[robberIndex].x, this.tiles[robberIndex].y];
         //console.log(`Old robber coordinates X:${oldCoordinates[0]}, Y:${oldCoordinates[1]}`);
         //console.log(`New robber coordinates X:${newCoordinates[0]}, Y:${newCoordinates[1]}`);
-        this.redrawRobberToken(this.draw, grid, Number(fomerRobber), Number(robberIndex));
+        this.robber.gridIndex = robberIndex;
+        this.moveRobberToken(this.draw, grid, Number(fomerRobber), Number(robberIndex));
       });
     },
     updateGraphicsPropertiesByWindowSize() {
@@ -614,13 +620,15 @@ export default {
     // Draw the number tiles
     renderNumberTokens(drawSVG, grid) {
       const numberTokenSVGs = [];
+      let i = 0;
       grid.forEach(hex => {
-        const numberTokenSVG = this.renderNumberToken(drawSVG, hex);
+        const numberTokenSVG = this.renderNumberToken(drawSVG, hex, i);
         numberTokenSVGs.push(numberTokenSVG);
+        i++;
       })
       console.log(numberTokenSVGs)
     },
-    renderNumberToken(drawSVG, hex) {
+    renderNumberToken(drawSVG, hex, index) {
       let number = hex.hexPolygon.node.getAttribute('numberToken');
       let resource = hex.hexPolygon.node.getAttribute('resource');
       const numberTokenRadius = hex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
@@ -647,6 +655,10 @@ export default {
             .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
             .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
         Object.assign(hex, {token: numberToken});
+        if (resource === 'desert') {
+          this.robber.token = numberToken;
+          this.robber.gridIndex = index;
+        }
       }
     },
     redrawNumberTokens(drawSVG, grid) {
@@ -669,11 +681,33 @@ export default {
           .transform(0)
           .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
     },
-    redrawRobberToken(drawSVG, grid, oldTileIndex, newTileIndex){
+    redrawRobberToken(drawSVG, grid){
+      const center = grid[this.robber.gridIndex].center();
+      const {x, y} = grid[this.robber.gridIndex].toPoint();
+      const numberTokenRadius = grid[this.robber.gridIndex].hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
+
+      // Redraw Robber token
+      this.robber.token
+          .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
+          .transform(0)
+          .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
+    },
+    moveRobberToken(drawSVG, grid, oldTileIndex, newTileIndex){
       let oldHex = grid.get(oldTileIndex);
       let newHex = grid.get(newTileIndex);
-      console.log(oldHex);
-      console.log(newHex);
+
+      const center = oldHex.center();
+      const {x, y} = newHex.toPoint();
+      const numberTokenRadius = newHex.hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
+
+      oldHex.token.node.classList.remove('d-none')
+      newHex.token.node.classList.add('d-none')
+
+      // Move Robber token
+      this.robber.token
+          .size(`${numberTokenRadius * 2}px`, `${numberTokenRadius * 2}px`)
+          .transform(0)
+          .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
     },
     startBuild(type) {
       if (type === 'road') {
@@ -766,6 +800,10 @@ export default {
 }
 
 #drawSVG {
+  display: none;
+}
+
+::v-deep .d-none {
   display: none;
 }
 
