@@ -251,20 +251,22 @@ export default {
         const hex = grid.get(hexCoordinates)
         console.log(hex)
         //If it is this players turn and the robber event is true move the robber to the clicked tile
-        if(this.player.isTurn && this.robberEvent){
-          let newRobber = hex.hexPolygon.node.getAttribute('index');
-          //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
-          this.robberEvent = false;
-          this.$emit('updateRobberEvent', this.robberEvent);
-          this.$socket.emit('robber_moved', newRobber);
-        }
-        /*if(this.player.isTurn){
+        /*if(this.player.isTurn && this.robberEvent){
           let newRobber = hex.hexPolygon.node.getAttribute('index');
           //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
           this.robberEvent = false;
           this.$emit('updateRobberEvent', this.robberEvent);
           this.$socket.emit('robber_moved', newRobber);
         }*/
+
+        //ForTesting
+        if(this.player.isTurn){
+          let newRobber = hex.hexPolygon.node.getAttribute('index');
+          //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
+          this.robberEvent = false;
+          this.$emit('updateRobberEvent', this.robberEvent);
+          this.$socket.emit('robber_moved', newRobber);
+        }
         // if (hex) {
         //   hex.highlight()
         // }
@@ -330,6 +332,19 @@ export default {
         // Update the dimensions of the settlements
         updateSettlementLocations(grid, this.settlements);
         renderSettlements(this.settlements, this.draw, this.graphics.settlementRadius);
+      });
+
+      this.sockets.subscribe('update_robber_location', (robberIndex) => {
+        let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
+        this.tiles[fomerRobber].isRobber = false;
+        this.tiles[robberIndex].isRobber = true;
+        //let oldHex = grid.get({x: this.tiles[fomerRobber].x, y: this.tiles[fomerRobber].y});
+        //let newHex = grid.get({x: this.tiles[robberIndex].x, y: this.tiles[robberIndex].y});
+        //const oldCoordinates = [this.tiles[fomerRobber].x, this.tiles[fomerRobber].y];
+        //const newCoordinates = [this.tiles[robberIndex].x, this.tiles[robberIndex].y];
+        //console.log(`Old robber coordinates X:${oldCoordinates[0]}, Y:${oldCoordinates[1]}`);
+        //console.log(`New robber coordinates X:${newCoordinates[0]}, Y:${newCoordinates[1]}`);
+        this.redrawRobberToken(this.draw, grid, Number(fomerRobber), Number(robberIndex));
       });
     },
     updateGraphicsPropertiesByWindowSize() {
@@ -654,8 +669,11 @@ export default {
           .transform(0)
           .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
     },
-    redrawRobberToken(drawSVG, oldHexCoordinates, newHexCoordinates){
-      console.log('drawing robber');
+    redrawRobberToken(drawSVG, grid, oldTileIndex, newTileIndex){
+      let oldHex = grid.get(oldTileIndex);
+      let newHex = grid.get(newTileIndex);
+      console.log(oldHex);
+      console.log(newHex);
     },
     startBuild(type) {
       if (type === 'road') {
@@ -718,7 +736,7 @@ export default {
         this.$bvToast.show('game-toast');
       }
     },
-    update_robber_location: function(robberIndex){
+    /*update_robber_location: function(robberIndex){
       let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
       
       this.tiles[fomerRobber].isRobber = false;
@@ -728,7 +746,7 @@ export default {
       //console.log(`Old robber coordinates X:${oldCoordinates[0]}, Y:${oldCoordinates[1]}`);
       //console.log(`New robber coordinates X:${newCoordinates[0]}, Y:${newCoordinates[1]}`);
       this.redrawRobberToken(this.draw, oldCoordinates, newCoordinates);
-    },
+    },*/
   }
 }
 
