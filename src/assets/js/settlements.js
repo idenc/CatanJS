@@ -1,4 +1,5 @@
 import {maxBuildings} from "../js/constants";
+import {arePointsEqual} from "@/assets/js/roads";
 
 const arrowImg = require('../img/arrow.svg');
 
@@ -76,6 +77,15 @@ const settlementAvailable = (gameBoard, settlement) => {
     for (const neighbourCoord of settlement.neighbours) {
         const neighbour = gameBoard.settlements.get(JSON.stringify(neighbourCoord));
         if (neighbour.state !== 'empty') {
+            return false;
+        }
+    }
+
+    if (gameBoard.turnNumber > 1) {
+        const settlementCoord = {x: settlement.x, y: settlement.y}
+        const adjacentRoads = gameBoard.roads.filter(road => road.player === gameBoard.player.name && (arePointsEqual(road.to, settlementCoord)
+            || arePointsEqual(road.from, settlementCoord)));
+        if (adjacentRoads.length === 0) {
             return false;
         }
     }
