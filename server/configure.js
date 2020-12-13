@@ -62,7 +62,6 @@ module.exports = app => {
         console.log('user connected');
 
         //debugGame.configureSocketInteractions(socket);
-        configureChat(socket);
         configureLobby(socket);
     });
 
@@ -99,7 +98,7 @@ module.exports = app => {
     app.get('/user_list', (req, res) => {
         let users = [];
 
-        User.find({}, function(err, docs) {
+        User.find({}, function (err, docs) {
             if (!err) {
                 for (let i = 0; i < docs.length; i++) {
                     let user = {};
@@ -120,9 +119,9 @@ module.exports = app => {
     // Security wise this is bad
     app.post('/make_admin', (req, res) => {
         User.updateOne(
-            { email: req.body.email }, 
-            { isAdmin : true },
-            function(err, res) {
+            {email: req.body.email},
+            {isAdmin: true},
+            function (err, res) {
 
             }
         );
@@ -133,9 +132,9 @@ module.exports = app => {
     // Security wise this is bad
     app.post('/demote_admin', (req, res) => {
         User.updateOne(
-            { email: req.body.email }, 
-            { isAdmin : false },
-            function(err, res) {
+            {email: req.body.email},
+            {isAdmin: false},
+            function (err, res) {
 
             }
         );
@@ -146,8 +145,8 @@ module.exports = app => {
     // Security wise this is bad
     app.post('/delete_user', (req, res, post_email) => {
         User.deleteOne(
-            { email: req.body.email }, 
-            function(err, res) {
+            {email: req.body.email},
+            function (err, res) {
 
             }
         );
