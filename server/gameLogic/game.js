@@ -485,10 +485,6 @@ class Game {
             io.to(this.socketRoom).emit('start_turn', this.players);
         });
 
-        socket.on('robber_moved', (tile) => {
-
-        });
-
         socket.on('update_player_resources', () => {
 
         });
