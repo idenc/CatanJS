@@ -859,4 +859,8 @@ export default {
   cursor: pointer;
 }
 
+::v-deep .settlement-upgrade:hover {
+  cursor: pointer;
+}
+
 </style>
