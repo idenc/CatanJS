@@ -176,6 +176,7 @@ export default {
         oceanGap: 8,
         roadGap: 8,
         settlementRadius: 15,
+        settlementPercentOfHex: 0.12,
         tokenBorder: 5,
         tokenDotRadius: 1.5,
         numberTokenPercentOfHex: 0.16,
@@ -233,6 +234,7 @@ export default {
       // Render resource tiles
       const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles);
       console.log(grid);
+      this.updateGraphicsPropertiesByWindowSize(grid);
 
       this.renderNumberTokens(draw, grid);
 
@@ -296,7 +298,7 @@ export default {
       }, 150));
 
       const handleWindowResize = () => {
-        this.updateGraphicsPropertiesByWindowSize();
+        this.updateGraphicsPropertiesByWindowSize(grid);
         // Recalculate max dimensions, redefine the grid, edit svg container dimensions to max dims
         maxHexSize = this.determineMaxHexSize(gameboardContainer);
         Hex = this.defineHexObject(maxHexSize, drawHexGroup);
@@ -353,7 +355,7 @@ export default {
         this.moveRobberToken(this.draw, grid, Number(fomerRobber), Number(robberIndex));
       });
     },
-    updateGraphicsPropertiesByWindowSize() {
+    updateGraphicsPropertiesByWindowSize(grid) {
       // Set the road gap based on the window size
       console.log(window.innerWidth);
       this.graphics.roadGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 4 : 8;
@@ -361,6 +363,10 @@ export default {
       this.graphics.tokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
       this.graphics.tokenDotRadius = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 1 : 1.5;
       this.graphics.shipTokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 1 : 3;
+
+      if (grid) {
+        this.graphics.settlementRadius = grid[0].hexPolygon.height() * this.graphics.settlementPercentOfHex;
+      }
     },
     // Determine maximum size of gameboard that fits play area div
     determineMaxHexSize(gameboardContainer) {
@@ -850,6 +856,11 @@ export default {
 
 ::v-deep .build-selector:hover {
   fill: green;
+  cursor: pointer;
+}
+
+::v-deep .settlement-upgrade:hover {
+  cursor: pointer;
 }
 
 </style>
