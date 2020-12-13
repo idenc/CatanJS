@@ -9,7 +9,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const {ensureAuthenticated} = require('./config/auth');
 const configureUserRegistration = require('./registration');
-const configureChat = require('./chat');
 const configureLobby = require('./lobby');
 const {Game} = require("./gameLogic/game");
 
