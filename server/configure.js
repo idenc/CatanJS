@@ -9,7 +9,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const {ensureAuthenticated} = require('./config/auth');
 const configureUserRegistration = require('./registration');
-const configureChat = require('./chat');
 const configureLobby = require('./lobby');
 const {Game} = require("./gameLogic/game");
 
@@ -56,13 +55,9 @@ module.exports = app => {
     //const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
-        if (socket.request.session.passport && socket.request.session.passport.user) {
-            console.log('user connected with id ' + socket.request.session.passport.user);
-        }
         console.log('user connected');
 
         //debugGame.configureSocketInteractions(socket);
-        configureChat(socket);
         configureLobby(socket);
     });
 
@@ -99,7 +94,7 @@ module.exports = app => {
     app.get('/user_list', (req, res) => {
         let users = [];
 
-        User.find({}, function(err, docs) {
+        User.find({}, function (err, docs) {
             if (!err) {
                 for (let i = 0; i < docs.length; i++) {
                     let user = {};
@@ -120,9 +115,9 @@ module.exports = app => {
     // Security wise this is bad
     app.post('/make_admin', (req, res) => {
         User.updateOne(
-            { email: req.body.email }, 
-            { isAdmin : true },
-            function(err, res) {
+            {email: req.body.email},
+            {isAdmin: true},
+            function (err, res) {
 
             }
         );
@@ -133,9 +128,9 @@ module.exports = app => {
     // Security wise this is bad
     app.post('/demote_admin', (req, res) => {
         User.updateOne(
-            { email: req.body.email }, 
-            { isAdmin : false },
-            function(err, res) {
+            {email: req.body.email},
+            {isAdmin: false},
+            function (err, res) {
 
             }
         );
@@ -146,8 +141,8 @@ module.exports = app => {
     // Security wise this is bad
     app.post('/delete_user', (req, res, post_email) => {
         User.deleteOne(
-            { email: req.body.email }, 
-            function(err, res) {
+            {email: req.body.email},
+            function (err, res) {
 
             }
         );

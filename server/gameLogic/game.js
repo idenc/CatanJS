@@ -6,6 +6,7 @@ const io = require('../socket').getio();
 const Player = require("./player");
 const Honeycomb = require('honeycomb-grid');
 const maxBuildings = require('../../src/assets/js/constants').maxBuildings;
+const ChatRoom = require('../chat');
 
 /**
  * Handles an instance of a game
@@ -35,6 +36,7 @@ class Game {
     grid;
     turnNumber = 0;
     playerColours = ['#FF0000', '#008000', '#0000ff', '#FFA500'] // Red, green, blue, orange
+    chatRoom;
 
     // socketRoom should be a string to identify
     // which room the game should communicate with
@@ -57,6 +59,8 @@ class Game {
         this.generateTiles();
         this.generateSettlements();
         this.generateDevCards();
+
+        this.chatRoom = new ChatRoom(socketRoom);
     }
 
     generateTiles() {
@@ -331,6 +335,46 @@ class Game {
     }
 
     /**
+     * Finds the player x with the most knights:
+     *  - x gets stored in game.largestArmy
+     *  - x gains 2 victory points
+     *  - if x gets replaced, x loses 2 victory points and the replacer gains 2
+     */
+    testLargestArmy() {
+        let largest; // the size of the largest army
+        let player_i = null; // tracks current record holder
+        let new_i = null; // index of player whose army size = largest (if this is not -1)
+
+        if (this.largestArmy == null) {
+            largest = 0;
+        } else {
+            largest = this.largestArmy.num;
+            player_i = this.largestArmy.player;
+        }
+
+        for (let i = 0; i < players.length; i++) {
+            const numKnights = players[i].numKnights;
+            if (numKnights >= 3 && numKnights > largest) {
+                largest = numKnights;
+                new_i = i;
+            }
+        }
+
+        if (new_i != null && player_i != new_i) {
+            this.largestArmy = {
+                num : largest,
+                player : new_i
+            };
+
+            if (player_i != null) {
+                player[player_i].victoryPoints -= 2;
+            }
+
+            player[new_i].victoryPoints += 2;
+        }
+    }
+
+    /**
      * Probably this method should be called when a room is created
      * for each player in the room
      * @param socket the socket for a player
@@ -345,6 +389,8 @@ class Game {
                 newPlayer = new Player(username, this.playerColours.pop());
                 this.players.push(newPlayer);
             }
+            socket.username = newPlayer.name;
+            socket.colour = newPlayer.colour;
             const currentTurnPlayer = this.players[this.turnNumber % this.players.length];
             newPlayer.isTurn = currentTurnPlayer.name === newPlayer.name;
             console.log(this.players);
@@ -356,6 +402,8 @@ class Game {
                 turnNumber: this.turnNumber,
                 player: newPlayer
             });
+            this.chatRoom.configureSocket(socket);
+            socket.emit('user_joined', {username: socket.username, colour: socket.colour})
         });
 
         //Prototype for creating game
@@ -448,7 +496,6 @@ class Game {
                 settlements: jsonSettlements,
                 player: player
             });
-            io.to(this.socketRoom).emit('update_victory_points', player);
         });
 
         socket.on('upgrade_settlement', (settlementCoord) => {
@@ -471,7 +518,6 @@ class Game {
                 city: settlementCoord,
                 player: player
             });
-            io.to(this.socketRoom).emit('update_victory_points', player);
         });
 
         //Build Road
@@ -509,7 +555,7 @@ class Game {
             //Need to check resources of player first
 
             if(this.availableDevCards.length === 0) return;
-            
+
             const playerIdx = this.turnNumber % this.players.length;
 
             var index = Math.floor(Math.random() * this.availableDevCards.length);
