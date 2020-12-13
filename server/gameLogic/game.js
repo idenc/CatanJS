@@ -6,6 +6,7 @@ const io = require('../socket').getio();
 const Player = require("./player");
 const Honeycomb = require('honeycomb-grid');
 const maxBuildings = require('../../src/assets/js/constants').maxBuildings;
+const ChatRoom = require('../chat');
 
 /**
  * Handles an instance of a game
@@ -26,7 +27,8 @@ class Game {
     // being the settlement's (x, y) coordinate
     settlements = [];
     roads = [];
-    longestRoad = null;
+    longestRoadOwner = null;
+    longestRoadLength = 0;
     largestArmy = null;
     players = [];
     availableDevCards = [];
@@ -35,6 +37,7 @@ class Game {
     grid;
     turnNumber = 0;
     playerColours = ['#FF0000', '#008000', '#0000ff', '#FFA500'] // Red, green, blue, orange
+    chatRoom;
 
     // socketRoom should be a string to identify
     // which room the game should communicate with
@@ -68,6 +71,8 @@ class Game {
             grain: 19,
             lumber: 19
         }
+
+        this.chatRoom = new ChatRoom(socketRoom);
     }
 
     generateTiles() {
@@ -81,6 +86,7 @@ class Game {
             let tile = {};
             if (tileResources[i] === 'desert') {
                 tile = new Tile(tileResources[i], 0);
+                tile.isRobber = true;
             } else {
                 tile = new Tile(tileResources[i], tileNumbers[numberIndex]);
                 numberIndex++;
@@ -239,25 +245,25 @@ class Game {
         let selectedTiles = this.tiles.filter(obj => obj.number === diceRoll.toString());
         //iterate through all selected tiles
         selectedTiles.forEach((tile) => {
-            // Iterate through all settlement locations touching tile
-            tile.settlements.forEach((settleCoord) => {
-                const settlement = this.settlements.get(JSON.stringify(settleCoord));
-                if (settlement.state !== 'empty') {
-                    const player = this.players.find(p => p.name === settlement.player);
-                    console.log('player');
-                    console.log(player);
+            if(tile.isRobber === false){
+                // Iterate through all settlement locations touching tile
+                tile.settlements.forEach((settleCoord) => {
+                    const settlement = this.settlements.get(JSON.stringify(settleCoord));
+                    if (settlement.state !== 'empty') {
+                        const player = this.players.find(p => p.name === settlement.player);
+                        console.log('player');
+                        console.log(player);
 
-                    if (player) {
-                        if (settlement.state === 'city') {
-                            player[tile.resource] += 2;
-                            this.availableResources[tile.resource] -= 2;
-                        } else {
-                            player[tile.resource]++;
-                            this.availableResources[tile.resource]--;
+                        if (player) {
+                            if (settlement.state === 'city') {
+                                player[tile.resource] += 2;
+                            } else {
+                                player[tile.resource]++;
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         });
     }
 
@@ -285,6 +291,109 @@ class Game {
         }
     }
 
+    checkLongestRoad(){
+        /*Road = {to, from, player} */
+        //construct roads
+        let currentLeader = '';
+        let maxSize = 0;
+        let currentSize = 1;
+        let currentSegment = 0;
+        let end = 0;
+        let road = [];
+        let visited = [];
+        for(let i = 0; i < this.roads.length; i++){
+            visited.push(false)
+        }
+        //for every road segment check for all possible connections
+        while(currentSegment < this.roads.length){
+            let tempMax = 0;
+            let index = 0;
+            let safeGuard = 0;
+            road.push(currentSegment)
+            //check all connections
+            while(road.length === 0){
+                if(this.roads[currentSegment].player === this.roads[index].player && !visited[index]){
+                    if(JSON.stringify(this.roads[end].to) === JSON.stringify(this.roads[index].from)){
+                        road.push(end);
+                        end = index;
+                        index = 0;
+                        currentSize++;
+                    }
+                }
+
+                index++;
+                if(index === this.roads.length){
+                    if(currentSize > tempMax){
+                        tempMax = currentSize;
+                    }
+                    visited[end] = true;
+                    currentSize--;
+                    end = road.pop();
+                }
+
+                safeGuard++;
+                if(safeGuard >= 200){
+                    break;
+                }
+            }
+
+            if(tempMax >= 5 && tempMax > maxSize){
+                maxSize = tempMax;
+                currentLeader = this.roads[currentSegment].player;
+            }
+
+            //reset visited array
+            for(let i = 0; i < visited.length; i++){
+                visited[i] = false;
+            }
+        }
+
+        if(maxSize >= 5 && maxSize >= this.longestRoadLength){
+            this.longestRoadLength = maxSize;
+            this.longestRoadOwner = currentLeader;
+        }
+    }
+
+    /**
+     * Finds the player x with the most knights:
+     *  - x gets stored in game.largestArmy
+     *  - x gains 2 victory points
+     *  - if x gets replaced, x loses 2 victory points and the replacer gains 2
+     */
+    testLargestArmy() {
+        let largest; // the size of the largest army
+        let player_i = null; // tracks current record holder
+        let new_i = null; // index of player whose army size = largest (if this is not -1)
+
+        if (this.largestArmy == null) {
+            largest = 0;
+        } else {
+            largest = this.largestArmy.num;
+            player_i = this.largestArmy.player;
+        }
+
+        for (let i = 0; i < players.length; i++) {
+            const numKnights = players[i].numKnights;
+            if (numKnights >= 3 && numKnights > largest) {
+                largest = numKnights;
+                new_i = i;
+            }
+        }
+
+        if (new_i != null && player_i != new_i) {
+            this.largestArmy = {
+                num : largest,
+                player : new_i
+            };
+
+            if (player_i != null) {
+                player[player_i].victoryPoints -= 2;
+            }
+
+            player[new_i].victoryPoints += 2;
+        }
+    }
+
     /**
      * Probably this method should be called when a room is created
      * for each player in the room
@@ -300,6 +409,8 @@ class Game {
                 newPlayer = new Player(username, this.playerColours.pop());
                 this.players.push(newPlayer);
             }
+            socket.username = newPlayer.name;
+            socket.colour = newPlayer.colour;
             const currentTurnPlayer = this.players[this.turnNumber % this.players.length];
             newPlayer.isTurn = currentTurnPlayer.name === newPlayer.name;
             console.log(this.players);
@@ -311,6 +422,8 @@ class Game {
                 turnNumber: this.turnNumber,
                 player: newPlayer
             });
+            this.chatRoom.configureSocket(socket);
+            socket.emit('user_joined', {username: socket.username, colour: socket.colour})
         });
 
         //Prototype for creating game
@@ -334,12 +447,18 @@ class Game {
                 this.robberEvent();
                 // io.to emits to everyone in room, socket.to emits to everyone except sender
                 io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
-                //Somehow allow the player that rolled the 7 to move teh robber
-                socket.to(this.socketRoom).emit('handle_robber_event');
             } else {
                 this.dealOutResources(roll);
                 io.to(this.socketRoom).emit('dice_result', {playerData: this.players, diceRoll: roll});
             }
+        });
+
+        socket.on('robber_moved', (robberIndex) => {
+            let formerRobber = this.tiles.findIndex((t) => t.isRobber === true);
+            console.log(`robber has moved to ${robberIndex}`);
+            this.tiles[formerRobber].isRobber = false;
+            this.tiles[robberIndex].isRobber = true;
+            io.to(this.socketRoom).emit('update_robber_location', robberIndex);
         });
 
         //Trade
@@ -367,6 +486,7 @@ class Game {
             const player = this.players[playerIdx];
             settlement.colour = player.colour;
             player.numSettlements--;
+            player.victoryPoints++;
             const playerTurnNumber = this.turnNumber - playerIdx;
             // Remove resources if it isn't the first two turns
             if (this.turnNumber >= (this.players.length*2)) {
@@ -409,7 +529,7 @@ class Game {
             // Give back settlement and remove city
             player.numSettlements++;
             player.numCities--;
-
+            player.victoryPoints++;
             player.ore -= 3;
             player.grain -= 2;
             this.availableResources[ore] += 3;
@@ -447,6 +567,7 @@ class Game {
             }
 
             this.roads.push(newRoad);
+            //this.checkLongestRoad();
             socket.to(this.socketRoom).emit('update_roads', {
                 roads: this.roads
             });
@@ -461,7 +582,7 @@ class Game {
             //Need to check resources of player first
 
             if(this.availableDevCards.length === 0) return;
-            
+
             const playerIdx = this.turnNumber % this.players.length;
 
             if (this.players[playerIdx].ore === 0 || this.players[playerIdx].lumber === 0 || this.players[playerIdx].grain === 0) return;
@@ -525,10 +646,6 @@ class Game {
             playerStartingTurn.isTurn = true;
 
             io.to(this.socketRoom).emit('start_turn', this.players);
-        });
-
-        socket.on('robber_moved', (tile) => {
-
         });
 
         socket.on('update_player_resources', () => {

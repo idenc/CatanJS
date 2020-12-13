@@ -1,8 +1,11 @@
 <template>
-  <div id="game-container">
+  <div
+    v-if="showPage"
+    id="game-container"
+  >
     <div id="board-container">
-      <DevCardModal 
-        v-if="devModal === true" 
+      <DevCardModal
+        v-if="devModal === true"
         :player="player"
       />
       <GameBoard
@@ -11,11 +14,13 @@
         @updatePlayer="updatePlayer"
         @displayEndTurnBtn="displayEndTurnBtn"
         @updateTurnNumber="updateTurnNumber"
+        @updateRobberEvent="updateRobberEvent"
       />
       <DiceButton
         :has-rolled="player.hasRolled"
         :turn-number="turnNumber"
         :is-turn="player.isTurn"
+        :robber-event="robberEvent"
         @rollDice="rollDice"
         @endTurn="endTurn"
       />
@@ -40,13 +45,13 @@
       <div id="sidebar-players-container">
         <UserList
           id="user-list"
-          :username="'test'"
+          :player="player"
         />
       </div>
       <div id="sidebar-chat-container">
         <ChatWindow
           id="chat"
-          @username="passUsername"
+          :username="player.name"
         />
       </div>
       <div id="sidebar-buttons-container">
@@ -85,6 +90,7 @@ import BuildButton from "@/components/BuildButton";
 import DiceButton from "@/components/DiceButton";
 import ResizeText from 'vue-resize-text';
 import {maxBuildings} from "@/assets/js/constants";
+import axios from "axios";
 
 export default {
 
@@ -110,9 +116,27 @@ export default {
         colour: '',
         isTurn: false,
       },
+      robberEvent: false,
+      showPage: false
     }
   },
   mounted: function () {
+    axios.get("/user")
+        .then((response) => {
+          this.showPage = true;
+          this.$nextTick(() => {
+            this.passUsername(response.data.user.name);
+          })
+
+        })
+        .catch((error) => {
+          console.log(error)
+          console.log(error.response);
+          this.$router.push({
+            name: 'Login',
+            params: {statusMessage: error.response.data, alertType: 'alert-danger'}
+          });
+        })
   },
   methods: {
     startBuild(type) {
@@ -138,7 +162,11 @@ export default {
       this.turnNumber++;
       console.log('emitting end turn');
       this.$socket.emit('end_turn');
-    }
+    },
+    updateRobberEvent(eventUpdate) {
+      this.robberEvent = eventUpdate;
+      console.log(`Updating Robber Event in Game.vue  ${this.robberEvent}`);
+    },
   },
 }
 </script>

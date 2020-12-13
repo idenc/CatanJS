@@ -5,7 +5,7 @@ class Tile {
     y;
     resource;
     number;
-    isRobber;
+    isRobber = false;
     isHarbour;
     settlements = [];
 

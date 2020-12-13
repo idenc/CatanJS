@@ -12,7 +12,7 @@
               :key="msg.id"
             >
               {{ new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) }} <span
-                :style="{'color': msg.color, 'font-weight': 'bold'}"
+                :style="{'color': msg.colour, 'font-weight': 'bold'}"
               >{{ msg.user }}:</span> {{
                 msg.message
               }}
@@ -20,7 +20,7 @@
             <li
               v-else
               :key="msg.id"
-              :style="{'color': msg.color}"
+              :style="{'color': msg.colour}"
             >
               {{ msg.message }}
             </li>
@@ -46,77 +46,45 @@ import InputBox from "@/components/chat/InputBox";
 export default {
   name: 'ChatWindow',
   components: {InputBox},
+  props: {
+    username: String('')
+  },
   data() {
     return {
       message: '',
-      username: '',
       users: [],
-      color: '',
+      colour: '',
       chat_messages: [],
     }
   },
   mounted: function () {
-    // When page loads we emit to server socket
-    if (localStorage.color) {
-      this.color = localStorage.color;
-      const user = {color: this.color}
-      this.$socket.emit('user info', user);
-    } else {
-      this.$socket.emit('user info', null);
-    }
-
-    this.sockets.subscribe('chat message', (msg) => {
-      const messageBox = this.$refs.message_box;
-      this.chat_messages.push(msg);
-
-      this.$nextTick(() => {
-        messageBox.scrollTop = messageBox.scrollHeight;
-      });
-    });
-
-    this.sockets.subscribe('user info', (user) => {
-      localStorage.color = user.color;
-      this.username = user.username;
-      this.color = user.color;
-      this.chat_messages.push({message: `You are ${user.username}`, id: 'username message'})
-      this.$emit('username', this.username);
-    })
-
-    // Server sends the chat history and user list
-    this.sockets.subscribe('chat info', (info) => {
-      console.log(`chat info: ${info}`)
-      this.chat_messages.push(...info.messages);
-    });
-
-    this.sockets.subscribe('command error', (err) => {
-      err.color = 'red';
-      this.chat_messages.push(err);
-    });
-
-    this.sockets.subscribe('color change', (color_info) => {
-      for (let i = 0; i < this.chat_messages.length; i++) {
-        if (this.chat_messages[i].user === color_info.username) {
-          this.chat_messages[i].color = color_info.new_color;
-        }
-      }
-    });
-
-    this.sockets.subscribe('user changed', (info) => {
-      for (let i = 0; i < this.chat_messages.length; i++) {
-        if (this.chat_messages[i].user === info.old_name) {
-          this.chat_messages[i].user = info.new_name;
-        }
-      }
-    });
-
+    this.$socket.emit("get_chat_info");
   },
   methods: {
     sendMessage() {
       if (this.message === '') {
         return;
       }
-      this.$socket.emit('chat message', this.message);
+      this.$socket.emit('chat_message', this.message);
       this.message = '';
+    }
+  },
+  sockets: {
+    chat_message: function (msg) {
+      const messageBox = this.$refs.message_box;
+      this.chat_messages.push(msg);
+
+      this.$nextTick(() => {
+        messageBox.scrollTop = messageBox.scrollHeight;
+      });
+    },
+    user_info: function (user) {
+      this.colour = user.colour;
+      this.chat_messages.push({message: `You are ${user.username}`, id: 'username message'})
+    },
+    chat_info: function (info) {
+      console.log(`chat info: ${info}`)
+      this.chat_messages.push(...info.messages);
     }
   }
 }

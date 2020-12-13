@@ -14,7 +14,13 @@
       Roll Dice
     </button>
     <button
-      v-else-if="hasRolled"
+      v-else-if="robberEvent"
+      class="dice-button btn btn-primary btn-block disabled"
+    >
+      Move The Robber
+    </button>
+    <button
+      v-else-if="hasRolled && !robberEvent"
       class="dice-button btn btn-primary btn-block end-turn"
       @click="$emit('endTurn')"
     >
@@ -40,7 +46,8 @@ export default {
   props: {
     turnNumber: Number(0),
     hasRolled: Boolean(false),
-    isTurn: Boolean(false)
+    isTurn: Boolean(false),
+    robberEvent: Boolean(false),
   }
 }
 </script>

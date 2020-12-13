@@ -1,11 +1,28 @@
 const {Game} = require("./gameLogic/game");
 const Player = require("./gameLogic/player");
+const User = require('./models/User');
 
 // All active games
 let lobbies = {};
 let games = {};
 
 module.exports = socket => {
+    if (socket.request.session.passport && socket.request.session.passport.user) {
+        User.findById(socket.request.session.passport.user, (err, user) => {
+            if (user) {
+                // Reconnect player to game
+                for (let key in games) {
+                    let game = games[key];
+                    for (const player of game.players) {
+                        if (player.name === user.name) {
+                            game.configureSocketInteractions(socket);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     // Request to create game
     socket.on("create_game", (gameRequest) => {
         const key = gameRequest.name.toLowerCase();
@@ -19,7 +36,6 @@ module.exports = socket => {
             lobbies[key] = gameRequest;
             games[key] = new Game(key);
             games[key].configureSocketInteractions(socket);
-            games[key].players.push(new Player());
             console.log(games);
             response = "success"; // replace with room code?
         }
@@ -37,10 +53,10 @@ module.exports = socket => {
             const searchName = key.toLowerCase();
             if (searchName.startsWith(queryName)) {
                 result[key] = {
-                    name : lobbies[key]["name"],
-                    type : lobbies[key]["type"],
-                    numPlayers : lobbies[key]["numPlayers"],
-                    playerCap : lobbies[key]["playerCap"]
+                    name: lobbies[key]["name"],
+                    type: lobbies[key]["type"],
+                    numPlayers: lobbies[key]["numPlayers"],
+                    playerCap: lobbies[key]["playerCap"]
                 };
             }
         }
@@ -56,31 +72,49 @@ module.exports = socket => {
                 lobbies[key]["numPlayers"] += 1;
                 lobbies[key]["players"].push(socket);
                 games[key].configureSocketInteractions(socket);
-                games[key].players.push(new Player());
                 socket.emit("create_game", "success"); // Temporary hack
             } else {
-                // socket.emit("enter_password", name);
+                socket.emit("enter_password", name);
             }
         }
     });
 
+    socket.on("join_game_passworded", (bundle) => {
+        const name = bundle.name;
+        const password = bundle.password;
 
-    socket.on("disconnect", () => {
-        for (let key in lobbies) {
-            let lobby = lobbies[key];
+        const key = name.toLowerCase();
 
-            const ind = lobby["players"].indexOf(socket);
-            if (ind != -1) {
-                lobby["players"].splice(ind, 1); // remove socket from playerlist
-                lobby["numPlayers"] -= 1;
-
-                if (lobby["numPlayers"] == 0) {
-                    delete lobbies[key];
-                    delete games[key];
-                }
-
-                console.log(games);
+        if (password == lobbies[key]["password"]) {
+            if (lobbies[key]["numPlayers"] < lobbies[key]["playerCap"]) {
+                lobbies[key]["numPlayers"] += 1;
+                lobbies[key]["players"].push(socket);
+                games[key].configureSocketInteractions(socket);
+                games[key].players.push(new Player());
+                socket.emit("create_game", "success"); // Temporary hack
             }
+        } else {
+            socket.emit("lobby_error", "Wrong Password");
         }
     });
+
+
+    // socket.on("disconnect", () => {
+    //     for (let key in lobbies) {
+    //         let lobby = lobbies[key];
+    //
+    //         const ind = lobby["players"].indexOf(socket);
+    //         if (ind != -1) {
+    //             lobby["players"].splice(ind, 1); // remove socket from playerlist
+    //             lobby["numPlayers"] -= 1;
+    //
+    //             if (lobby["numPlayers"] == 0) {
+    //                 delete lobbies[key];
+    //                 delete games[key];
+    //             }
+    //
+    //             console.log(games);
+    //         }
+    //     }
+    // });
 }
