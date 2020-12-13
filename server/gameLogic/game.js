@@ -62,11 +62,11 @@ class Game {
 
     generateResources(){
         this.availableResources = {
-            'brick': 19,
-            'ore': 19,
-            'wool': 19,
-            'grain': 19,
-            'lumber': 19
+            brick: 19,
+            ore: 19,
+            wool: 19,
+            grain: 19,
+            lumber: 19
         }
     }
 
@@ -374,10 +374,10 @@ class Game {
                 player.lumber--;
                 player.wool--;
                 player.grain--;
-                this.availableResources['brick']++;
-                this.availableResources['lumber']++;
-                this.availableResources['wool']++;
-                this.availableResources['grain']++;
+                this.availableResources[brick]++;
+                this.availableResources[lumber]++;
+                this.availableResources[wool]++;
+                this.availableResources[grain]++;
             }
 
             // Get tiles adjacent to this settlement
@@ -412,8 +412,8 @@ class Game {
 
             player.ore -= 3;
             player.grain -= 2;
-            this.availableResources['ore'] += 3;
-            this.availableResources['grain'] += 2;
+            this.availableResources[ore] += 3;
+            this.availableResources[grain] += 2;
 
             const settlement = this.settlements.get(JSON.stringify(settlementCoord));
             settlement.state = 'city';
@@ -439,8 +439,8 @@ class Game {
             if (this.turnNumber >= (this.players.length*2)) {
                 player.brick--;
                 player.lumber--;
-                this.availableResources['brick']++;
-                this.availableResources['lumber']++;
+                this.availableResources[brick]++;
+                this.availableResources[lumber]++;
             } else{
                 console.log('updating end turn');
                 player.hasRolled = true;
@@ -487,17 +487,27 @@ class Game {
                 
             }
             else if(cardPlayed === 'yearOfPlenty'){
-                //display modal for picking 2 resources
+                socket.emit('yearOfPlentyPlayed');
             }
             else if(cardPlayed === 'monopoly'){
-                //when resources are limited, deal all of one type to this player
+                socket.emit('monopoly_played');
             }
             else if(cardPlayed === 'victoryPoint'){
                 this.players[playerIdx].victoryPoints++;
             }
+
+            socket.on('monopoly_selected', (resource) => {
+                var numResource = this.availableResources[resource];
+                this.players[playerIdx].resource += numResource;
+                this.availableResources[resource] = 0;
+            });
+            socket.on('yearOfPlenty_selected', (resource) => {
+                this.availableResources[resource]--;
+                this.players[playerIdx].resource ++;
+            });
         });
 
-        //Fill out devCardCounts in DevCardModel.vue when the vue is created
+        // Fill out devCardCounts in DevCardModel.vue when the vue is created
         socket.on('dev_card_info', (playerName) => {
             const player = this.players.find(p => p.name === playerName);
             let devCards = player.devCards;
