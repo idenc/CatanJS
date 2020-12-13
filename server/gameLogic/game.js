@@ -279,7 +279,7 @@ class Game {
     }
 
     checkLongestRoad(){
-        let currentLeader = '';
+        let currentLeader = null;
         let maxSize = 0;
         let currentSegment = 0;
         let stack = [];
@@ -321,11 +321,22 @@ class Game {
             }
             currentSegment++;
         }
-
         if(maxSize >= 5 && maxSize > this.longestRoadLength){
+            if(this.longestRoadOwner === null){
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
+            else if(currentLeader !== this.longestRoadOwner){
+                const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                oldLongestRoad.victoryPoints -= 2;
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
             this.longestRoadLength = maxSize;
-            this.longestRoadOwner = currentLeader;
         }
+        //return currentLeader;
     }
 
     /**
@@ -533,6 +544,13 @@ class Game {
 
             this.roads.push(newRoad);
             this.checkLongestRoad();
+            /*if(newOwner !== this.longestRoadOwner){
+                const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
+                const newLongestRoad = this.players.find((p) => p.name === newOwner);
+                oldLongestRoad.victoryPoints -= 2;
+                newLongestRoad += 2;
+                //io.to(this.socketRoom).emit('update_longest_road', this.players);
+            }*/
             console.log(`Longest Road Owner: ${this.longestRoadOwner}`);
             console.log(`Longest Road Length: ${this.longestRoadLength}`);
             socket.to(this.socketRoom).emit('update_roads', {
