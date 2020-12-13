@@ -276,50 +276,42 @@ class Game {
 
     checkLongestRoad(){
         /*Road = {to, from, player} */
-        //construct roads
         let currentLeader = '';
         let maxSize = 0;
         let currentSize = 1;
         let currentSegment = 0;
-        let end = 0;
-        let road = [];
+        //let end = 0;
+        let stack = [];
         let visited = [];
         for(let i = 0; i < this.roads.length; i++){
             visited.push(false)
         }
+        console.log(`Visited array = ${visited.length}, starting the while loop`);
         //for every road segment check for all possible connections
         while(currentSegment < this.roads.length){
             let tempMax = 0;
-            let index = 0;
-            let safeGuard = 0;
-            road.push(currentSegment)
+            stack.push(currentSegment)
+            currentSize = 1;
+            
             //check all connections
-            while(road.length === 0){
-                if(this.roads[currentSegment].player === this.roads[index].player && !visited[index]){
-                    if(JSON.stringify(this.roads[end].to) === JSON.stringify(this.roads[index].from)){
-                        road.push(end);
-                        end = index;
-                        index = 0;
-                        currentSize++;
+            while(stack.length !== 0){
+                let node = stack.pop();
+                if(visited[node] === false){
+                    visited[node] = true;
+                    for(let j = 0; j < this.roads.length; j++){
+                        if(this.roads[node].player === this.roads[j].player){
+                            if(JSON.stringify(this.roads[node].to) === JSON.stringify(this.roads[j].from)){
+                                stack.push(j);
+                                node = j;
+                            }
+                        }
                     }
                 }
-
-                index++;
-                if(index === this.roads.length){
-                    if(currentSize > tempMax){
-                        tempMax = currentSize;
-                    }
-                    visited[end] = true;
-                    currentSize--;
-                    end = road.pop();
-                }
-
-                safeGuard++;
-                if(safeGuard >= 200){
-                    break;
+                if(stack.length > tempMax){
+                    tempMax = stack.length;
                 }
             }
-
+            console.log(`tempMax = ${tempMax}`);
             if(tempMax >= 5 && tempMax > maxSize){
                 maxSize = tempMax;
                 currentLeader = this.roads[currentSegment].player;
@@ -329,6 +321,7 @@ class Game {
             for(let i = 0; i < visited.length; i++){
                 visited[i] = false;
             }
+            currentSegment++;
         }
 
         if(maxSize >= 5 && maxSize >= this.longestRoadLength){
@@ -499,7 +492,9 @@ class Game {
             }
 
             this.roads.push(newRoad);
-            //this.checkLongestRoad();
+            this.checkLongestRoad();
+            console.log(`Longest Road Owner: ${this.longestRoadOwner}`);
+            console.log(`Longest Road Length: ${this.longestRoadLength}`);
             socket.to(this.socketRoom).emit('update_roads', {
                 roads: this.roads
             });

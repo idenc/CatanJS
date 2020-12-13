@@ -140,9 +140,9 @@ const startRoadSelection = (gameBoard) => {
         || gameBoard.turnNumber === 1 && gameBoard.player.numRoads === maxBuildings.roads - 1;
     const hasResources = gameBoard.player.brick >= 1 && gameBoard.player.lumber >= 1;
     // Ensure player qualifies to build road
-    if (!firstTwoTurns && !hasResources) {
+    /*if (!firstTwoTurns && !hasResources) {
         return;
-    }
+    }*/
     // Iterate through each settlement (i.e. grid intersection point)
     for (const [, settlement] of gameBoard.settlements.entries()) {
         const neighbours = settlement.neighbours;
