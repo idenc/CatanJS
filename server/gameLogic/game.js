@@ -61,6 +61,7 @@ class Game {
         this.generateSettlements();
         this.generateDevCards();
         this.generateResources();
+        this.chatRoom = new ChatRoom(socketRoom);
     }
 
     generateResources(){
@@ -71,8 +72,6 @@ class Game {
             grain: 19,
             lumber: 19
         }
-
-        this.chatRoom = new ChatRoom(socketRoom);
     }
 
     generateTiles() {
@@ -257,8 +256,10 @@ class Game {
                         if (player) {
                             if (settlement.state === 'city') {
                                 player[tile.resource] += 2;
+                                this.availableResources[tile.resource] -= 2;
                             } else {
                                 player[tile.resource]++;
+                                this.availableResources[tile.resource]--;
                             }
                         }
                     }
