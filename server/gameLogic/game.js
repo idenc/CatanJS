@@ -233,7 +233,7 @@ class Game {
         let selectedTiles = this.tiles.filter(obj => obj.number === diceRoll.toString());
         //iterate through all selected tiles
         selectedTiles.forEach((tile) => {
-            if(tile.isRobber === false){
+            if (tile.isRobber === false) {
                 // Iterate through all settlement locations touching tile
                 tile.settlements.forEach((settleCoord) => {
                     const settlement = this.settlements.get(JSON.stringify(settleCoord));
@@ -284,7 +284,7 @@ class Game {
         let currentSegment = 0;
         let stack = [];
         let visited = [];
-        for(let i = 0; i < this.roads.length; i++){
+        for (let i = 0; i < this.roads.length; i++) {
             visited.push(false)
         }
         //for every road segment check for all possible connections
@@ -316,7 +316,7 @@ class Game {
             }
 
             //reset visited array
-            for(let i = 0; i < visited.length; i++){
+            for (let i = 0; i < visited.length; i++) {
                 visited[i] = false;
             }
             currentSegment++;
@@ -367,8 +367,8 @@ class Game {
 
         if (new_i != null && player_i != new_i) {
             this.largestArmy = {
-                num : largest,
-                player : new_i
+                num: largest,
+                player: new_i
             };
 
             if (player_i != null) {
@@ -378,6 +378,20 @@ class Game {
             player[new_i].victoryPoints += 2;
         }
     }
+
+    generateUsers() {
+        const users = [];
+        for (const player of this.players) {
+            users.push({
+                username: player.name,
+                colour: player.colour,
+                victoryPoints: player.victoryPoints,
+                numDevCards: player.devCards.length,
+            })
+        }
+        return users;
+    }
+
 
     /**
      * Probably this method should be called when a room is created
@@ -394,8 +408,7 @@ class Game {
                 newPlayer = new Player(username, this.playerColours.pop());
                 this.players.push(newPlayer);
             }
-            socket.username = newPlayer.name;
-            socket.colour = newPlayer.colour;
+            socket.player = newPlayer;
             const currentTurnPlayer = this.players[this.turnNumber % this.players.length];
             newPlayer.isTurn = currentTurnPlayer.name === newPlayer.name;
             console.log(this.players);
@@ -408,7 +421,7 @@ class Game {
                 player: newPlayer
             });
             this.chatRoom.configureSocket(socket);
-            socket.emit('user_joined', {username: socket.username, colour: socket.colour})
+            socket.emit('user_joined', {username: newPlayer.name, colour: socket.colour})
         });
 
         //Prototype for creating game
@@ -458,89 +471,97 @@ class Game {
         //Build Settlement
         socket.on('build_settlement', (newSettlement) => {
             console.log('settlement received');
-            console.log(newSettlement);
-            // Update the server's settlement object
-            const settlement = this.settlements.get(JSON.stringify({
-                x: newSettlement.x,
-                y: newSettlement.y
-            }));
-            settlement.player = newSettlement.player;
-            settlement.state = newSettlement.state;
+            const player = this.players[this.turnNumber % this.players.length];
+            // This should be checked on client side but double check just in case
+            if (player.isTurn
+                && (player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1)
+                || this.turnNumber < (this.players.length * 2)) {
+                console.log(newSettlement);
+                // Update the server's settlement object
+                const settlement = this.settlements.get(JSON.stringify({
+                    x: newSettlement.x,
+                    y: newSettlement.y
+                }));
+                settlement.player = newSettlement.player;
+                settlement.state = newSettlement.state;
 
-            const playerIdx = this.turnNumber % this.players.length;
-            const player = this.players[playerIdx];
-            settlement.colour = player.colour;
-            player.numSettlements--;
-            player.victoryPoints++;
-            const playerTurnNumber = this.turnNumber - playerIdx;
-            // Remove resources if it isn't the first two turns
-            if (this.turnNumber >= (this.players.length*2)) {
-                player.brick--;
-                player.lumber--;
-                player.wool--;
-                player.grain--;
+                settlement.colour = player.colour;
+                player.numSettlements--;
+                player.victoryPoints++;
+                // Remove resources if it isn't the first two turns
+                if (this.turnNumber >= (this.players.length * 2)) {
+                    player.brick--;
+                    player.lumber--;
+                    player.wool--;
+                    player.grain--;
+                }
+
+                // Get tiles adjacent to this settlement
+                const adjacentTiles = this.tiles.filter((t) =>
+                    t.settlements.some((s) => s.x === settlement.x && s.y === settlement.y));
+
+                // Give the player one resource for each adjacent tile
+                adjacentTiles.forEach((tile) => {
+                    player[tile.resource]++;
+                });
+
+                const jsonSettlements = JSON.stringify(Array.from(this.settlements.entries()));
+
+                // Send the updated settlement to all players
+                // Send the updated settlements and player info to player who built
+                socket.to(this.socketRoom).emit('update_settlements', {
+                    settlements: jsonSettlements
+                });
+                socket.emit('update_settlements', {
+                    settlements: jsonSettlements,
+                    player: player
+                });
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
             }
-
-            // Get tiles adjacent to this settlement
-            const adjacentTiles = this.tiles.filter((t) =>
-                t.settlements.some((s) => s.x === settlement.x && s.y === settlement.y));
-
-            // Give the player one resource for each adjacent tile
-            adjacentTiles.forEach((tile) => {
-                player[tile.resource]++;
-            });
-
-            const jsonSettlements = JSON.stringify(Array.from(this.settlements.entries()));
-
-            // Send the updated settlement to all players
-            // Send the updated settlements and player info to player who built
-            socket.to(this.socketRoom).emit('update_settlements', {
-                settlements: jsonSettlements
-            });
-            socket.emit('update_settlements', {
-                settlements: jsonSettlements,
-                player: player
-            });
         });
 
         socket.on('upgrade_settlement', (settlementCoord) => {
             console.log('upgrading settlement');
             const player = this.players[this.turnNumber % this.players.length];
-            // Give back settlement and remove city
-            player.numSettlements++;
-            player.numCities--;
-            player.victoryPoints++;
-            player.ore -= 3;
-            player.grain -= 2;
+            if (player.isTurn && player.ore >= 3 && player.grain >= 2) {
+                // Give back settlement and remove city
+                player.numSettlements++;
+                player.numCities--;
+                player.victoryPoints++;
+                player.ore -= 3;
+                player.grain -= 2;
 
-            const settlement = this.settlements.get(JSON.stringify(settlementCoord));
-            settlement.state = 'city';
+                const settlement = this.settlements.get(JSON.stringify(settlementCoord));
+                settlement.state = 'city';
 
-            socket.to(this.socketRoom).emit('update_city', {
-                city: settlementCoord
-            });
-            socket.emit('update_city', {
-                city: settlementCoord,
-                player: player
-            });
+                socket.to(this.socketRoom).emit('update_city', {
+                    city: settlementCoord
+                });
+                socket.emit('update_city', {
+                    city: settlementCoord,
+                    player: player
+                });
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            }
         });
 
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
-            const playerIdx = this.turnNumber % this.players.length;
-            const player = this.players[playerIdx];
-            player.numRoads--;
-            const playerTurnNumber = this.turnNumber - playerIdx;
-            newRoad.colour = player.colour;
+            const player = this.players[this.turnNumber % this.players.length];
+            if (player.isTurn
+                && (player.brick >= 1 && player.lumber >= 1)
+                || this.turnNumber < (this.players.length * 2)) {
+                player.numRoads--;
+                newRoad.colour = player.colour;
 
-            if (this.turnNumber >= (this.players.length*2)) {
-                player.brick--;
-                player.lumber--;
-            } else{
-                console.log('updating end turn');
-                player.hasRolled = true;
-            }
+                if (this.turnNumber >= (this.players.length * 2)) {
+                    player.brick--;
+                    player.lumber--;
+                } else {
+                    console.log('updating end turn');
+                    player.hasRolled = true;
+                }
 
             this.roads.push(newRoad);
             this.checkLongestRoad();
@@ -566,7 +587,7 @@ class Game {
         socket.on('build_dev_card', () => {
             //Need to check resources of player first
 
-            if(this.availableDevCards.length === 0) return;
+            if (this.availableDevCards.length === 0) return;
 
             const playerIdx = this.turnNumber % this.players.length;
 

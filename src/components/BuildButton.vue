@@ -33,15 +33,18 @@ export default {
   mounted: function () {
     document.addEventListener('click', (e) => {
       if (e.target.id !== 'build-button') {
-        const roadButton = document.getElementById('road-button');
-        const settlementButton = document.getElementById('settlement-button');
-
-        roadButton.classList.remove("animated", "fadeInUp");
-        settlementButton.classList.remove("animated", "fadeInUp");
+        this.closeBuildButton();
       }
     });
   },
   methods: {
+    closeBuildButton() {
+      const roadButton = document.getElementById('road-button');
+      const settlementButton = document.getElementById('settlement-button');
+
+      roadButton.classList.remove("animated", "fadeInUp");
+      settlementButton.classList.remove("animated", "fadeInUp");
+    },
     buildClicked() {
       if (this.isTurn) {
         const buildButton = document.getElementById('build-button');

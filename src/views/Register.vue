@@ -69,7 +69,7 @@
         </form>
         <p class="lead mt-4">
           Have An Account?
-          <router-link to="/login">
+          <router-link to="/">
             Login
           </router-link>
         </p>

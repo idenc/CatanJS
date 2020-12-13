@@ -101,15 +101,17 @@ const redrawRoads = (gameBoard) => {
     });
 }
 
+const arePointsEqual = (p1, p2) => {
+    return p1.x === p2.x && p1.y === p2.y;
+}
+
 const canBuildRoad = (gameBoard, settlement, neighbour) => {
     // Need to check all conditions to build a road
     // 1. The player has necessary resources
     // 2. The road space is empty
     // 3. The road is connected to another road or a settlement
 
-    const arePointsEqual = (p1, p2) => {
-        return p1.x === p2.x && p1.y === p2.y;
-    }
+
     const settlementCoord = {x: settlement.x, y: settlement.y};
     const neighbourCoord = {x: neighbour.x, y: neighbour.y};
 
@@ -204,5 +206,6 @@ export {
     drawRoadDebug,
     startRoadSelection,
     redrawRoads,
-    renderRoads
+    renderRoads,
+    arePointsEqual
 }
