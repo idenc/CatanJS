@@ -55,9 +55,6 @@ module.exports = app => {
     //const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
-        if (socket.request.session.passport && socket.request.session.passport.user) {
-            console.log('user connected with id ' + socket.request.session.passport.user);
-        }
         console.log('user connected');
 
         //debugGame.configureSocketInteractions(socket);

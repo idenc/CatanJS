@@ -1,5 +1,8 @@
 <template>
-  <div id="user-div">
+  <div
+    v-if="player"
+    id="user-div"
+  >
     <h1>Players</h1>
     <div id="user-list">
       <div id="user-rows">
@@ -14,7 +17,7 @@
               :style="{'background-color': user.colour}"
             >
               <div
-                v-if="user.username === username"
+                v-if="user.username === player.name"
                 id="name"
               >
                 {{ user.username }} (You)
@@ -27,15 +30,16 @@
               </div>
 
               <div id="vic-points">
-                # VP:<br> 0
+                # VP:<br> {{ player.victoryPoints }}
                 <!-- here is where we put victory points *********************-->
               </div>
               <div id="num-roads">
+                <!-- Do we need this?-->
                 # Roads:<br> 0
                 <!-- here is where we put num of roads *********************-->
               </div>
               <div id="num-cards">
-                # Cards: <br> 0
+                # Cards: <br> {{ player.devCards.length }}
                 <!-- here is where we put num of cards *********************-->
               </div>
               <div id="admin-buttons">
@@ -61,7 +65,7 @@
 export default {
   name: "UserList",
   props: {
-    username: String('')
+    player: Object()
   },
   data() {
     return {
@@ -69,17 +73,6 @@ export default {
     }
   },
   mounted: function () {
-    this.sockets.subscribe('update_victory_points', (player) => {
-      let user = this.users.find(u => u.username === player.name);
-      if(!user){
-        return;
-      }
-      console.log(`${player.name} VP: ${player.victoryPoints}`);
-      let container = document.getElementsByClassName(user.username);
-      let victoryPoints = container[0].children[1];
-      victoryPoints.innerHTML = `# VP:<br> ${player.victoryPoints}`;
-
-    });
   },
   sockets: {
     chat_info: function (chatInfo) {

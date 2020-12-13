@@ -503,7 +503,6 @@ class Game {
                 settlements: jsonSettlements,
                 player: player
             });
-            io.to(this.socketRoom).emit('update_victory_points', player);
         });
 
         socket.on('upgrade_settlement', (settlementCoord) => {
@@ -526,7 +525,6 @@ class Game {
                 city: settlementCoord,
                 player: player
             });
-            io.to(this.socketRoom).emit('update_victory_points', player);
         });
 
         //Build Road

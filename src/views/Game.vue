@@ -45,7 +45,7 @@
       <div id="sidebar-players-container">
         <UserList
           id="user-list"
-          :username="'test'"
+          :player="player"
         />
       </div>
       <div id="sidebar-chat-container">

@@ -724,6 +724,7 @@ export default {
   },
   sockets: {
     board_info: function (boardInfo) {
+      console.log('received board info');
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.roads = boardInfo.roads;
