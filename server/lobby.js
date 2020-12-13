@@ -19,7 +19,6 @@ module.exports = socket => {
             lobbies[key] = gameRequest;
             games[key] = new Game(key);
             games[key].configureSocketInteractions(socket);
-            games[key].players.push(new Player());
             console.log(games);
             response = "success"; // replace with room code?
         }
@@ -56,7 +55,6 @@ module.exports = socket => {
                 lobbies[key]["numPlayers"] += 1;
                 lobbies[key]["players"].push(socket);
                 games[key].configureSocketInteractions(socket);
-                games[key].players.push(new Player());
                 socket.emit("create_game", "success"); // Temporary hack
             } else {
                 socket.emit("enter_password", name);
