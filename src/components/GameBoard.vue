@@ -803,6 +803,10 @@ export default {
   display: none;
 }
 
+#game-toast__toast_outer {
+  position: absolute;
+}
+
 ::v-deep .d-none {
   display: none;
 }
