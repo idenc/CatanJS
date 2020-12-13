@@ -44,21 +44,19 @@
               </div>
               <div
 
-                  :id="'host-buttons'"
+                :id="'host-buttons'"
               >
                 <button
-                    :id="'kick-button'"
-                    :class="'btn btn-primary btn-block'"
-                    @click="kick(user)"
-
+                  :id="'kick-button'"
+                  :class="'btn btn-primary btn-block'"
+                  @click="kick(user)"
                 >
                   Kick
                 </button>
                 <button
-                    :id="'mute-button'"
-                    :class="'btn btn-primary btn-block'"
-                    @click="mute(user)"
-
+                  :id="'mute-button'"
+                  :class="'btn btn-primary btn-block'"
+                  @click="mute(user)"
                 >
                   Mute
                 </button>
@@ -71,7 +69,6 @@
   </div>
 </template>
 <script>
-var username;
 export default {
   name: "UserList",
   props: {
@@ -85,9 +82,7 @@ export default {
   },
   mounted: function () {
     this.sockets.subscribe('got kicked', (user) => {
-      // console.log(this.$socket.username);
-      // console.log(user.username);
-      if (this.$socket.username === user.username) {
+      if (this.player.name === user.username) {
 
         document.querySelector("#overlay.main").classList.add("active");
         document.querySelector("#overlayin.kicked").classList.add("active");
@@ -144,12 +139,13 @@ export default {
         document.querySelector("#overlayin.player").classList.remove("active");
       });
     },
+  },
   sockets: {
     chat_info: function (chatInfo) {
       console.log(`chat info: ${chatInfo}`)
       this.users.push(...chatInfo.current_users);
     },
-    update_players: function(users) {
+    update_players: function (users) {
       this.users = users;
     },
     user_joined: function (user) {

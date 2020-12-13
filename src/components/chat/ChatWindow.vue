@@ -88,8 +88,8 @@ export default {
       this.message = '';
     },
     muteAlert(user, check) {
-      var docStr = '';
-      var msgStr = '';
+      let docStr = '';
+      let msgStr = '';
       if (check) {
         msgStr = user.username + " has been muted!";
 

@@ -65,12 +65,11 @@
           @buildStarted="startBuild"
         />
         <button
-            id="tradeButton"
-            class="btn btn-primary btn-block"
-            @click="attemptTrade"
+          id="tradeButton"
+          class="btn btn-primary btn-block"
+          @click="attemptTrade"
         >
           Trade
-
         </button>
         <button
           class="btn btn-primary btn-block sidebar-main-button"
@@ -180,10 +179,6 @@ export default {
     },
     attemptTrade() {
       this.$refs.overlay.attemptTrade();
-      // this.users = this.$socket.users;
-      // console.log(this.$socket.users);
-      // document.querySelector("#overlay.main").classList.add("active");
-      // document.querySelector("#overlayin.trade").classList.add("active");
     },
   },
 }
@@ -218,7 +213,6 @@ export default {
   width: 50%;
 
 }  */
-
 
 
 #board-container {

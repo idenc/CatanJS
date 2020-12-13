@@ -50,11 +50,11 @@ class ChatRoom {
         });
 
         socket.on('got kicked', (user) => {
-            io.emit('got kicked', user);
-            users = users.filter(u => u.username !== user.username);
-            io.emit('user left', user.username);
-            if (users.length >= 1 && users[0].isHost === false) {
-                users[0].isHost = true;
+            io.to(this.socketRoom).emit('got kicked', user);
+            this.users = this.users.filter(u => u.username !== user.username);
+            io.to(this.socketRoom).emit('user left', user.username);
+            if (this.users.length >= 1 && this.users[0].isHost === false) {
+                this.users[0].isHost = true;
             }
         });
 

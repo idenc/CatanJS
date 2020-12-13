@@ -463,16 +463,16 @@ class Game {
 
         //Trade
         socket.on('trade_offer', (users) => {
-            var dealer = users[0];
-            var customer = users[1];
+            const dealer = users[0];
+            const customer = users[1];
             console.log(customer);
-            io.emit('trade_request', dealer, customer); 
+            io.emit('trade_request', dealer, customer);
             // this needs to be changed to the room thing!! **********************
         });
 
         socket.on('trade_accept', (users) => {
-            var dealer = users[0];
-            var customer = users[1];
+            const dealer = users[0];
+            const customer = users[1];
             io.emit('alert message', dealer + " and " + customer + " are trading...");
             io.emit('trade_accept', dealer, customer);
         });
@@ -485,7 +485,7 @@ class Game {
 
         });
 
-        socket.on('trade_cancel', (player) =>{
+        socket.on('trade_cancel', (player) => {
             io.emit('trade_cancel', player);
         });
 
@@ -604,8 +604,8 @@ class Game {
 
             const playerIdx = this.turnNumber % this.players.length;
 
-            var index = Math.floor(Math.random() * this.availableDevCards.length);
-            var card = this.availableDevCards.splice(index, 1);
+            const index = Math.floor(Math.random() * this.availableDevCards.length);
+            const card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
 
             //io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
