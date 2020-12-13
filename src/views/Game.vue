@@ -45,13 +45,13 @@
       <div id="sidebar-players-container">
         <UserList
           id="user-list"
-          :username="'test'"
+          :player="player"
         />
       </div>
       <div id="sidebar-chat-container">
         <ChatWindow
           id="chat"
-          @username="passUsername"
+          :username="player.name"
         />
       </div>
       <div id="sidebar-buttons-container">
@@ -122,10 +122,15 @@ export default {
   },
   mounted: function () {
     axios.get("/user")
-        .then(() => {
+        .then((response) => {
           this.showPage = true;
+          this.$nextTick(() => {
+            this.passUsername(response.data.user.name);
+          })
+
         })
         .catch((error) => {
+          console.log(error)
           console.log(error.response);
           this.$router.push({
             name: 'Login',

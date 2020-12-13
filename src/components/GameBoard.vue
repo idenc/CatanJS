@@ -255,7 +255,7 @@ export default {
         const hex = grid.get(hexCoordinates)
         console.log(hex)
         //If it is this players turn and the robber event is true move the robber to the clicked tile
-        if(this.player.isTurn && this.robberEvent){
+        if (this.player.isTurn && this.robberEvent) {
           let newRobber = hex.hexPolygon.node.getAttribute('index');
           //console.log(`former robber = ${fomerRobber}, new robber = ${newRobber}`);
           this.robberEvent = false;
@@ -681,7 +681,7 @@ export default {
           .transform(0)
           .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
     },
-    redrawRobberToken(drawSVG, grid){
+    redrawRobberToken(drawSVG, grid) {
       const center = grid[this.robber.gridIndex].center();
       const {x, y} = grid[this.robber.gridIndex].toPoint();
       const numberTokenRadius = grid[this.robber.gridIndex].hexPolygon.height() * this.graphics.numberTokenPercentOfHex;
@@ -692,7 +692,7 @@ export default {
           .transform(0)
           .translate(x + center.x - (numberTokenRadius), y + center.y - (numberTokenRadius));
     },
-    moveRobberToken(drawSVG, grid, oldTileIndex, newTileIndex){
+    moveRobberToken(drawSVG, grid, oldTileIndex, newTileIndex) {
       let oldHex = grid.get(oldTileIndex);
       let newHex = grid.get(newTileIndex);
 
@@ -724,6 +724,7 @@ export default {
   },
   sockets: {
     board_info: function (boardInfo) {
+      console.log('received board info');
       this.tiles = boardInfo.tiles;
       this.settlements = new Map(JSON.parse(boardInfo.settlements));
       this.roads = boardInfo.roads;
@@ -757,14 +758,13 @@ export default {
       if (newPlayer) {
         this.player = newPlayer;
       }
-      if(result.diceRoll === 7 && this.player.isTurn){
+      if (result.diceRoll === 7 && this.player.isTurn) {
         this.robberEvent = true;
         this.$emit('updateRobberEvent', this.robberEvent);
         this.toastTitle = "Rolled";
         this.toastMessage = `${result.diceRoll}: Click on a tile to move the robber`;
         this.$bvToast.show('game-toast');
-      }
-      else{
+      } else {
         this.toastTitle = "Rolled";
         this.toastMessage = result.diceRoll;
         this.$bvToast.show('game-toast');
@@ -772,7 +772,7 @@ export default {
     },
     /*update_robber_location: function(robberIndex){
       let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
-      
+
       this.tiles[fomerRobber].isRobber = false;
       this.tiles[robberIndex].isRobber = true;
       const oldCoordinates = [this.tiles[fomerRobber].x, this.tiles[fomerRobber].y];
