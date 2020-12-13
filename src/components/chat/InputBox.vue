@@ -88,4 +88,20 @@ a:hover {
   padding: 22px 18px;
 }
 
+@media (max-width: 768px) {
+  .form__field {
+    padding: 0.25rem 1rem;
+    width: 0;
+  }
+
+  .btn {
+    padding: 0.25rem 1rem;
+  }
+
+  .btn--inside {
+    margin-left: 0;
+  }
+
+}
+
 </style>

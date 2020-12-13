@@ -28,7 +28,11 @@
               </span>
             </p>
             
-            <button class="btn btn-secondary rounded-pill">
+            <button
+              v-if="game.numPlayers < game.playerCap"
+              class="btn btn-secondary rounded-pill"
+              @click="joinGame(game.name)"
+            >
               Join
             </button>
           </div>
@@ -53,11 +57,29 @@ export default {
     get_games: function(games) {
       //console.log(games);
       this.games = games;
+    },
+    enter_password: function(game_name) {
+      const user_input = prompt("Enter password for game '" + name + "'");
+      
+      const bundle = { 
+        name : game_name,
+        password : user_input
+      };
+
+      this.$socket.emit("join_game_passworded", bundle);
+    },
+    lobby_error: function(error_message) {
+      alert(error_message);
     }
   },
   watch: {
     searchQuery: function() {
       this.$socket.emit("get_games", this.searchQuery);
+    }
+  },
+  methods: {
+    joinGame(name) {
+      this.$socket.emit("join_game", name);
     }
   }
 }

@@ -2,13 +2,13 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const mongoose = require('mongoose');
+const User = require('./models/User');
 const io = require('./socket').init(http);
 const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const {ensureAuthenticated} = require('./config/auth');
 const configureUserRegistration = require('./registration');
-const configureChat = require('./chat');
 const configureLobby = require('./lobby');
 const {Game} = require("./gameLogic/game");
 
@@ -32,6 +32,7 @@ module.exports = app => {
     // Express session
     const sessionMiddleware = session({
         secret: 'secret',
+        cookie: {expires: new Date(2147483647000)}, // Expires in 2038
         resave: true,
         saveUninitialized: true,
         store: new MongoStore({
@@ -51,18 +52,12 @@ module.exports = app => {
     app.use(passport.session());
 
     // TODO: Integrate this to be created with a lobby
-    const debugGame = new Game('placeholderRoom');
+    //const debugGame = new Game('placeholderRoom');
 
     io.on('connection', (socket) => {
-        // Using socket io to handle registration,
-        // Should probably change to just using a post request
-        if (socket.request.session.passport && socket.request.session.passport.user) {
-            console.log('user connected with id ' + socket.request.session.passport.user);
-        }
         console.log('user connected');
 
-        debugGame.configureSocketInteractions(socket);
-        configureChat(socket);
+        //debugGame.configureSocketInteractions(socket);
         configureLobby(socket);
     });
 
@@ -93,11 +88,71 @@ module.exports = app => {
         console.log([req.user, req.session])
 
         res.send({user: req.user})
-    })
+    });
 
+    // Security wise this is bad
+    app.get('/user_list', (req, res) => {
+        let users = [];
+
+        User.find({}, function (err, docs) {
+            if (!err) {
+                for (let i = 0; i < docs.length; i++) {
+                    let user = {};
+                    user.email = docs[i]["email"];
+                    user.name = docs[i]["name"];
+                    user.isAdmin = docs[i]["isAdmin"];
+                    //console.log(user);
+                    users.push(user);
+                }
+            } else {
+                console.log(err);
+            }
+
+            res.send(users)
+        });
+    });
+
+    // Security wise this is bad
+    app.post('/make_admin', (req, res) => {
+        User.updateOne(
+            {email: req.body.email},
+            {isAdmin: true},
+            function (err, res) {
+
+            }
+        );
+
+        res.send();
+    });
+
+    // Security wise this is bad
+    app.post('/demote_admin', (req, res) => {
+        User.updateOne(
+            {email: req.body.email},
+            {isAdmin: false},
+            function (err, res) {
+
+            }
+        );
+
+        res.send();
+    });
+
+    // Security wise this is bad
+    app.post('/delete_user', (req, res, post_email) => {
+        User.deleteOne(
+            {email: req.body.email},
+            function (err, res) {
+
+            }
+        );
+
+        res.send();
+    });
 
     app.get('/logout', (req, res) => {
         req.logout();
+        req.session.destroy();
 
         console.log('logged out');
 
@@ -129,7 +184,7 @@ module.exports = app => {
                     return res.redirect('/#/register');
                 } else {
                     // User has already registered, redirect
-                    return res.redirect('/#/game');
+                    return res.redirect('/#/lobby');
                 }
             });
         }

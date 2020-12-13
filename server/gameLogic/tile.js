@@ -5,8 +5,9 @@ class Tile {
     y;
     resource;
     number;
-    isRobber;
+    isRobber = false;
     isHarbour;
+    settlements = [];
 
     constructor(resource, number) {
         this.resource = resource;

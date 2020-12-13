@@ -6,6 +6,7 @@
 
 <style>
 @import './assets/styles/bootstrap.min.css';
+@import '../node_modules/bootstrap-vue/dist/bootstrap-vue.css';
 @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
 
 #app {

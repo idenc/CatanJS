@@ -109,12 +109,7 @@ export default {
               'Content-Type': 'application/json'
             }
           })
-          .then(() => {
-            this.$socket.name = this.username;
-            this.$router.push('/game');
-          })
-          
-          
+          .then(() => this.$router.push('/lobby'))
           .catch(err => {
             console.log(err.response);
             this.myStatusMessage = err.response.data.info.message;

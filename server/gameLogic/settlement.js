@@ -4,7 +4,7 @@ class Settlement {
     x;
     y;
     player = "";
-    type = "empty";
+    state = "empty";
     harbour;
     neighbours = [];
 
