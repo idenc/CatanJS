@@ -1,8 +1,11 @@
 <template>
-  <div id="game-container">
+  <div
+    v-if="showPage"
+    id="game-container"
+  >
     <div id="board-container">
-      <DevCardModal 
-        v-if="devModal === true" 
+      <DevCardModal
+        v-if="devModal === true"
         :player="player"
       />
       <GameBoard
@@ -87,6 +90,7 @@ import BuildButton from "@/components/BuildButton";
 import DiceButton from "@/components/DiceButton";
 import ResizeText from 'vue-resize-text';
 import {maxBuildings} from "@/assets/js/constants";
+import axios from "axios";
 
 export default {
 
@@ -113,9 +117,21 @@ export default {
         isTurn: false,
       },
       robberEvent: false,
+      showPage: false
     }
   },
   mounted: function () {
+    axios.get("/user")
+        .then(() => {
+          this.showPage = true;
+        })
+        .catch((error) => {
+          console.log(error.response);
+          this.$router.push({
+            name: 'Login',
+            params: {statusMessage: error.response.data, alertType: 'alert-danger'}
+          });
+        })
   },
   methods: {
     startBuild(type) {
