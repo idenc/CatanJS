@@ -274,6 +274,46 @@ class Game {
     }
 
     /**
+     * Finds the player x with the most knights:
+     *  - x gets stored in game.largestArmy
+     *  - x gains 2 victory points
+     *  - if x gets replaced, x loses 2 victory points and the replacer gains 2
+     */
+    testLargestArmy() {
+        let largest; // the size of the largest army
+        let player_i; = null; // tracks current record holder
+        let new_i = null; // index of player whose army size = largest (if this is not -1)
+
+        if (this.largestArmy == null) {
+            largest = 0;
+        } else {
+            largest = this.largestArmy.num;
+            player_i = this.largestArmy.player;
+        }
+
+        for (let i = 0; i < players.length; i++) {
+            const numKnights = players[i].numKnights;
+            if (numKnights >= 3 && numKnights > largest) {
+                largest = numKnights;
+                new_i = i;
+            }
+        }
+
+        if (new_i != null && player_i != new_i) {
+            this.largestArmy = {
+                num : largest,
+                player : new_i
+            };
+
+            if (player_i != null) {
+                player[player_i].victoryPoints -= 2;
+            }
+
+            player[new_i].victoryPoints += 2;
+        }
+    }
+
+    /**
      * Probably this method should be called when a room is created
      * for each player in the room
      * @param socket the socket for a player
