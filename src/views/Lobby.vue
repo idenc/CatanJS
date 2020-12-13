@@ -1,11 +1,13 @@
 <template>
-  <div class="container">
-        <h2
-          v-if="showUsername"
-          class="h2 pt-5"
-        >
-          Welcome {{ username }}
-        </h2>
+  <div
+    v-if="showPage"
+    class="container"
+  >
+    <h2
+      class="h2 pt-5"
+    >
+      Welcome {{ username }}
+    </h2>
     <div class="row mt-5">
       <div class="col-2">
         <button
@@ -56,7 +58,7 @@ export default {
   data() {
     return {
       showCreateScreen: true,
-      showUsername: false,
+      showPage: false,
       username: '',
       showAdmin: false,
       isAdmin: false // Super Secure Setting™
@@ -83,17 +85,16 @@ export default {
           .then((response) => {
             console.log(response)
             this.username = response.data.user.name;
-            this.showUsername = true;
+            this.showPage = true;
             this.isAdmin = response.data.user.isAdmin;
           })
           .catch((error) => {
-            console.log('error')
-            console.log(error);
+            console.log(error.response);
             this.$router.push({
               name: 'Login',
               params: {statusMessage: error.response.data, alertType: 'alert-danger'}
             });
-          });
+          })
     }
   }
 }
