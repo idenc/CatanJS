@@ -554,7 +554,7 @@ class Game {
                 || this.turnNumber < (this.players.length * 2)) {
                 player.numRoads--;
                 newRoad.colour = player.colour;
-
+                }
                 if (this.turnNumber >= (this.players.length * 2)) {
                     player.brick--;
                     player.lumber--;
@@ -565,15 +565,7 @@ class Game {
 
             this.roads.push(newRoad);
             this.checkLongestRoad();
-            /*if(newOwner !== this.longestRoadOwner){
-                const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
-                const newLongestRoad = this.players.find((p) => p.name === newOwner);
-                oldLongestRoad.victoryPoints -= 2;
-                newLongestRoad += 2;
-                //io.to(this.socketRoom).emit('update_longest_road', this.players);
-            }*/
-            console.log(`Longest Road Owner: ${this.longestRoadOwner}`);
-            console.log(`Longest Road Length: ${this.longestRoadLength}`);
+            io.to(this.socketRoom).emit('update_players', this.generateUsers());
             socket.to(this.socketRoom).emit('update_roads', {
                 roads: this.roads
             });
