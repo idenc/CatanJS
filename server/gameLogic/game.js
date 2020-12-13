@@ -381,6 +381,20 @@ class Game {
         }
     }
 
+    generateUsers() {
+        const users = [];
+        for (const player of this.players) {
+            users.push({
+                username: player.name,
+                colour: player.colour,
+                victoryPoints: player.victoryPoints,
+                numDevCards: player.devCards.length,
+            })
+        }
+        return users;
+    }
+
+
     /**
      * Probably this method should be called when a room is created
      * for each player in the room
@@ -396,8 +410,7 @@ class Game {
                 newPlayer = new Player(username, this.playerColours.pop());
                 this.players.push(newPlayer);
             }
-            socket.username = newPlayer.name;
-            socket.colour = newPlayer.colour;
+            socket.player = newPlayer;
             const currentTurnPlayer = this.players[this.turnNumber % this.players.length];
             newPlayer.isTurn = currentTurnPlayer.name === newPlayer.name;
             console.log(this.players);
@@ -410,7 +423,7 @@ class Game {
                 player: newPlayer
             });
             this.chatRoom.configureSocket(socket);
-            socket.emit('user_joined', {username: socket.username, colour: socket.colour})
+            socket.emit('user_joined', {username: newPlayer.name, colour: socket.colour})
         });
 
         //Prototype for creating game
@@ -505,6 +518,7 @@ class Game {
                     settlements: jsonSettlements,
                     player: player
                 });
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
             }
         });
 
@@ -529,6 +543,7 @@ class Game {
                     city: settlementCoord,
                     player: player
                 });
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
             }
         });
 
