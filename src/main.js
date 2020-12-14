@@ -10,7 +10,7 @@ Vue.use(new VueSocketIO({
     connection: io(':9999', {
         reconnectionDelay: 1000,
         reconnection: true,
-        reconnectionAttemps: 10,
+        reconnectionAttempts: 10,
         transports: ['websocket'],
         agent: false,
         upgrade: false,
