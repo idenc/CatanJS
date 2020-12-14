@@ -571,14 +571,17 @@ class Game {
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
+            let roadBuildingPlayed = newRoad.roadBuildingPlayed;
+            delete newRoad.roadBuildingPlayed;
             const player = this.players[this.turnNumber % this.players.length];
+            console.log(roadBuildingPlayed);
             if (player.isTurn
                 && (player.brick >= 1 && player.lumber >= 1)
-                || this.turnNumber < (this.players.length * 2)) {
+                || this.turnNumber < (this.players.length * 2) || roadBuildingPlayed) {
                 player.numRoads--;
                 newRoad.colour = player.colour;
 
-                if (this.turnNumber >= (this.players.length * 2)) {
+                if (this.turnNumber >= (this.players.length * 2) && !roadBuildingPlayed) {
                     player.brick--;
                     player.lumber--;
                     this.availableResources.brick++;
@@ -630,13 +633,13 @@ class Game {
         //Play Development Card
         socket.on('dev_card_played', (cardPlayed) => {
             const playerIdx = this.turnNumber % this.players.length;
-
+            console.log(`Played ${cardPlayed}`);
             if(cardPlayed === 'knight'){
                 this.robberEvent();
                 socket.to(this.socketRoom).emit('handle_robber_event');
             }
             else if(cardPlayed === 'roadBuilding'){
-                
+                socket.emit('road_building_card');
             }
             else if(cardPlayed === 'yearOfPlenty'){
                 socket.emit('yearOfPlentyPlayed');

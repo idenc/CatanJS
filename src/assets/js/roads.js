@@ -141,8 +141,9 @@ const startRoadSelection = (gameBoard) => {
     const firstTwoTurns = gameBoard.turnNumber === 0 && gameBoard.player.numRoads === maxBuildings.roads
         || gameBoard.turnNumber === 1 && gameBoard.player.numRoads === maxBuildings.roads - 1;
     const hasResources = gameBoard.player.brick >= 1 && gameBoard.player.lumber >= 1;
+    const roadBuildingPlayed = gameBoard.roadBuildingEvent;
     // Ensure player qualifies to build road
-    if (!firstTwoTurns && !hasResources) {
+    if (!firstTwoTurns && !hasResources && !roadBuildingPlayed) {
         return;
     }
     // Iterate through each settlement (i.e. grid intersection point)
@@ -175,12 +176,23 @@ const startRoadSelection = (gameBoard) => {
                         neighbour);
 
                     // If first two turns and player has used their turn's buildings
-
-                    gameBoard.$socket.emit('build_road', {
-                        to: {x: settlement.x, y: settlement.y},
-                        from: {x: neighbour.x, y: neighbour.y},
-                        player: gameBoard.player.name
-                    });
+                    if(roadBuildingPlayed){
+                        gameBoard.$socket.emit('build_road', {
+                            to: {x: settlement.x, y: settlement.y},
+                            from: {x: neighbour.x, y: neighbour.y},
+                            player: gameBoard.player.name,
+                            roadBuildingPlayed: true
+                        });
+                    }
+                    else{
+                        gameBoard.$socket.emit('build_road', {
+                            to: {x: settlement.x, y: settlement.y},
+                            from: {x: neighbour.x, y: neighbour.y},
+                            player: gameBoard.player.name,
+                            roadBuildingPlayed: false
+                        });
+                    }
+                    
                 });
             }
         });

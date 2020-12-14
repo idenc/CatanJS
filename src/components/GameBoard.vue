@@ -189,6 +189,8 @@ export default {
         token: null,
         gridIndex: null
       },
+      roadBuildingEvent: false,
+      roadsBuilt: 0,
     }
   },
   watch: {
@@ -736,6 +738,15 @@ export default {
       if (newRoads.player) {
         this.player = newRoads.player;
       }
+      if(this.roadBuildingEvent){
+        this.roadsBuilt++;
+      }
+      if(this.roadsBuilt === 2){
+        this.roadBuildingEvent = false;
+        this.roadsBuilt = 0
+        this.$emit('updateRoadBuildingEvent');
+      }
+      console.log(`Roads Built: ${this.roadsBuilt}`);
       this.roads = newRoads.roads;
       renderRoads(this);
     },
@@ -770,6 +781,10 @@ export default {
         this.$bvToast.show('game-toast');
       }
     },
+    road_building_card: function(){
+      this.roadBuildingEvent = true;
+      this.$emit('updateRoadBuildingEvent', this.roadBuildingEvent);
+    }
     /*update_robber_location: function(robberIndex){
       let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
 
