@@ -510,6 +510,10 @@ class Game {
                     player.lumber--;
                     player.wool--;
                     player.grain--;
+                    this.availableResources.brick++;
+                    this.availableResources.lumber++;
+                    this.availableResources.wool++;
+                    this.availableResources.grain++;
                 }
 
                 // Get tiles adjacent to this settlement
@@ -547,8 +551,8 @@ class Game {
                 player.victoryPoints++;
                 player.ore -= 3;
                 player.grain -= 2;
-                this.availableResources[ore] += 3;
-                this.availableResources[grain] += 2;
+                this.availableResources.ore += 3;
+                this.availableResources.grain += 2;
 
                 const settlement = this.settlements.get(JSON.stringify(settlementCoord));
                 settlement.state = 'city';
@@ -577,8 +581,8 @@ class Game {
                 if (this.turnNumber >= (this.players.length * 2)) {
                     player.brick--;
                     player.lumber--;
-                    this.availableResources[brick]++;
-                    this.availableResources[lumber]++;
+                    this.availableResources.brick++;
+                    this.availableResources.lumber++;
                 } else {
                     console.log('updating end turn');
                     player.hasRolled = true;
@@ -616,6 +620,8 @@ class Game {
             this.availableResources.lumber++;
             this.availableResources.grain++;
 
+            io.to(this.socketRoom).emit('update_players', this.generateUsers());
+
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
             io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length); //Send info to all players to update overall dev card count
@@ -640,16 +646,19 @@ class Game {
             }
             else if(cardPlayed === 'victoryPoint'){
                 this.players[playerIdx].victoryPoints++;
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
             }
 
             socket.on('monopoly_selected', (resource) => {
                 var numResource = this.availableResources[resource];
                 this.players[playerIdx].resource += numResource;
                 this.availableResources[resource] = 0;
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
             });
             socket.on('yearOfPlenty_selected', (resource) => {
                 this.availableResources[resource]--;
                 this.players[playerIdx].resource ++;
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
             });
         });
 
