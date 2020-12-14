@@ -213,7 +213,7 @@ const addUpgradeSelector = (gameBoard, settlement) => {
 
     const settlementGroup = settlement.svg.node;
     settlementGroup.addEventListener('click', () => {
-        settlement.svg.find('.settlement-upgrade').remove();
+        gameBoard.draw.find('.settlement-upgrade').remove();
 
         upgradeSettlement(settlement);
 
