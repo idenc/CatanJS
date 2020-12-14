@@ -229,6 +229,12 @@ p.mute {
 
 #kick-button, #mute-button {
   margin: 2px;
+  flex-grow: 1;
+  padding: 4px;
+}
+
+#host-buttons {
+  padding-right: 8px !important;
 }
 
 
@@ -241,6 +247,12 @@ li {
   color: white;
 }
 
+@media (max-height: 700px) {
+  #kick-button, #mute-button {
+    padding: 0px;
+  }
+}
+
 @media (max-height: 600px) {
   h1 {
     font-size: 1rem;
@@ -251,5 +263,7 @@ li {
     font-size: 0.5rem;
   }
 }
+
+
 
 </style>
