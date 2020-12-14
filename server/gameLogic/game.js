@@ -636,7 +636,7 @@ class Game {
             console.log(`Played ${cardPlayed}`);
             if(cardPlayed === 'knight'){
                 this.robberEvent();
-                socket.to(this.socketRoom).emit('handle_robber_event');
+                socket.emit('handle_robber_event');
             }
             else if(cardPlayed === 'roadBuilding'){
                 socket.emit('road_building_card');

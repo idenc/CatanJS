@@ -790,18 +790,11 @@ export default {
       if (newPlayer) {
         this.player = newPlayer;
       }
+    },
+    handle_robber_event: function(){
+      this.robberEvent = true;
+      this.$emit('updateRobberEvent', this.robberEvent);
     }
-    /*update_robber_location: function(robberIndex){
-      let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
-
-      this.tiles[fomerRobber].isRobber = false;
-      this.tiles[robberIndex].isRobber = true;
-      const oldCoordinates = [this.tiles[fomerRobber].x, this.tiles[fomerRobber].y];
-      const newCoordinates = [this.tiles[robberIndex].x, this.tiles[robberIndex].y];
-      //console.log(`Old robber coordinates X:${oldCoordinates[0]}, Y:${oldCoordinates[1]}`);
-      //console.log(`New robber coordinates X:${newCoordinates[0]}, Y:${newCoordinates[1]}`);
-      this.redrawRobberToken(this.draw, oldCoordinates, newCoordinates);
-    },*/
   }
 }
 
