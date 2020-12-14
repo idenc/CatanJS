@@ -646,29 +646,30 @@ class Game {
                 && player.numRoads > 0
                 && (player.brick >= 1 && player.lumber >= 1)
                 || this.turnNumber < (this.players.length * 2) || roadBuildingPlayed) {
-                player.numRoads--;
-                newRoad.colour = player.colour;
+                    player.numRoads--;
+                    newRoad.colour = player.colour;
 
-                if (this.turnNumber >= (this.players.length * 2) && !roadBuildingPlayed) {
-                    player.brick--;
-                    player.lumber--;
-                    this.availableResources.brick++;
-                    this.availableResources.lumber++;
-                } else {
-                    console.log('updating end turn');
-                    player.hasRolled = true;
-                }
+                    if (this.turnNumber >= (this.players.length * 2) && !roadBuildingPlayed) {
+                        player.brick--;
+                        player.lumber--;
+                        this.availableResources.brick++;
+                        this.availableResources.lumber++;
+                    } else {
+                        console.log('updating end turn');
+                        player.hasRolled = true;
+                    }
 
-            this.roads.push(newRoad);
-            this.checkLongestRoad();
-            io.to(this.socketRoom).emit('update_players', this.generateUsers());
-            socket.to(this.socketRoom).emit('update_roads', {
-                roads: this.roads
-            });
-            socket.emit('update_roads', {
-                roads: this.roads,
-                player: player
-            });
+                this.roads.push(newRoad);
+                this.checkLongestRoad();
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
+                socket.to(this.socketRoom).emit('update_roads', {
+                    roads: this.roads
+                });
+                socket.emit('update_roads', {
+                    roads: this.roads,
+                    player: player
+                });
+            }
         });
 
         //Build Development Card
