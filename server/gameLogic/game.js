@@ -462,7 +462,12 @@ class Game {
                 colour: player.colour,
                 victoryPoints: player.victoryPoints,
                 numDevCards: player.devCards.length,
-            })
+                brick: player.brick,
+                grain: player.grain,
+                ore: player.ore,
+                lumber: player.ore,
+                wool: player.wool,
+            });
         }
         return users;
     }
@@ -541,12 +546,35 @@ class Game {
         });
 
         //Trade
-        socket.on('trade_offer', (dealer, customer) => {
+        socket.on('trade_offer', (users) => {
+            const dealer = users[0];
+            const customer = users[1];
+            console.log(customer);
+            io.to(this.socketRoom).emit('trade_request', dealer, customer);
+            // this needs to be changed to the room thing!! **********************
+        });
 
+        socket.on('trade_accept', (users) => {
+            const dealer = users[0];
+            const customer = users[1];
+            io.to(this.socketRoom).emit('alert message', dealer + " and " + customer + " are trading...");
+            io.to(this.socketRoom).emit('trade_accept', dealer, customer);
+        });
+
+        socket.on('trade_cond', (info) => {
+            socket.to(this.socketRoom).emit('trade_cond', info );
+        });
+
+        socket.on('trade_refuse', () => {
+            socket.to(this.socketRoom).emit('trade_refuse');
         });
 
         socket.on('trade_outcome', (dealer, customer) => {
 
+        });
+
+        socket.on('trade_cancel', (player) => {
+            io.to(this.socketRoom).emit('trade_cancel', player);
         });
 
         //Build Settlement
@@ -680,10 +708,8 @@ class Game {
 
             const playerIdx = this.turnNumber % this.players.length;
 
-            if (this.players[playerIdx].ore === 0 || this.players[playerIdx].wool === 0 || this.players[playerIdx].grain === 0) return;
-
-            var index = Math.floor(Math.random() * this.availableDevCards.length);
-            var card = this.availableDevCards.splice(index, 1);
+            const index = Math.floor(Math.random() * this.availableDevCards.length);
+            const card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
             this.players[playerIdx].ore--;
             this.players[playerIdx].wool--;

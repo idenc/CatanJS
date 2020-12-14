@@ -51,12 +51,19 @@
           Cities - {{ player.numCities }}
         </div>
       </div>
+      <Overlay
+        ref="overlay"
+        :username="player.name"
+        :users="users"
+      />
     </div>
     <div id="sidebar-container">
       <div id="sidebar-players-container">
         <UserList
           id="user-list"
           :player="player"
+          :users="users"
+          @updateUsers="updateUserList"
         />
       </div>
       <div id="sidebar-chat-container">
@@ -74,7 +81,11 @@
           :is-turn="player.isTurn"
           @buildStarted="startBuild"
         />
-        <button class="btn btn-primary btn-block sidebar-main-button">
+        <button
+          id="tradeButton"
+          class="btn btn-primary btn-block"
+          @click="attemptTrade"
+        >
           Trade
         </button>
         <button
@@ -98,6 +109,9 @@ import UserList from "@/components/chat/UserList";
 import ChatWindow from "@/components/chat/ChatWindow";
 import DevCardModal from '@/components/DevCardModal';
 import Resources from "@/components/Resources";
+import Overlay from "@/components/Overlay";
+
+
 import BuildButton from "@/components/BuildButton";
 import DiceButton from "@/components/DiceButton";
 import ResizeText from 'vue-resize-text';
@@ -107,7 +121,7 @@ import axios from "axios";
 export default {
 
   name: "Game",
-  components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
+  components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal, Overlay},
   directives: {
     ResizeText
   },
@@ -130,6 +144,7 @@ export default {
       },
       robberEvent: false,
       showPage: false,
+      users: [],
       roadEvent: false,
     }
   },
@@ -185,6 +200,13 @@ export default {
       this.robberEvent = eventUpdate;
       console.log(`Updating Robber Event in Game.vue  ${this.robberEvent}`);
     },
+    attemptTrade() {
+      this.$refs.overlay.attemptTrade();
+    },
+    updateUserList(newUserList) {
+      console.log('updating game user list');
+      this.users = newUserList;
+    },
 
     updateRoadBuildingEvent(eventUpdate){
       this.roadEvent = eventUpdate;
@@ -194,8 +216,9 @@ export default {
       this.$socket.emit('leave_game');
       this.$socket.emit('lobby_leave_game');
     }
-
   },
+
+
 }
 </script>
 
@@ -204,6 +227,31 @@ export default {
   display: flex;
   flex-direction: row;
 }
+
+#user-row {
+  width: 100%;
+  display: flex;
+  /* height: 100%; */
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: space-between;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1%;
+
+
+}
+
+#user-row div {
+  width: 30%;
+
+}
+
+/* #user-row button {
+  width: 50%;
+
+}  */
+
 
 #board-container {
   flex-grow: 1;
