@@ -22,11 +22,11 @@ class ChatRoom {
      */
     configureSocket = (socket) => {
         socket.on('disconnect', () => {
-            console.log(`${socket.username} left`)
+            console.log(`${socket.player.name} left`)
             socket.numSessions--;
             if (socket.numSessions <= 0) {
-                this.users = this.users.filter(u => u.username !== socket.username);
-                io.to(this.socketRoom).emit('user_left', socket.username);
+                this.users = this.users.filter(u => u.username !== socket.player.name);
+                io.to(this.socketRoom).emit('user_left', socket.player.name);
             }
         });
 
@@ -50,10 +50,10 @@ class ChatRoom {
             msg = msg.replace(/:\(/g, '🙁');
             msg = msg.replace(/:o/g, '😲');
             const message = {
-                'user': socket.username,
+                'user': socket.player.name,
                 'message': msg,
                 'timestamp': Date.now(),
-                'color': socket.colour,
+                'color': socket.player.colour,
                 'id': uuidv4(),
             };
             this.messages.push(message);
@@ -62,12 +62,14 @@ class ChatRoom {
 
         // Check if the user is already present in the chat
         // We want to keep track of the number of tabs user has open
-        if (!this.users.some(u => u.username === socket.username)) {
+        if (!this.users.some(u => u.username === socket.player.name)) {
             // If they are not, initialize their numSessions
             socket.numSessions = 1;
             const userInfo = {
-                username: socket.username,
-                colour: socket.colour
+                username: socket.player.name,
+                colour: socket.player.colour,
+                victoryPoints: socket.player.victoryPoints,
+                numDevCards: socket.player.devCards.length
             };
             this.users.push(userInfo);
             // Tell everyone else another user joined
@@ -79,8 +81,10 @@ class ChatRoom {
             console.log('found user')
             socket.numSessions++;
         }
+
         console.log('a user connected with username ' + socket.username);
         //console.log(this.users);
+        
         socket.emit('chat_info', {
             current_users: this.users,
             messages: this.messages

@@ -1,4 +1,5 @@
 import {maxBuildings} from "../js/constants";
+import {arePointsEqual} from "@/assets/js/roads";
 
 const arrowImg = require('../img/arrow.svg');
 
@@ -80,6 +81,15 @@ const settlementAvailable = (gameBoard, settlement) => {
         }
     }
 
+    if (gameBoard.turnNumber > 1) {
+        const settlementCoord = {x: settlement.x, y: settlement.y}
+        const adjacentRoads = gameBoard.roads.filter(road => road.player === gameBoard.player.name && (arePointsEqual(road.to, settlementCoord)
+            || arePointsEqual(road.from, settlementCoord)));
+        if (adjacentRoads.length === 0) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -90,9 +100,9 @@ const settlementAvailable = (gameBoard, settlement) => {
 const startBuildSettlements = (gameBoard) => {
     // Need to check if player is eligible to build any settlements/cities
     const player = gameBoard.player;
-    console.log(maxBuildings);
-    const canBuildSettlement = player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
-    const canUpgrade = player.ore >= 3 && player.grain >= 2;
+    const canBuildSettlement = player.numSettlements > 0 && player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
+    const canUpgrade = player.numCities > 0 && player.ore >= 3 && player.grain >= 2;
+
     // All players get 2 settlements and 2 roads to begin
     if (!(player.numSettlements === maxBuildings.settlements && gameBoard.turnNumber === 0
         || player.numSettlements === maxBuildings.settlements - 1 && gameBoard.turnNumber === 1)) {
@@ -102,7 +112,7 @@ const startBuildSettlements = (gameBoard) => {
     }
 
     for (const [, settlement] of gameBoard.settlements.entries()) {
-        if (settlementAvailable(gameBoard, settlement)) {
+        if (canBuildSettlement && settlementAvailable(gameBoard, settlement)) {
             settlement.svg = addSettlementSelector(gameBoard, settlement);
         } else if (canUpgrade && settlement.state === 'settlement') {
             addUpgradeSelector(gameBoard, settlement);
@@ -203,7 +213,7 @@ const addUpgradeSelector = (gameBoard, settlement) => {
 
     const settlementGroup = settlement.svg.node;
     settlementGroup.addEventListener('click', () => {
-        settlement.svg.find('.settlement-upgrade').remove();
+        gameBoard.draw.find('.settlement-upgrade').remove();
 
         upgradeSettlement(settlement);
 

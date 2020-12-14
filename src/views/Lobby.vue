@@ -8,7 +8,7 @@
     >
       Welcome {{ username }}
     </h2>
-    <div class="row mt-5">
+    <div id="body-container" class="row mt-5">
       <div class="col-2">
         <button
           class="btn mb-2"
@@ -103,4 +103,10 @@ export default {
 </script>
 
 
-<style></style>
+<style>
+@media (max-height: 500px) {
+  #body-container {
+    margin-top: 0.75rem !important;
+  }
+}
+</style>

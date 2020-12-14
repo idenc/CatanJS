@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <router-view />
+    <div class="overlay"> Please Rotate Screen to Landscape</div>
   </div>
 </template>
 
@@ -28,5 +29,29 @@
 
 #nav a.router-link-exact-active {
   color: #42b983;
+}
+
+.overlay {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #1b75bb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  opacity: 0;
+  font-size: large;
+  display: none;
+}
+
+@media (max-width: 576px) {
+  .overlay {
+    opacity: 1;
+    display: flex;
+  }
 }
 </style>
