@@ -437,13 +437,12 @@
 
 export default {
   name: "Overlay",
-  prop: {
+  props: {
     username: String(),
+    users: [],
   },
   data() {
     return {
-      users: this.$socket.users,
-      username: this.username,
       resources: [
         ('clay', "..\\assets\\svg\\clay.svg"),
         ['lumber', '..\\assets\\svg\\wood.svg'],
@@ -454,8 +453,6 @@ export default {
     }
   },
   mounted: function () {
-
-
     this.sockets.subscribe('trade_request', (userList) => {
       const dealer = userList[0];
       const customer = userList[1];
@@ -503,10 +500,9 @@ export default {
     });
 
   },
-
   methods: {
     attemptTrade() {
-      this.users = this.$socket.users;
+      //this.users = this.$socket.users;
       //   console.log(this.$socket.users);
       document.querySelector("#overlay.main").classList.add("active");
       document.querySelector("#overlayin.trade").classList.add("active");

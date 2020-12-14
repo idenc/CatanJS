@@ -43,6 +43,7 @@
       <Overlay
         ref="overlay"
         :username="player.name"
+        :users="users"
       />
     </div>
     <div id="sidebar-container">
@@ -50,6 +51,7 @@
         <UserList
           id="user-list"
           :player="player"
+          @updateUsers="updateUserList"
         />
       </div>
       <div id="sidebar-chat-container">
@@ -129,7 +131,8 @@ export default {
         isTurn: false,
       },
       robberEvent: false,
-      showPage: false
+      showPage: false,
+      users: [],
     }
   },
   mounted: function () {
@@ -183,6 +186,10 @@ export default {
     attemptTrade() {
       this.$refs.overlay.attemptTrade();
     },
+    updateUserList(newUserList) {
+      console.log('updating game user list');
+      this.users = newUserList;
+    }
   },
 }
 </script>

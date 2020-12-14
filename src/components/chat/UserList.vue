@@ -120,8 +120,6 @@ export default {
       }
 
     },
-
-
     mute: function (user) {
       if (this.$socket.isHost) {
         this.$socket.emit('mute player', user);
@@ -129,8 +127,6 @@ export default {
         this.playerAlert();
       }
     },
-
-
     playerAlert: function () {
       document.querySelector("#overlay.main").classList.add("active");
       document.querySelector("#overlayin.player").classList.add("active");
@@ -139,24 +135,32 @@ export default {
         document.querySelector("#overlayin.player").classList.remove("active");
       });
     },
+    sendUserListUpdate: function () {
+      console.log('sending updated user list')
+      this.$emit('updateUsers', this.users);
+    }
   },
   sockets: {
     chat_info: function (chatInfo) {
       console.log(`chat info: ${chatInfo}`)
       this.users.push(...chatInfo.current_users);
+      this.sendUserListUpdate();
     },
     update_players: function (users) {
       this.users = users;
+      this.sendUserListUpdate();
     },
     user_joined: function (user) {
       console.log(`user joined: ${user}`)
       if (!this.users.some(u => u.username === user.username)) {
         this.users.push(user);
       }
+      this.sendUserListUpdate();
     },
     user_left: function (user) {
       console.log(`user left: ${user}`)
       this.users = this.users.filter(u => u.username !== user);
+      this.sendUserListUpdate();
     }
   }
 }
