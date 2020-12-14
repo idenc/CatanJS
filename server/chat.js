@@ -40,7 +40,6 @@ class ChatRoom {
         });
 
         socket.on('chat_message', (msg) => {
-            console.log(msg);
             // Keep 200 most recent messages
             if (this.messages.length >= 200) {
                 this.messages.shift();
