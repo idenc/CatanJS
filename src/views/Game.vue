@@ -128,7 +128,6 @@ export default {
           this.$nextTick(() => {
             this.passUsername(response.data.user.name);
           })
-
         })
         .catch((error) => {
           console.log(error)
