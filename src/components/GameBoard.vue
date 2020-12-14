@@ -112,18 +112,6 @@
         </pattern>
       </defs>
     </svg>
-    <b-toast
-      id="game-toast"
-      class="align-self-start"
-      title="BootstrapVue"
-      static
-      auto-hide-delay="5000"
-    >
-      <template #toast-title>
-        <strong class="mr-2"> {{ toastTitle }} </strong>
-      </template>
-      {{ toastMessage }}
-    </b-toast>
   </div>
 </template>
 
@@ -141,11 +129,9 @@ import {
 } from "@/assets/js/settlements";
 import {SCREEN_BREAKPOINTS, maxBuildings} from "@/assets/js/constants";
 import {redrawRoads, renderRoads, startRoadSelection} from "@/assets/js/roads";
-import {BToast} from 'bootstrap-vue'
 
 export default {
   name: "GameBoard",
-  components: {BToast},
   props: {
     turnNumber: Number(0)
   },
@@ -184,8 +170,6 @@ export default {
         shipTokenPercentOfHex: 0.24,
         shipTokenBorder: 3,
       },
-      toastTitle: 'Put toast title here',
-      toastMessage: 'Put toast message here',
       robberEvent: false,
       robber: {
         token: null,
@@ -204,7 +188,6 @@ export default {
 
   },
   mounted: function () {
-    // this.$bvToast.show(`game-toast`)
   },
   methods: {
     initializeBoard() {
@@ -219,7 +202,7 @@ export default {
       while (board.childNodes.length > 1) {
         board.removeChild(board.childNodes[1]);
       }
-      
+
       this.draw = SVG().addTo('#board')
       this.draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
       this.draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
@@ -754,10 +737,10 @@ export default {
       if (newRoads.player) {
         this.player = newRoads.player;
       }
-      if(this.roadBuildingEvent){
+      if (this.roadBuildingEvent) {
         this.roadsBuilt++;
       }
-      if(this.roadsBuilt === 2){
+      if (this.roadsBuilt === 2) {
         this.roadBuildingEvent = false;
         this.roadsBuilt = 0
         this.$emit('updateRoadBuildingEvent');
@@ -781,6 +764,7 @@ export default {
       }
     },
     dice_result: function (result) {
+      console.log('got dice result')
       const newPlayer = result.playerData.find(p => p.name === this.player.name);
       if (newPlayer) {
         this.player = newPlayer;
@@ -797,17 +781,17 @@ export default {
         this.$bvToast.show('game-toast');
       }
     },
-    road_building_card: function(){
+    road_building_card: function () {
       this.roadBuildingEvent = true;
       this.$emit('updateRoadBuildingEvent', this.roadBuildingEvent);
     },
-    update_resources: function(players){
+    update_resources: function (players) {
       const newPlayer = players.find(p => p.name === this.player.name);
       if (newPlayer) {
         this.player = newPlayer;
       }
     },
-    handle_robber_event: function(){
+    handle_robber_event: function () {
       this.robberEvent = true;
       this.$emit('updateRobberEvent', this.robberEvent);
     }

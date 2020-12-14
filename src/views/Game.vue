@@ -25,6 +25,18 @@
         @updateRobberEvent="updateRobberEvent"
         @updateRoadBuildingEvent="updateRoadBuildingEvent"
       />
+      <b-toast
+        id="game-toast"
+        class="align-self-start"
+        title="BootstrapVue"
+        auto-hide-delay="5000"
+        static
+      >
+        <template #toast-title>
+          <strong class="mr-2"> {{ toastTitle }} </strong>
+        </template>
+        {{ toastMessage }}
+      </b-toast>
       <DiceButton
         :has-rolled="player.hasRolled"
         :turn-number="turnNumber"
@@ -60,7 +72,7 @@
         <UserList
           id="user-list"
           :player="player"
-          :users="users"
+          :users-prop="users"
           @updateUsers="updateUserList"
         />
       </div>
@@ -114,11 +126,12 @@ import DiceButton from "@/components/DiceButton";
 import ResizeText from 'vue-resize-text';
 import {maxBuildings} from "@/assets/js/constants";
 import axios from "axios";
+import {BToast} from 'bootstrap-vue'
 
 export default {
 
   name: "Game",
-  components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal, Overlay},
+  components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal, Overlay, BToast},
   directives: {
     ResizeText
   },
@@ -143,6 +156,8 @@ export default {
       showPage: false,
       users: [],
       roadEvent: false,
+      toastTitle: 'Put toast title here',
+      toastMessage: 'Put toast message here',
     }
   },
   mounted: function () {
@@ -160,11 +175,23 @@ export default {
             name: 'Login',
             params: {statusMessage: error.response.data, alertType: 'alert-danger'}
           });
-        })
+        });
+
   },
   sockets: {
-    ready_to_leave: function() {
+    ready_to_leave: function () {
       this.$router.push({name: 'Lobby'});
+    },
+    dice_result: function (result) {
+      if (result.diceRoll === 7 && this.player.isTurn) {
+        this.toastTitle = "Rolled";
+        this.toastMessage = `${result.diceRoll}: Click on a tile to move the robber`;
+        this.$bvToast.show('game-toast');
+      } else {
+        this.toastTitle = "Rolled";
+        this.toastMessage = result.diceRoll;
+        this.$bvToast.show('game-toast');
+      }
     }
   },
   methods: {
@@ -205,7 +232,7 @@ export default {
       this.users = newUserList;
     },
 
-    updateRoadBuildingEvent(eventUpdate){
+    updateRoadBuildingEvent(eventUpdate) {
       this.roadEvent = eventUpdate;
     },
 
@@ -354,12 +381,12 @@ export default {
 
 @media (max-width: 768px) {
   #building-info {
-      font-size: 0.5rem;
-      padding: 6px;
+    font-size: 0.5rem;
+    padding: 6px;
   }
 
   #leave-button {
-      font-size: 0.5rem;
+    font-size: 0.5rem;
   }
 }
 
@@ -384,6 +411,14 @@ export default {
   justify-content: center;
   font-weight: bold;
   opacity: 0.9;
+}
+
+#game-toast__toast_outer {
+  margin: auto;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
 }
 
 </style>

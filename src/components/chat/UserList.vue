@@ -71,11 +71,20 @@
 <script>
 export default {
   name: "UserList",
-  props: {
-    player: Object(),
-    users: [],
+  props: [
+    'player',
+    'usersProp',
+  ],
+  data() {
+    return {
+      users: Array()
+    }
   },
-
+  watch: {
+    usersProp: function(newVal) {
+      this.users = newVal;
+    }
+  },
   mounted: function () {
     this.sockets.subscribe('got kicked', (user) => {
       if (this.player.name === user.username) {
@@ -103,7 +112,7 @@ export default {
 
     });
 
-    
+
 
   },
   methods: {
