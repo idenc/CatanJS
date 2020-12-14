@@ -6,7 +6,7 @@ const User = require('./models/User');
 let lobbies = {};
 let games = {};
 
-module.exports = socket => {
+module.exports = (socket) => {
     if (socket.request.session.passport && socket.request.session.passport.user) {
         User.findById(socket.request.session.passport.user, (err, user) => {
             if (user) {
@@ -16,6 +16,9 @@ module.exports = socket => {
                     for (const player of game.players) {
                         if (player.name === user.name) {
                             game.configureSocketInteractions(socket);
+                            socket.on('request_game', () => {
+                                socket.emit('is_in_game');
+                            });
                         }
                     }
                 }
@@ -99,22 +102,22 @@ module.exports = socket => {
     });
 
 
-    // socket.on("disconnect", () => {
-    //     for (let key in lobbies) {
-    //         let lobby = lobbies[key];
-    //
-    //         const ind = lobby["players"].indexOf(socket);
-    //         if (ind != -1) {
-    //             lobby["players"].splice(ind, 1); // remove socket from playerlist
-    //             lobby["numPlayers"] -= 1;
-    //
-    //             if (lobby["numPlayers"] == 0) {
-    //                 delete lobbies[key];
-    //                 delete games[key];
-    //             }
-    //
-    //             console.log(games);
-    //         }
-    //     }
-    // });
+    socket.on("disconnect", () => {
+        for (let key in lobbies) {
+            let lobby = lobbies[key];
+
+            const ind = lobby["players"].indexOf(socket);
+            if (ind != -1) {
+                lobby["players"].splice(ind, 1); // remove socket from playerlist
+                lobby["numPlayers"] -= 1;
+
+                if (lobby["numPlayers"] == 0) {
+                    delete lobbies[key];
+                    delete games[key];
+                }
+
+                console.log(games);
+            }
+        }
+    });
 }
