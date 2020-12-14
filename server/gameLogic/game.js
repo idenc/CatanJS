@@ -287,155 +287,93 @@ class Game {
         for (let i = 0; i < this.roads.length; i++) {
             visited.push(false)
         }
-        console.log("<> ------- this.roads: ", this.roads)
 
         //for every road segment check for all possible connections
         while(currentSegment < this.roads.length){
-            console.log("start for segment ---- " + currentSegment + " ------")
             // Copy roads to new array
             const roads = [];
             this.roads.forEach(r => {
                 roads.push({to: {x: r.to.x, y: r.to.y}, from: {x: r.from.x, y: r.from.y}, player: r.player, visited: false});
             })
-            console.log("roads: ", roads)
 
             // Push a road to the stack as a starting point
             stack.push(roads[currentSegment])
             //check all connections
             while(stack.length !== 0){
                 // Explore
-                console.log("explore ----")
                 let currNode = stack[stack.length - 1];
-                // let currNode = stack.pop();
-                console.log(currNode)
                 let matchFound = false
                 roads.forEach(road => {
                     if (!matchFound) {
-                        // Check for a match that is not visited
+                        // Check for connected a match that is not a visited road
                         if (JSON.stringify(road.from) === JSON.stringify(currNode.to) &&
                             !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
                             JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
                             !road.visited) {
-                            console.log("--match11 ----")
-                            console.log("road", road)
-                            console.log("currNode", currNode)
-
-                            console.log(("visited" in road.to || "visited" in road.from))
-                            console.log(("visited" in currNode.to || "visited" in currNode.from))
+                            // Don't check for new roads from the backwards node
                             if (!(("visited" in road.to || "visited" in road.from) &&
                                 ("visited" in currNode.to || "visited" in currNode.from))) {
                                 road.visited = true
                                 stack.push(road)
-                                
-                                console.log("match1 ----")
-                                console.log("road", road)
-                                console.log("currNode", currNode)
                                 Object.assign(road.from, {visited: true})
                                 matchFound = true;
                             }
                         }
+                        // Check for connected a match that is not a visited road
                         if (JSON.stringify(road.to) === JSON.stringify(currNode.from) && 
                             !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
                             JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
                             !road.visited) {
-                                console.log("--match22 ----")
-                                console.log("road", road)
-                                console.log("currNode", currNode)
-
-                                console.log(("visited" in road.to || "visited" in road.from))
-                                console.log(("visited" in currNode.to || "visited" in currNode.from))
-                                if (!(("visited" in road.to || "visited" in road.from) &&
-                                ("visited" in currNode.to || "visited" in currNode.from))) {
-                                road.visited = true
-                                stack.push(road)
-                                
-                                console.log("match2 ----")
-                                console.log("road", road)
-                                console.log("currNode", currNode)
-                                Object.assign(road.to, {visited: true})
-                                matchFound = true;
-                            }
-                        }
-                        if (JSON.stringify(road.to) === JSON.stringify(currNode.to) && 
-                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
-                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
-                            !road.visited) {
-                            console.log("--match33 ----")
-                            console.log("road", road)
-                            console.log("currNode", currNode)
-
-                            console.log(("visited" in road.to || "visited" in road.from))
-                            console.log(("visited" in currNode.to || "visited" in currNode.from))
+                            // Don't check for new roads from the backwards node
                             if (!(("visited" in road.to || "visited" in road.from) &&
                                 ("visited" in currNode.to || "visited" in currNode.from))) {
                                 road.visited = true
                                 stack.push(road)
-                                
-                                console.log("match3 ----")
-                                console.log("road", road)
-                                console.log("currNode", currNode)
                                 Object.assign(road.to, {visited: true})
                                 matchFound = true;
                             }
                         }
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.to) === JSON.stringify(currNode.to) && 
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.to, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        // Check for connected a match that is not a visited road
                         if (JSON.stringify(road.from) === JSON.stringify(currNode.from) && 
                             !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
                             JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
                             !road.visited) {
-                                console.log("--match44 ----")
-                                console.log("road", road)
-                                console.log("currNode", currNode)
-
-                                console.log(("visited" in road.to || "visited" in road.from))
-                                console.log(("visited" in currNode.to || "visited" in currNode.from))
-                                if (!(("visited" in road.to || "visited" in road.from) &&
-                                    ("visited" in currNode.to || "visited" in currNode.from))) {
-                                    road.visited = true
-                                    stack.push(road)
-                                    
-                                    console.log("match4 ----")
-                                    console.log("road", road)
-                                    console.log("currNode", currNode)
-                                    Object.assign(road.from, {visited: true})
-                                    matchFound = true;
-                                }
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.from, {visited: true})
+                                matchFound = true;
+                            }
                         }
                     }
                 })
 
+                // Determine if there is a new leader
                 if(stack.length > maxSize){
                     maxSize = stack.length;
                     currentLeader = this.roads[currentSegment].player;
                 }
 
+                // Pop node and search backwards if no new connected nodes
                 if (matchFound === false) {
                     stack.pop();
                 }
-                
-
-
-
-                // let node = stack.pop();
-                // console.log("node: ", node)
-                // if(visited[node] === false){
-                //     visited[node] = true;
-                //     for(let j = 0; j < this.roads.length; j++){
-                //         if(this.roads[node].player === this.roads[j].player ){
-                //             let exists = stack.includes(j);
-                //             if((JSON.stringify(this.roads[node].from) === JSON.stringify(this.roads[j].to) ||
-                //                 JSON.stringify(this.roads[node].to) === JSON.stringify(this.roads[j].from) ||
-                //                 JSON.stringify(this.roads[node].to) === JSON.stringify(this.roads[j].to) ||
-                //                 JSON.stringify(this.roads[node].from) === JSON.stringify(this.roads[j].from)) && !exists){
-                //                 stack.push(j);
-                //                 //node = j;
-                //             }
-                //         }
-                //     }
-                // }
-                // if(stack.length > maxSize){
-                //     maxSize = stack.length;
-                //     currentLeader = this.roads[currentSegment].player;
-                // }
             }
 
             //reset visited array
