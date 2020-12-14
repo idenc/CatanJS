@@ -229,6 +229,12 @@ p.mute {
 
 #kick-button, #mute-button {
   margin: 2px;
+  flex-grow: 1;
+  padding: 0;
+}
+
+#host-buttons {
+  padding-right: 8px !important;
 }
 
 
