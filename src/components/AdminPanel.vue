@@ -121,7 +121,17 @@ export default {
           this.masterPlayers = response.data;
           this.players = response.data;
           this.searchQuery = temp;
+          this.sortList();
         });
+    },
+    sortList() {
+      this.players.sort((a, b) => {
+        if (a.isAdmin)
+          return -1;
+        if (b.isAdmin)
+          return 1;
+        return 0;
+      });
     }
   }
 }

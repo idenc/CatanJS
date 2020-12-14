@@ -7,10 +7,10 @@ import { BootstrapVue } from 'bootstrap-vue'
 
 Vue.use(new VueSocketIO({
     debug: true,
-    connection: io('http://localhost:9999', {
+    connection: io(':9999', {
         reconnectionDelay: 1000,
         reconnection: true,
-        reconnectionAttemps: 10,
+        reconnectionAttempts: 10,
         transports: ['websocket'],
         agent: false,
         upgrade: false,

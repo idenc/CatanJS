@@ -77,6 +77,7 @@ export default {
   sockets: {
     chat_info: function (chatInfo) {
       console.log(`chat info: ${chatInfo}`)
+      this.users = [];
       this.users.push(...chatInfo.current_users);
     },
     update_players: function(users) {
@@ -164,7 +165,7 @@ li {
   color: white;
 }
 
-@media (max-width: 768px) {
+@media (max-height: 600px) {
   h1 {
     font-size: 1rem;
     margin: 0.25rem;

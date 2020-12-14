@@ -88,7 +88,7 @@ a:hover {
   padding: 22px 18px;
 }
 
-@media (max-width: 768px) {
+@media (max-height: 600px) {
   .form__field {
     padding: 0.25rem 1rem;
     width: 0;

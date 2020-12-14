@@ -159,6 +159,7 @@ export default {
       draw: SVG(),
       settlements: [],
       roads: [],
+      gameBoardInitialized: false,
       player: {
         name: '',
         brick: 0,
@@ -176,6 +177,7 @@ export default {
         oceanGap: 8,
         roadGap: 8,
         settlementRadius: 15,
+        settlementPercentOfHex: 0.12,
         tokenBorder: 5,
         tokenDotRadius: 1.5,
         numberTokenPercentOfHex: 0.16,
@@ -189,6 +191,8 @@ export default {
         token: null,
         gridIndex: null
       },
+      roadBuildingEvent: false,
+      roadsBuilt: 0,
     }
   },
   watch: {
@@ -211,6 +215,11 @@ export default {
       let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
       // Create svg container that fits the maximum gameboard size and store svg in draw variable
+      const board = document.getElementById("board");
+      while (board.childNodes.length > 1) {
+        board.removeChild(board.childNodes[1]);
+      }
+      
       this.draw = SVG().addTo('#board')
       this.draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
       this.draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
@@ -233,6 +242,7 @@ export default {
       // Render resource tiles
       const grid = this.renderResourceHexes(Hex, Grid, drawHexGroup, this.tiles);
       console.log(grid);
+      this.updateGraphicsPropertiesByWindowSize(grid);
 
       this.renderNumberTokens(draw, grid);
 
@@ -296,7 +306,7 @@ export default {
       }, 150));
 
       const handleWindowResize = () => {
-        this.updateGraphicsPropertiesByWindowSize();
+        this.updateGraphicsPropertiesByWindowSize(grid);
         // Recalculate max dimensions, redefine the grid, edit svg container dimensions to max dims
         maxHexSize = this.determineMaxHexSize(gameboardContainer);
         Hex = this.defineHexObject(maxHexSize, drawHexGroup);
@@ -352,8 +362,10 @@ export default {
         this.robber.gridIndex = robberIndex;
         this.moveRobberToken(this.draw, grid, Number(fomerRobber), Number(robberIndex));
       });
+
+      this.gameBoardInitialized = true;
     },
-    updateGraphicsPropertiesByWindowSize() {
+    updateGraphicsPropertiesByWindowSize(grid) {
       // Set the road gap based on the window size
       console.log(window.innerWidth);
       this.graphics.roadGap = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 4 : 8;
@@ -361,6 +373,10 @@ export default {
       this.graphics.tokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 2 : 5;
       this.graphics.tokenDotRadius = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 1 : 1.5;
       this.graphics.shipTokenBorder = window.innerWidth <= SCREEN_BREAKPOINTS.MD ? 1 : 3;
+
+      if (grid) {
+        this.graphics.settlementRadius = grid[0].hexPolygon.height() * this.graphics.settlementPercentOfHex;
+      }
     },
     // Determine maximum size of gameboard that fits play area div
     determineMaxHexSize(gameboardContainer) {
@@ -730,12 +746,23 @@ export default {
       this.roads = boardInfo.roads;
       this.$emit('updateTurnNumber', boardInfo.turnNumber);
       this.player = boardInfo.player;
-      this.initializeBoard();
+      if (!this.gameBoardInitialized) {
+        this.initializeBoard();
+      }
     },
     update_roads: function (newRoads) {
       if (newRoads.player) {
         this.player = newRoads.player;
       }
+      if(this.roadBuildingEvent){
+        this.roadsBuilt++;
+      }
+      if(this.roadsBuilt === 2){
+        this.roadBuildingEvent = false;
+        this.roadsBuilt = 0
+        this.$emit('updateRoadBuildingEvent');
+      }
+      console.log(`Roads Built: ${this.roadsBuilt}`);
       this.roads = newRoads.roads;
       renderRoads(this);
     },
@@ -770,17 +797,20 @@ export default {
         this.$bvToast.show('game-toast');
       }
     },
-    /*update_robber_location: function(robberIndex){
-      let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
-
-      this.tiles[fomerRobber].isRobber = false;
-      this.tiles[robberIndex].isRobber = true;
-      const oldCoordinates = [this.tiles[fomerRobber].x, this.tiles[fomerRobber].y];
-      const newCoordinates = [this.tiles[robberIndex].x, this.tiles[robberIndex].y];
-      //console.log(`Old robber coordinates X:${oldCoordinates[0]}, Y:${oldCoordinates[1]}`);
-      //console.log(`New robber coordinates X:${newCoordinates[0]}, Y:${newCoordinates[1]}`);
-      this.redrawRobberToken(this.draw, oldCoordinates, newCoordinates);
-    },*/
+    road_building_card: function(){
+      this.roadBuildingEvent = true;
+      this.$emit('updateRoadBuildingEvent', this.roadBuildingEvent);
+    },
+    update_resources: function(players){
+      const newPlayer = players.find(p => p.name === this.player.name);
+      if (newPlayer) {
+        this.player = newPlayer;
+      }
+    },
+    handle_robber_event: function(){
+      this.robberEvent = true;
+      this.$emit('updateRobberEvent', this.robberEvent);
+    }
   }
 }
 
@@ -850,6 +880,11 @@ export default {
 
 ::v-deep .build-selector:hover {
   fill: green;
+  cursor: pointer;
+}
+
+::v-deep .settlement-upgrade:hover {
+  cursor: pointer;
 }
 
 </style>
