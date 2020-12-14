@@ -651,18 +651,27 @@ class Game {
                 this.players[playerIdx].victoryPoints++;
                 io.to(this.socketRoom).emit('update_players', this.generateUsers());
             }
+        });
 
-            socket.on('monopoly_selected', (resource) => {
-                var numResource = this.availableResources[resource];
-                this.players[playerIdx].resource += numResource;
-                this.availableResources[resource] = 0;
-                io.to(this.socketRoom).emit('update_players', this.generateUsers());
-            });
-            socket.on('yearOfPlenty_selected', (resource) => {
-                this.availableResources[resource]--;
-                this.players[playerIdx].resource ++;
-                io.to(this.socketRoom).emit('update_players', this.generateUsers());
-            });
+        socket.on('monopoly_selected', (resource) => {
+            const playerIdx = this.turnNumber % this.players.length;
+            for(let i = 0; i < this.players.length; i++){
+                if(playerIdx != i){
+                    this.players[playerIdx][resource] = this.players[i][resource];
+                    this.players[i][resource] = 0;
+                }
+            }
+            //io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            io.to(this.socketRoom).emit('update_resources', this.players);
+        });
+
+        socket.on('yearOfPlenty_selected', (resource) => {
+            const playerIdx = this.turnNumber % this.players.length;
+            console.log(`${this.players[playerIdx].name} is selecting ${resource}`);
+            this.availableResources[resource]--;
+            this.players[playerIdx][resource] ++;
+            //io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            io.to(this.socketRoom).emit('update_resources', this.players);
         });
 
         // Fill out devCardCounts in DevCardModel.vue when the vue is created

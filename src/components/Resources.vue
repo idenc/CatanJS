@@ -3,7 +3,7 @@
     <div
       class="resource"
       resource="clay"
-      @click="select(brick)"
+      @click="select('brick')"
     >
       <img
         class="resource-icon"
@@ -16,7 +16,7 @@
     <div
       class="resource"
       resource="wood"
-      @click="select(lumber)"
+      @click="select('lumber')"
     >
       <img
         class="resource-icon"
@@ -29,7 +29,7 @@
     <div
       class="resource"
       resource="sheep"
-      @click="select(wool)"
+      @click="select('wool')"
     >
       <img
         class="resource-icon"
@@ -42,7 +42,7 @@
     <div
       class="resource"
       resource="wheat"
-      @click="select(wheat)"
+      @click="select('grain')"
     >
       <img
         class="resource-icon"
@@ -55,7 +55,7 @@
     <div
       class="resource"
       resource="ore"
-      @click="select(ore)"
+      @click="select('ore')"
     >
       <img
         class="resource-icon"
@@ -88,7 +88,7 @@ export default {
   },
   sockets: {
     monopoly_played() {
-      this.monopoly_played = true;
+      this.monopolySelect = true;
     },
     yearOfPlentyPlayed() {
       this.yearOfPlentySelect = true;

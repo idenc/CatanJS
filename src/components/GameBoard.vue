@@ -784,6 +784,12 @@ export default {
     road_building_card: function(){
       this.roadBuildingEvent = true;
       this.$emit('updateRoadBuildingEvent', this.roadBuildingEvent);
+    },
+    update_resources: function(players){
+      const newPlayer = players.find(p => p.name === this.player.name);
+      if (newPlayer) {
+        this.player = newPlayer;
+      }
     }
     /*update_robber_location: function(robberIndex){
       let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
