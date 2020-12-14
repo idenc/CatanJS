@@ -247,6 +247,12 @@ li {
   color: white;
 }
 
+@media (max-height: 700px) {
+  #kick-button, #mute-button {
+    padding: 0px;
+  }
+}
+
 @media (max-height: 600px) {
   h1 {
     font-size: 1rem;
@@ -258,10 +264,6 @@ li {
   }
 }
 
-@media (max-height: 700px) {
-  #kick-button, #mute-button {
-    padding: 0px;
-  }
-}
+
 
 </style>
