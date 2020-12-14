@@ -237,7 +237,7 @@ export default {
   width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (max-height: 600px) {
   ::v-deep .sidebar-main-button {
     margin: 0;
     padding: 0.25rem 0.25rem;

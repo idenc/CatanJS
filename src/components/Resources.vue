@@ -129,7 +129,7 @@ export default {
   pointer-events: none;
 }
 
-@media (max-width: 768px) {
+@media (max-height: 600px) {
   .resources-container {
     padding: 0.25rem;
   }
