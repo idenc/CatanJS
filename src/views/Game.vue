@@ -74,14 +74,13 @@
         <BuildButton
           id="build-button"
           ref="buildButton"
-          class="button-component"
-          style="width: 30%;"
+          class="button-component btn btn-primary btn-block sidebar-main-button"
           :is-turn="player.isTurn"
           @buildStarted="startBuild"
         />
         <button
           id="tradeButton"
-          class="btn btn-primary btn-block"
+          class="btn btn-primary btn-block sidebar-main-button"
           @click="attemptTrade"
         >
           Trade
@@ -299,6 +298,10 @@ export default {
 ::v-deep .sidebar-main-button {
   margin: 0;
   padding: 0.5rem 1rem;
+}
+
+#build-button {
+  padding: 0;
 }
 
 #sidebar-resources-container {
