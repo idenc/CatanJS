@@ -634,6 +634,8 @@ class Game {
         socket.on('dev_card_played', (cardPlayed) => {
             const playerIdx = this.turnNumber % this.players.length;
             console.log(`Played ${cardPlayed}`);
+            let toRemove = this.players[playerIdx].devCards.findIndex((c) => c === cardPlayed);
+            this.players[playerIdx].devCards.splice(toRemove, 1);
             if(cardPlayed === 'knight'){
                 this.robberEvent();
                 socket.emit('handle_robber_event');

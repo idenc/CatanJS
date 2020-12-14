@@ -115,9 +115,9 @@ export default {
       }
     },
     useDevCard(card){
-      if(this.player.isTurn){
+      if(this.player.isTurn && this.devCardCount[card] !== 0){
         this.$socket.emit('dev_card_played', card);
-        if(this.devCardCount[card] > 0) this.devCardCount[card]--;
+        this.devCardCount[card]--;
       }
     }
   },
