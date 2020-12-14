@@ -219,7 +219,7 @@ export default {
       while (board.childNodes.length > 1) {
         board.removeChild(board.childNodes[1]);
       }
-      
+
       this.draw = SVG().addTo('#board')
       this.draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
       this.draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
@@ -754,10 +754,10 @@ export default {
       if (newRoads.player) {
         this.player = newRoads.player;
       }
-      if(this.roadBuildingEvent){
+      if (this.roadBuildingEvent) {
         this.roadsBuilt++;
       }
-      if(this.roadsBuilt === 2){
+      if (this.roadsBuilt === 2) {
         this.roadBuildingEvent = false;
         this.roadsBuilt = 0
         this.$emit('updateRoadBuildingEvent');
@@ -781,6 +781,7 @@ export default {
       }
     },
     dice_result: function (result) {
+      console.log('got dice result')
       const newPlayer = result.playerData.find(p => p.name === this.player.name);
       if (newPlayer) {
         this.player = newPlayer;
@@ -797,17 +798,17 @@ export default {
         this.$bvToast.show('game-toast');
       }
     },
-    road_building_card: function(){
+    road_building_card: function () {
       this.roadBuildingEvent = true;
       this.$emit('updateRoadBuildingEvent', this.roadBuildingEvent);
     },
-    update_resources: function(players){
+    update_resources: function (players) {
       const newPlayer = players.find(p => p.name === this.player.name);
       if (newPlayer) {
         this.player = newPlayer;
       }
     },
-    handle_robber_event: function(){
+    handle_robber_event: function () {
       this.robberEvent = true;
       this.$emit('updateRobberEvent', this.robberEvent);
     }

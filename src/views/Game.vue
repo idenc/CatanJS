@@ -54,7 +54,7 @@
       <Overlay
         ref="overlay"
         :username="player.name"
-        :users="users"
+        :user-prop="users"
       />
     </div>
     <div id="sidebar-container">
@@ -62,7 +62,7 @@
         <UserList
           id="user-list"
           :player="player"
-          :users="users"
+          :users-prop="users"
           @updateUsers="updateUserList"
         />
       </div>
