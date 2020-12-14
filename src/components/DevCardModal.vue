@@ -208,7 +208,7 @@ export default {
   }
 
   .requires[resource='sheep']{
-    background: green;
+    background: #bababa;
   }
 
   .requires[resource='wheat']{
