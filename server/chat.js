@@ -31,11 +31,11 @@ class ChatRoom {
         });
 
         socket.on('leave_game', () => {
-            console.log(`${socket.username} left`)
+            console.log(`${socket.player.name} left`)
             socket.numSessions--;
             if (socket.numSessions <= 0) {
-                this.users = this.users.filter(u => u.username !== socket.username);
-                io.to(this.socketRoom).emit('user_left', socket.username);
+                this.users = this.users.filter(u => u.username !== socket.player.name);
+                io.to(this.socketRoom).emit('user_left', socket.player.name);
             }
         });
 

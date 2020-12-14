@@ -8,7 +8,10 @@
     >
       Welcome {{ username }}
     </h2>
-    <div id="body-container" class="row mt-5">
+    <div
+      id="body-container" 
+      class="row mt-5"
+    >
       <div class="col-2">
         <button
           class="btn mb-2"
