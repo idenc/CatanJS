@@ -230,7 +230,7 @@ p.mute {
 #kick-button, #mute-button {
   margin: 2px;
   flex-grow: 1;
-  padding: 0;
+  padding: 4px;
 }
 
 #host-buttons {
@@ -255,6 +255,12 @@ li {
 
   #user-rows {
     font-size: 0.5rem;
+  }
+}
+
+@media (max-height: 700px) {
+  #kick-button, #mute-button {
+    padding: 0px;
   }
 }
 
