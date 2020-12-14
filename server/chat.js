@@ -49,17 +49,32 @@ class ChatRoom {
             io.to(this.socketRoom).emit('chat_message', message);
         });
 
+        socket.on('alert message', (msg) => {
+            if (this.messages.length >= 200) {
+                this.messages.shift();
+            }
+            const message = {
+                'user': 'Server',
+                'message': msg,
+                'timestamp': Date.now(),
+                'color': socket.player.colour,
+                'id': uuidv4(),
+            };
+            this.messages.push(message);
+            io.to(this.socketRoom).emit('chat_message', message);
+        });
+
         socket.on('got kicked', (user) => {
             io.to(this.socketRoom).emit('got kicked', user);
             this.users = this.users.filter(u => u.username !== user.username);
-            io.to(this.socketRoom).emit('user left', user.username);
+            io.to(this.socketRoom).emit('user_left', user.username);
             if (this.users.length >= 1 && this.users[0].isHost === false) {
                 this.users[0].isHost = true;
             }
         });
 
         socket.on('mute player', (user) => {
-            io.emit('mute player', user);
+            io.to(this.socketRoom).emit('mute player', user);
         });
 
 

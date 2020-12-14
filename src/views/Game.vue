@@ -51,6 +51,7 @@
         <UserList
           id="user-list"
           :player="player"
+          :users="users"
           @updateUsers="updateUserList"
         />
       </div>

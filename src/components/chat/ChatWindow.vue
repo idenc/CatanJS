@@ -98,7 +98,8 @@ export default {
         msgStr = user.username + " has been unmuted!";
         docStr = "#overlayin.unmute";
       }
-      this.$socket.emit('alert message', msgStr);
+      console.log(this.$socket);
+      this.$socket.emit('alert_message', msgStr);
 
       document.querySelector("#overlay.main").classList.add("active");
       document.querySelector(docStr).classList.add("active");
@@ -111,6 +112,17 @@ export default {
   },
   sockets: {
     chat_message: function (msg) {
+      if (!this.mute_list.includes(this.username)) {
+        this.$socket.emit('chat message', this.message);
+        document.querySelector("#overlayin.mute").classList.add("active");
+        document.querySelector("#overlay.main").addEventListener("click", () => {
+          document.querySelector("#overlay.main").classList.remove("active");
+          document.querySelector("#overlayin.mute").classList.remove("active");
+      });
+      }
+      else {
+        document.querySelector("#overlay.main").classList.add("active");
+      }
       const messageBox = this.$refs.message_box;
       this.chat_messages.push(msg);
 

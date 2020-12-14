@@ -125,7 +125,7 @@
                   id="clay"
                   type="text"
                   class="receive"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType2">
@@ -141,7 +141,7 @@
                   id="wood"
                   type="text"
                   class="receive"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType2">
@@ -157,7 +157,7 @@
                   id="sheep"
                   type="text"
                   class="receive"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType2">
@@ -173,7 +173,7 @@
                   id="wheat"
                   type="text"
                   class="receive"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType2">
@@ -189,7 +189,7 @@
                   id="ore"
                   type="text"
                   class="receive"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType2">
@@ -208,7 +208,7 @@
                   id="clay"
                   type="text"
                   class="offer"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType1">
@@ -224,7 +224,7 @@
                   id="wood"
                   type="text"
                   class="offer"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType1">
@@ -240,7 +240,7 @@
                   id="sheep"
                   type="text"
                   class="offer"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType1">
@@ -256,7 +256,7 @@
                   id="wheat"
                   type="text"
                   class="offer"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType1">
@@ -272,7 +272,7 @@
                   id="ore"
                   type="text"
                   class="offer"
-                  value="0"
+                  :value='0'
                 >
               </div>
               <p id="clayTradeType1">
@@ -307,7 +307,7 @@
             <button
               id="accept"
               class="btn btn-primary btn-block"
-              @click="acceptTrade()"
+              @click="acceptOffer()"
             >
               Accept
             </button>
@@ -315,44 +315,49 @@
         </div>
         <div id="column3">
           <p class="big">
-            All trades are 4:1 unless you own a harbour that allows to better rates.
+            All trades are 4:1 unless you own a harbour that allows better rates.
           </p>
+          <p class="big"> Harbours Owned:</p>
           <ul id="harboursOwned">
-            Harbours Owned:
             <li id="genericHarbour">
               Generic Harbour: 3:1 for every resource
             </li>
             <li
-              id="specialHabour"
+              id="specialHarbour"
               class="clay"
             >
               Clay Special Harbour: 2 clay:1 any resource
             </li>
             <li
-              id="specialHabour"
+              id="specialHarbour"
               class="wood"
             >
               Wood Special Harbour: 2 wood:1 any resource
             </li>
             <li
-              id="specialHabour"
+              id="specialHarbour"
               class="wheat"
             >
               Wheat Special Harbour: 2 wheat:1 any resource
             </li>
             <li
-              id="specialHabour"
+              id="specialHarbour"
               class="sheep"
             >
               Sheep Special Harbour: 2 sheep:1 any resource
             </li>
             <li
-              id="specialHabour"
+              id="specialHarbour"
               class="ore"
             >
               Ore Special Harbour: 2 ore:1 any resource
             </li>
           </ul>
+        </div>
+        <div id="column4">
+            <p id='offerMsg' class='big'>
+                Someone made an offer.
+            </p>
         </div>
       </div>
     </div>
@@ -443,6 +448,7 @@ export default {
   },
   data() {
     return {
+        tradePlayer: '',
       resources: [
         ('clay', "..\\assets\\svg\\clay.svg"),
         ['lumber', '..\\assets\\svg\\wood.svg'],
@@ -460,7 +466,7 @@ export default {
       console.log(dealer);
       console.log(this.username);
       if (this.username === customer) {
-        this.$socket.tradePlayer = dealer;
+        this.tradePlayer = dealer;
         document.getElementById("tradeMsg").innerHTML = dealer + " would like to trade with you.";
         document.querySelector("#overlay.main").classList.add("active");
         document.querySelector("#overlayin.tradeOptions").classList.add("active");
@@ -476,27 +482,66 @@ export default {
           document.querySelector("#overlayin.tradeCancel").classList.remove("active");
         });
         document.querySelector("#overlay.main").classList.remove("active");
-        this.toggleButtons(false);
+        // this.toggleButtons(false);
       }
     });
 
+    this.sockets.subscribe('trade_refuse', () => {
+        if (document.querySelector("#overlayin.trade").classList.contains('active')) {
+          document.getElementById("cancelButton").disabled = false;
+          document.querySelector("#overlayin.trade").classList.remove("active");
+          
+          document.querySelector("#overlayin.tradeCancel").classList.add("active");
+          
+          document.querySelector("#overlay.main").addEventListener("click", () => {
+            document.querySelector("#overlay.main").classList.remove("active");
+            document.querySelector("#overlayin.tradeCancel").classList.remove("active");
+          });
+        }
+    })
+
     this.sockets.subscribe('trade_accept', (userList) => {
-      console.log("getting callback!!!");
+    //   console.log("getting callback!!!");
       const dealer = userList[0];
       const customer = userList[1];
-      console.log(dealer);
-      console.log(this.username);
+    //   console.log(dealer);
+    //   console.log(this.username);
 
       if (this.username === dealer) {
-        this.$socket.tradePlayer = customer;
+        this.tradePlayer = customer;
         document.querySelector("#overlayin.trade").classList.remove("active");
         document.getElementById("cancelButton").disabled = false;
         this.tradeMenu(dealer, customer);
       } else if (this.username === customer) {
-        this.$socket.tradePlayer = dealer;
+        this.tradePlayer = dealer;
         document.querySelector("#overlayin.tradeOptions").classList.remove("active");
+        document.getElementById("cancelButton").disabled = false;
         this.tradeMenu(customer, dealer);
       }
+    });
+
+    this.sockets.subscribe('trade_cond', (info) => {
+        // console.log(info);
+        document.querySelector("#offer").disabled = false;
+        document.querySelector("#reset").disabled = false;
+        document.querySelector("#accept").disabled = false;
+        document.querySelector("#column4").classList.remove('active');
+        if (this.username == info[0]) {
+            document.querySelector("#clay.receive").value = info[1];
+            document.querySelector("#wood.receive").value = info[2];
+            document.querySelector("#sheep.receive").value = info[3];
+            document.querySelector("#wheat.receive").value = info[4];
+            document.querySelector("#ore.receive").value = info[5];
+
+            document.querySelector("#clay.offer").value = info[6];
+            document.querySelector("#wood.offer").value = info[7];
+            document.querySelector("#sheep.offer").value = info[8];
+            document.querySelector("#wheat.offer").value = info[9];
+            document.querySelector("#ore.offer").value = info[10];
+            document.querySelector("#offerMsg").innerHTML = this.tradePlayer + " has made an offer. Click Accept to accept. If you wish to counter offer change the values and click offer."
+            document.querySelector("#column4").classList.add('active');
+
+        }
     });
 
   },
@@ -510,7 +555,7 @@ export default {
 
     tradeRequest(username) {
       if (username === 'bank') {
-        this.$socket.tradePlayer = 'Bank';
+        this.tradePlayer = 'Bank';
         document.querySelector("#overlayin.trade").classList.remove("active");
         this.tradeMenu(this.username, 'bank');
       } else {
@@ -531,24 +576,24 @@ export default {
         document.querySelector("#offer").disabled = true;
       }
       document.querySelector("#overlayin.tradeMenu").classList.add("active");
-      this.toggleButtons(true);
+    //   this.toggleButtons(true);
     },
 
     cancelTrade(txt) {
       document.querySelector(txt).classList.remove("active");
       document.querySelector("#overlay.main").classList.remove("active");
 
-      if (this.$socket.tradePlayer !== 'Bank') {
-        this.$socket.emit('trade_cancel', this.$socket.tradePlayer);
-        this.$socket.tradePlayer = '';
+      if (this.tradePlayer !== 'Bank') {
+        this.$socket.emit('trade_cancel', this.tradePlayer);
+        this.tradePlayer = '';
       } else {
         document.querySelector('#column3').classList.remove("active");
         document.querySelector("#offer").disabled = false;
       }
-      this.toggleButtons(false);
-      if (this.$socket.tradePlayer !== '') {
-        this.$socket.emit('trade_cancel', this.$socket.tradePlayer);
-        this.$socket.tradePlayer = '';
+    //   this.toggleButtons(false);
+      if (this.tradePlayer !== '') {
+        this.$socket.emit('trade_cancel', this.tradePlayer);
+        this.tradePlayer = '';
       }
     },
 
@@ -580,7 +625,7 @@ export default {
 
     },
 
-    offerTrade(type) {
+    offerTrade() {
       const clayRec = document.querySelector("#clay.receive").value;
       const woodRec = document.querySelector("#wood.receive").value;
       const sheepRec = document.querySelector("#sheep.receive").value;
@@ -593,7 +638,7 @@ export default {
       const wheatOff = document.querySelector("#wheat.offer").value;
       const oreOff = document.querySelector("#ore.offer").value;
 
-      if (type == 'domestic') {
+      if (this.tradePlayer === '') {
         // This is never used?
         const clayTradeType = document.querySelector("#clayTradeType");
         const woodTradeType = document.querySelector("#woodTradeType");
@@ -605,27 +650,47 @@ export default {
         const totalOff = clayOff + woodOff + sheepOff + wheatOff + oreOff;
         if (totalOff == 0 || totalRec == 0) {
           document.querySelector("#overlayin.tradeMenu").classList.remove("active");
-          document.querySelector("overlayin.invalidTrade").classList.add("active");
+          document.querySelector("#overlayin.invalidTrade").classList.add("active");
           document.querySelector("#overlay.main").addEventListener("click", () => {
             document.querySelector("#overlayin.invalidTrade").classList.remove("active");
             document.querySelector("#overlayin.tradeMenu").classList.add("active");
           });
+        } else {
+  
+            for (let i =0; i<this.users.length; i++) {
+                if (this.users[i].username == this.username) {
+                    console.log(this.users[i]);
+                     if (clayOff > this.users[i].brick || woodOff > this.users[i].lumber || sheepOff > this.users[i].wool || wheatOff > this.users[i].grain || oreOff > this.users[i].ore) {
+                        document.querySelector("#column4").classList.add('active');
+                        document.querySelector("#offerMsg").innerHTMl = 'Invalid trade, you do not have enough resources';
+                    } else {
+                        let info =[this.tradePlayer, clayOff, woodOff, sheepOff, wheatOff, oreOff, clayRec, woodRec, sheepRec, wheatRec, oreRec];
+                        document.querySelector("#offer").disabled = true;
+                        document.querySelector("#reset").disabled = true;
+                        document.querySelector("#accept").disabled = true;
+                        document.querySelector("#column4").classList.add('active');
+                        document.querySelector("#offerMsg").innerHTMl = 'Request sent please wait for response...';
+                        this.$socket.emit('trade_cond', info);
+                    }
+                    break;
+                }
+
+            }
         }
-        this.$socket.emit('trade_cond', this.$socket.tradePlayer);
-
-
       }
+      
 
 
     },
 
     acceptTrade() {
-      const userList = [this.$socket.tradePlayer, this.username];
+      const userList = [this.tradePlayer, this.username];
       this.$socket.emit('trade_accept', (userList));
     },
 
     declineTrade() {
-      this.$socket.emit('trade_refuse', (this.$socket.tradePlayer, this.username));
+      document.querySelector("#overlayin.tradeOptions").classList.remove('active');
+      this.$socket.emit('trade_refuse' );
     }
 
   }
@@ -641,11 +706,25 @@ export default {
   visibility: hidden;
 }
 
+#column4 {
+    display: none;
+    visibility: active;
+}
+
+#column4.active {
+  visibility: visible;
+  display: block;
+}
+
 #column3.active {
   visibility: visible;
   display: block;
 }
 
+#harboursOwned li {
+    visibility: hidden;
+    display:none;
+}
 /* #recResources div, #offResources div {
     width: 20%;
     display: flex;
@@ -814,10 +893,11 @@ export default {
   animation-fill-mode: forwards;
 }
 
-#overlayin.tradeMenu {
+/* #overlayin.tradeMenu {
   margin-right: 20%;
   margin-bottom: 30%;
-}
+  margin-top: 10%;
+} */
 
 #overlay * {
   pointer-events: none;

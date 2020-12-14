@@ -389,7 +389,12 @@ class Game {
                 colour: player.colour,
                 victoryPoints: player.victoryPoints,
                 numDevCards: player.devCards.length,
-            })
+                brick: player.brick,
+                grain: player.grain,
+                ore: player.ore,
+                lumber: player.ore,
+                wool: player.wool,
+            });
         }
         return users;
     }
@@ -466,19 +471,23 @@ class Game {
             const dealer = users[0];
             const customer = users[1];
             console.log(customer);
-            io.emit('trade_request', dealer, customer);
+            io.to(this.socketRoom).emit('trade_request', dealer, customer);
             // this needs to be changed to the room thing!! **********************
         });
 
         socket.on('trade_accept', (users) => {
             const dealer = users[0];
             const customer = users[1];
-            io.emit('alert message', dealer + " and " + customer + " are trading...");
-            io.emit('trade_accept', dealer, customer);
+            io.to(this.socketRoom).emit('alert message', dealer + " and " + customer + " are trading...");
+            io.to(this.socketRoom).emit('trade_accept', dealer, customer);
         });
 
-        socket.on('trade_refuse', (dealer) => {
-            socket.to(this.socketRoom).emit('trade_refuse', dealer);
+        socket.on('trade_cond', (info) => {
+            socket.to(this.socketRoom).emit('trade_cond', info );
+        });
+
+        socket.on('trade_refuse', () => {
+            socket.to(this.socketRoom).emit('trade_refuse');
         });
 
         socket.on('trade_outcome', (dealer, customer) => {
@@ -486,7 +495,7 @@ class Game {
         });
 
         socket.on('trade_cancel', (player) => {
-            io.emit('trade_cancel', player);
+            io.to(this.socketRoom).emit('trade_cancel', player);
         });
 
         //Build Settlement

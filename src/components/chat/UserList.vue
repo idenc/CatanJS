@@ -72,14 +72,10 @@
 export default {
   name: "UserList",
   props: {
-    player: Object()
+    player: Object(),
+    users: [],
   },
-  data() {
-    return {
-      users: [],
-      socketList: []
-    }
-  },
+
   mounted: function () {
     this.sockets.subscribe('got kicked', (user) => {
       if (this.player.name === user.username) {
@@ -106,13 +102,16 @@ export default {
 
 
     });
+
+    
+
   },
   methods: {
     kick: function (user) {
-
+      console.log(this.player.name);
+      console.log(this.users[0].username);
       // console.log(this.$socket.isHost);
-      if (this.$socket.isHost) {
-        console.log(this.$socket);
+      if (this.player.name == this.users[0].username) {
         this.$socket.emit('got kicked', user);
         this.$socket.emit('alert message', user.username + " has been kicked!");
       } else {
@@ -121,7 +120,7 @@ export default {
 
     },
     mute: function (user) {
-      if (this.$socket.isHost) {
+      if (this.player.name == this.users[0].username) {
         this.$socket.emit('mute player', user);
       } else {
         this.playerAlert();
