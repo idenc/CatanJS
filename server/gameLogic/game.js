@@ -292,66 +292,125 @@ class Game {
         }
     }
 
-    checkLongestRoad() {
-        /*Road = {to, from, player} */
-        //construct roads
-        let currentLeader = '';
+    checkLongestRoad(){
+        let currentLeader = null;
         let maxSize = 0;
-        let currentSize = 1;
         let currentSegment = 0;
-        let end = 0;
-        let road = [];
+        let stack = [];
         let visited = [];
         for (let i = 0; i < this.roads.length; i++) {
             visited.push(false)
         }
+
         //for every road segment check for all possible connections
-        while (currentSegment < this.roads.length) {
-            let tempMax = 0;
-            let index = 0;
-            let safeGuard = 0;
-            road.push(currentSegment)
+        while(currentSegment < this.roads.length){
+            // Copy roads to new array
+            const roads = [];
+            this.roads.forEach(r => {
+                roads.push({to: {x: r.to.x, y: r.to.y}, from: {x: r.from.x, y: r.from.y}, player: r.player, visited: false});
+            })
+
+            // Push a road to the stack as a starting point
+            stack.push(roads[currentSegment])
             //check all connections
-            while (road.length === 0) {
-                if (this.roads[currentSegment].player === this.roads[index].player && !visited[index]) {
-                    if (JSON.stringify(this.roads[end].to) === JSON.stringify(this.roads[index].from)) {
-                        road.push(end);
-                        end = index;
-                        index = 0;
-                        currentSize++;
+            while(stack.length !== 0){
+                // Explore
+                let currNode = stack[stack.length - 1];
+                let matchFound = false
+                roads.forEach(road => {
+                    if (!matchFound) {
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.from) === JSON.stringify(currNode.to) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.from, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.to) === JSON.stringify(currNode.from) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.to, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.to) === JSON.stringify(currNode.to) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.to, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.from, {visited: true})
+                                matchFound = true;
+                            }
+                        }
                     }
+                })
+
+                // Determine if there is a new leader
+                if(stack.length > maxSize){
+                    maxSize = stack.length;
+                    currentLeader = this.roads[currentSegment].player;
                 }
 
-                index++;
-                if (index === this.roads.length) {
-                    if (currentSize > tempMax) {
-                        tempMax = currentSize;
-                    }
-                    visited[end] = true;
-                    currentSize--;
-                    end = road.pop();
+                // Pop node and search backwards if no new connected nodes
+                if (matchFound === false) {
+                    stack.pop();
                 }
-
-                safeGuard++;
-                if (safeGuard >= 200) {
-                    break;
-                }
-            }
-
-            if (tempMax >= 5 && tempMax > maxSize) {
-                maxSize = tempMax;
-                currentLeader = this.roads[currentSegment].player;
             }
 
             //reset visited array
             for (let i = 0; i < visited.length; i++) {
                 visited[i] = false;
             }
+            console.log("maxsize: ", maxSize)
+            currentSegment++;
         }
-
-        if (maxSize >= 5 && maxSize >= this.longestRoadLength) {
+        if(maxSize >= 5 && maxSize > this.longestRoadLength){
+            if(this.longestRoadOwner === null){
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
+            else if(currentLeader !== this.longestRoadOwner){
+                const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                oldLongestRoad.victoryPoints -= 2;
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
             this.longestRoadLength = maxSize;
-            this.longestRoadOwner = currentLeader;
         }
     }
 
@@ -587,21 +646,22 @@ class Game {
                 && player.numRoads > 0
                 && (player.brick >= 1 && player.lumber >= 1)
                 || this.turnNumber < (this.players.length * 2) || roadBuildingPlayed) {
-                player.numRoads--;
-                newRoad.colour = player.colour;
+                    player.numRoads--;
+                    newRoad.colour = player.colour;
 
-                if (this.turnNumber >= (this.players.length * 2) && !roadBuildingPlayed) {
-                    player.brick--;
-                    player.lumber--;
-                    this.availableResources.brick++;
-                    this.availableResources.lumber++;
-                } else {
-                    console.log('updating end turn');
-                    player.hasRolled = true;
-                }
+                    if (this.turnNumber >= (this.players.length * 2) && !roadBuildingPlayed) {
+                        player.brick--;
+                        player.lumber--;
+                        this.availableResources.brick++;
+                        this.availableResources.lumber++;
+                    } else {
+                        console.log('updating end turn');
+                        player.hasRolled = true;
+                    }
 
                 this.roads.push(newRoad);
-                //this.checkLongestRoad();
+                this.checkLongestRoad();
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
                 socket.to(this.socketRoom).emit('update_roads', {
                     roads: this.roads
                 });
