@@ -13,7 +13,6 @@ class ChatRoom {
         this.socketRoom = socketRoom;
     }
 
-<<<<<<< HEAD
     /**
      * Configures a socket for chat
      * The socket should be part of a game
@@ -30,98 +29,24 @@ class ChatRoom {
                 io.to(this.socketRoom).emit('user_left', socket.player.name);
             }
         });
+
+        socket.on('alert message', (msg) => {
+            const message = {
+                'user': "Server",
+                'message': msg,
+                'timestamp': Date.now(),
+                'color': 'white',
+                'id': uuidv4(),
+            };
+            messages.push(message);
+            io.emit('chat message', message);
+        });
+    
         socket.on('chat_message', (msg) => {
             // Keep 200 most recent messages
             if (this.messages.length >= 200) {
                 this.messages.shift();
             }
-=======
-/**
- * Checks whether a color string is a valid hex color
- * source: https://stackoverflow.com/questions/8027423/how-to-check-if-a-string-is-a-valid-hex-color-representation
- * Answer by fflorent
- * @param hex
- * @returns {boolean}
- */
-function isHexColor(hex) {
-    return typeof hex === 'string'
-        && hex.length === 6
-        && !isNaN(Number('0x' + hex))
-}
-
-const messages = [];
-let users = [];
-module.exports = socket => {
-    
-    function commandError(socket, error) {
-        socket.emit('command error', {message: error, id: uuidv4()})
-    }
-
-    function handleCommand(socket, command) {
-        try {
-            if (command.startsWith('/color')) {
-                let color = command.split(" ");
-                if (color.length !== 2) {
-                    commandError(socket, 'Incorrect number of arguments for changing color. Command should be in the form /color RRGGBB')
-                    return;
-                }
-                color = color[1];
-                if (!isHexColor(color)) {
-                    commandError(socket, `Invalid color: ${color}`);
-                }
-                color = "#" + color;
-                for (let i = 0; i < users.length; i++) {
-                    if (users[i].username === socket.username) {
-                        socket.color = color;
-                        users[i].color = color;
-                        io.emit('color change', {username: socket.username, new_color: color})
-                        return;
-                    }
-                }
-            } else {
-                commandError(socket, `No such command exists: ${command}`);
-            }
-        } catch (err) {
-            console.error(err);
-            commandError(socket, `Failed to apply command: ${command}`);
-        }
-
-    }
-
-    
-
-
-    socket.on('disconnect', () => {
-        console.log(`${socket.username} left`)
-        users = users.filter(u => u.username !== socket.username);
-        io.emit('user left', socket.username);
-        if (users.length >= 1 && users[0].isHost === false) {
-            users[0].isHost = true;
-        }
-    });
-
-    socket.on('alert message', (msg) => {
-        const message = {
-            'user': "Server",
-            'message': msg,
-            'timestamp': Date.now(),
-            'color': 'white',
-            'id': uuidv4(),
-        };
-        messages.push(message);
-        io.emit('chat message', message);
-    });
-
-    socket.on('chat message', (msg) => {
-        // Keep 200 most recent messages
-        if (messages.length >= 200) {
-            messages.shift();
-        }
-        // Handle commands
-        if (msg.startsWith('/')) {
-            handleCommand(socket, msg)
-        } else {
->>>>>>> host-options
             // Replace emojis
             msg = msg.replace(/:\)/g, '😁');
             msg = msg.replace(/:\(/g, '🙁');
@@ -137,7 +62,6 @@ module.exports = socket => {
             io.to(this.socketRoom).emit('chat_message', message);
         });
 
-<<<<<<< HEAD
         // Check if the user is already present in the chat
         // We want to keep track of the number of tabs user has open
         if (!this.users.some(u => u.username === socket.player.name)) {
@@ -158,7 +82,6 @@ module.exports = socket => {
             // Increment numSessions
             console.log('found user')
             socket.numSessions++;
-=======
     socket.on('got kicked', (user) => {
         io.emit('got kicked', user);
         users = users.filter(u => u.username !== user.username);
@@ -207,7 +130,6 @@ module.exports = socket => {
                     socket.emit('chat info', {current_users: users, messages: messages});
                 })
                 .catch((e) => console.log(e))
->>>>>>> host-options
         }
         console.log('a user connected with username ' + socket.player.name);
         console.log(this.users);
