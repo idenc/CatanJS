@@ -60,6 +60,7 @@ export default {
   },
   mounted: function () {
     this.$socket.emit("get_chat_info");
+    
     this.sockets.subscribe('mute player', (user) => {
       // console.log(user.username);
       // console.log(this.username);
@@ -112,19 +113,23 @@ export default {
   },
   sockets: {
     chat_message: function (msg) {
-      if (!this.mute_list.includes(this.username)) {
-        this.$socket.emit('chat message', this.message);
-        document.querySelector("#overlayin.mute").classList.add("active");
-        document.querySelector("#overlay.main").addEventListener("click", () => {
-          document.querySelector("#overlay.main").classList.remove("active");
-          document.querySelector("#overlayin.mute").classList.remove("active");
-      });
-      }
-      else {
-        document.querySelector("#overlay.main").classList.add("active");
-      }
-      const messageBox = this.$refs.message_box;
+      // if (!this.mute_list.includes(this.username)) {
+      //   this.$socket.emit('chat message', this.message);
+      //   this.chat_messages.push(msg);
+        
+      // }
+      // else {
+      //   document.querySelector("#overlayin.mute").classList.add("active");
+      //   document.querySelector("#overlay.main").addEventListener("click", () => {
+      //     document.querySelector("#overlay.main").classList.remove("active");
+      //     document.querySelector("#overlayin.mute").classList.remove("active");
+      //   });
+      // }
+
+      this.$socket.emit('chat message', this.message);
       this.chat_messages.push(msg);
+      const messageBox = this.$refs.message_box;
+      
 
       this.$nextTick(() => {
         messageBox.scrollTop = messageBox.scrollHeight;

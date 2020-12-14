@@ -11,7 +11,6 @@
       <div
         id="leave-button"
         ref="leaveButton"
-        v-resize-text="{minFontSize: '0px'}"
         class="dice-button btn btn-primary btn-block"
         @click="handleLeaveGame()"
       >
@@ -38,7 +37,6 @@
       <div
         id="building-info"
         ref="buildingInfo"
-        v-resize-text="{minFontSize: '0px'}"
         class="dice-button btn btn-primary btn-block disabled"
       >
         <div>
@@ -76,14 +74,13 @@
         <BuildButton
           id="build-button"
           ref="buildButton"
-          class="button-component"
-          style="width: 30%;"
+          class="button-component btn btn-primary btn-block sidebar-main-button"
           :is-turn="player.isTurn"
           @buildStarted="startBuild"
         />
         <button
           id="tradeButton"
-          class="btn btn-primary btn-block"
+          class="btn btn-primary btn-block sidebar-main-button"
           @click="attemptTrade"
         >
           Trade
@@ -303,6 +300,10 @@ export default {
   padding: 0.5rem 1rem;
 }
 
+#build-button {
+  padding: 0;
+}
+
 #sidebar-resources-container {
   background: rgb(44, 44, 44);
   /* flex-grow: 1; */
@@ -339,7 +340,7 @@ export default {
 
   #building-info {
     padding: 2px;
-    width: 15% !important;
+    /* width: 15% !important; */
   }
 }
 
@@ -353,10 +354,12 @@ export default {
 
 @media (max-width: 768px) {
   #building-info {
-    bottom: auto;
-    top: 0;
-    padding: 2px;
-    /* width: 15% !important; */
+      font-size: 0.5rem;
+      padding: 6px;
+  }
+
+  #leave-button {
+      font-size: 0.5rem;
   }
 }
 

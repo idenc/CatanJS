@@ -7,7 +7,7 @@ const User = require('./models/User');
 // All active games
 let lobbies = {};
 let games = {};
-
+let timeout;
 
 
 module.exports = socket => {
@@ -19,6 +19,7 @@ module.exports = socket => {
                     let game = games[key];
                     for (const player of game.players) {
                         if (player.name === user.name) {
+                            clearTimeout(timeout);
                             game.configureSocketInteractions(socket);
                             socket.on('request_game', () => {
                                 socket.emit('is_in_game');
@@ -112,15 +113,17 @@ module.exports = socket => {
 
             const ind = lobby["players"].indexOf(socket);
             if (ind != -1) {
-                lobby["players"].splice(ind, 1); // remove socket from playerlist
-                lobby["numPlayers"] -= 1;
+                // Wait one minute before removing the player
+                // to give them a chance to reconnect
+                timeout = setTimeout(() => {
+                    lobby["players"].splice(ind, 1); // remove socket from playerlist
+                    lobby["numPlayers"] -= 1;
 
-                if (lobby["numPlayers"] == 0) {
-                    delete lobbies[key];
-                    delete games[key];
-                }
-
-                console.log(games);
+                    if (lobby["numPlayers"] == 0) {
+                        delete lobbies[key];
+                        delete games[key];
+                    }
+                }, 60000);
             }
         }
     });
@@ -166,7 +169,7 @@ module.exports = socket => {
                         roads: game.roads
                     });
 
-                    game.settlements.forEach(function(value, key, map) {
+                    game.settlements.forEach(function (value, key, map) {
                         if (value.player == name) {
                             value.player = "";
                             value.state = "empty";
@@ -183,7 +186,7 @@ module.exports = socket => {
                 }
 
                 //console.log(games);
-            
+
                 socket.emit('ready_to_leave');
             }
         }
