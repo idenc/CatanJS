@@ -431,6 +431,12 @@ class Game {
             socket.emit('user_joined', {username: newPlayer.name, colour: socket.colour})
         });
 
+        //socket.on('leave_game', () => {
+        //    const playerIdx = this.turnNumber % this.players.length;
+        //    this.players.splice(playerIdx, 1);
+        //    socket.leave(this.socketRoom);
+        //});
+
         //Prototype for creating game
         //initialize tiles, players, and socketRoom
         socket.on('new_game', () => {
@@ -504,6 +510,7 @@ class Game {
             const player = this.players[this.turnNumber % this.players.length];
             // This should be checked on client side but double check just in case
             if (player.isTurn
+                && player.numSettlements > 0
                 && (player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1)
                 || this.turnNumber < (this.players.length * 2)) {
                 console.log(newSettlement);
@@ -553,7 +560,8 @@ class Game {
         socket.on('upgrade_settlement', (settlementCoord) => {
             console.log('upgrading settlement');
             const player = this.players[this.turnNumber % this.players.length];
-            if (player.isTurn && player.ore >= 3 && player.grain >= 2) {
+            if (player.isTurn && player.numCities > 0
+                && player.ore >= 3 && player.grain >= 2) {
                 // Give back settlement and remove city
                 player.numSettlements++;
                 player.numCities--;
@@ -580,6 +588,7 @@ class Game {
             console.log('road received');
             const player = this.players[this.turnNumber % this.players.length];
             if (player.isTurn
+                && player.numRoads > 0
                 && (player.brick >= 1 && player.lumber >= 1)
                 || this.turnNumber < (this.players.length * 2)) {
                 player.numRoads--;

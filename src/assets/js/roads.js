@@ -110,6 +110,9 @@ const canBuildRoad = (gameBoard, settlement, neighbour) => {
     // 1. The player has necessary resources
     // 2. The road space is empty
     // 3. The road is connected to another road or a settlement
+    if (gameBoard.player.numRoads <= 0) {
+        return false;
+    }
 
 
     const settlementCoord = {x: settlement.x, y: settlement.y};

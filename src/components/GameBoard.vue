@@ -159,6 +159,7 @@ export default {
       draw: SVG(),
       settlements: [],
       roads: [],
+      gameBoardInitialized: false,
       player: {
         name: '',
         brick: 0,
@@ -212,6 +213,11 @@ export default {
       let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
       // Create svg container that fits the maximum gameboard size and store svg in draw variable
+      const board = document.getElementById("board");
+      while (board.childNodes.length > 1) {
+        board.removeChild(board.childNodes[1]);
+      }
+      
       this.draw = SVG().addTo('#board')
       this.draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
       this.draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);
@@ -354,6 +360,8 @@ export default {
         this.robber.gridIndex = robberIndex;
         this.moveRobberToken(this.draw, grid, Number(fomerRobber), Number(robberIndex));
       });
+
+      this.gameBoardInitialized = true;
     },
     updateGraphicsPropertiesByWindowSize(grid) {
       // Set the road gap based on the window size
@@ -736,7 +744,9 @@ export default {
       this.roads = boardInfo.roads;
       this.$emit('updateTurnNumber', boardInfo.turnNumber);
       this.player = boardInfo.player;
-      this.initializeBoard();
+      if (!this.gameBoardInitialized) {
+        this.initializeBoard();
+      }
     },
     update_roads: function (newRoads) {
       if (newRoads.player) {

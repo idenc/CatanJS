@@ -66,7 +66,7 @@ export default {
         password : user_input
       };
 
-      this.$socket.emit("join_game_passworded", bundle);
+      this.$socket.emit("lobby_join_game_passworded", bundle);
     },
     lobby_error: function(error_message) {
       alert(error_message);
@@ -74,12 +74,12 @@ export default {
   },
   watch: {
     searchQuery: function() {
-      this.$socket.emit("get_games", this.searchQuery);
+      this.$socket.emit("lobby_get_games", this.searchQuery);
     }
   },
   methods: {
     joinGame(name) {
-      this.$socket.emit("join_game", name);
+      this.$socket.emit("lobby_join_game", name);
     }
   }
 }
