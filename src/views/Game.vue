@@ -54,7 +54,7 @@
       <Overlay
         ref="overlay"
         :username="player.name"
-        :user-prop="users"
+        :users="users"
       />
     </div>
     <div id="sidebar-container">

@@ -71,10 +71,10 @@
 <script>
 export default {
   name: "UserList",
-  props: {
-    player: Object(),
-    usersProp: Array(),
-  },
+  props: [
+    'player',
+    'usersProp',
+  ],
   data() {
     return {
       users: Array()
