@@ -9,7 +9,7 @@
       Welcome {{ username }}
     </h2>
     <div
-      id="body-container" 
+      id="body-container"
       class="row mt-5"
     >
       <div class="col-2">
@@ -88,7 +88,7 @@ export default {
     getUser() {
       axios.get("/user")
           .then((response) => {
-            //console.log(response)
+            this.$socket.emit('request_game');
             this.username = response.data.user.name;
             this.showPage = true;
             this.isAdmin = response.data.user.isAdmin;
@@ -100,6 +100,11 @@ export default {
               params: {statusMessage: error.response.data, alertType: 'alert-danger'}
             });
           })
+    },
+  },
+  sockets: {
+    is_in_game: function () {
+      this.$router.push({name: 'Game'});
     }
   }
 }

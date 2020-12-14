@@ -20,6 +20,9 @@ module.exports = socket => {
                     for (const player of game.players) {
                         if (player.name === user.name) {
                             game.configureSocketInteractions(socket);
+                            socket.on('request_game', () => {
+                                socket.emit('is_in_game');
+                            });
                         }
                     }
                 }
@@ -103,24 +106,24 @@ module.exports = socket => {
     });
 
 
-    // socket.on("disconnect", () => {
-    //     for (let key in lobbies) {
-    //         let lobby = lobbies[key];
-    //
-    //         const ind = lobby["players"].indexOf(socket);
-    //         if (ind != -1) {
-    //             lobby["players"].splice(ind, 1); // remove socket from playerlist
-    //             lobby["numPlayers"] -= 1;
-    //
-    //             if (lobby["numPlayers"] == 0) {
-    //                 delete lobbies[key];
-    //                 delete games[key];
-    //             }
-    //
-    //             console.log(games);
-    //         }
-    //     }
-    // });
+    socket.on("disconnect", () => {
+        for (let key in lobbies) {
+            let lobby = lobbies[key];
+
+            const ind = lobby["players"].indexOf(socket);
+            if (ind != -1) {
+                lobby["players"].splice(ind, 1); // remove socket from playerlist
+                lobby["numPlayers"] -= 1;
+
+                if (lobby["numPlayers"] == 0) {
+                    delete lobbies[key];
+                    delete games[key];
+                }
+
+                console.log(games);
+            }
+        }
+    });
 
     socket.on('lobby_leave_game', () => {
         for (let key in lobbies) {
@@ -136,12 +139,12 @@ module.exports = socket => {
 
                 const events = socket.eventNames();
                 socket.leave(game.socketRoom);
-                
+
                 for (const eventName of events) {
                     if (!eventName.startsWith("lobby_")) {
                         socket.removeAllListeners([eventName]);
                     }
-                    
+
                     //console.log(eventName + " : " + socket.listenerCount(eventName));
                 }
 
