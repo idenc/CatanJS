@@ -11,7 +11,6 @@
       <div
         id="leave-button"
         ref="leaveButton"
-        v-resize-text="{minFontSize: '0px'}"
         class="dice-button btn btn-primary btn-block"
         @click="handleLeaveGame()"
       >
@@ -300,6 +299,10 @@ export default {
 
 @media (max-width: 768px) {
   #building-info {
+      font-size: 0.5rem;
+  }
+
+  #leave-button {
       font-size: 0.5rem;
   }
 }
