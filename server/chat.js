@@ -97,7 +97,12 @@ class ChatRoom {
                 username: socket.player.name,
                 colour: socket.player.colour,
                 victoryPoints: socket.player.victoryPoints,
-                numDevCards: socket.player.devCards.length
+                numDevCards: socket.player.devCards.length,
+                brick: socket.player.brick,
+                grain: socket.player.grain,
+                lumber: socket.player.lumber,
+                ore: socket.player.ore,
+                wool: socket.player.wool
             };
             this.users.push(userInfo);
             // Tell everyone else another user joined

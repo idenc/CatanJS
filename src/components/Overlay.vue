@@ -355,8 +355,11 @@
           </ul>
         </div>
         <div id="column4">
-            <p id='offerMsg' class='big'>
-                Someone made an offer.
+            <p 
+                id='offerMsg' 
+                class='big'
+            >
+                Invalid trade, you do not have enough resources
             </p>
         </div>
       </div>
@@ -562,6 +565,7 @@ export default {
         // var dealer = this.username;
         // var customer = username;
         const userList = [this.username, username];
+        document.getElementById("reqSent").classList.add("active");
         document.getElementById("cancelButton").disabled = true;
         this.$socket.emit('trade_offer', (userList));
       }
@@ -661,8 +665,8 @@ export default {
                 if (this.users[i].username == this.username) {
                     console.log(this.users[i]);
                      if (clayOff > this.users[i].brick || woodOff > this.users[i].lumber || sheepOff > this.users[i].wool || wheatOff > this.users[i].grain || oreOff > this.users[i].ore) {
+                        document.getElementById("offerMsg").innerHTMl = 'Invalid trade, you do not have enough resources';
                         document.querySelector("#column4").classList.add('active');
-                        document.querySelector("#offerMsg").innerHTMl = 'Invalid trade, you do not have enough resources';
                     } else {
                         let info =[this.tradePlayer, clayOff, woodOff, sheepOff, wheatOff, oreOff, clayRec, woodRec, sheepRec, wheatRec, oreRec];
                         document.querySelector("#offer").disabled = true;
@@ -700,6 +704,16 @@ export default {
 </script>
 
 <style scoped>
+
+#reqSent {
+    visibility: hidden;
+    display: none;
+}
+
+#reqSent.active {
+    visibility: visible;
+    display: block;
+}
 
 #column3 {
   display: none;
