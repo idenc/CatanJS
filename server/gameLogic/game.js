@@ -287,54 +287,180 @@ class Game {
         for (let i = 0; i < this.roads.length; i++) {
             visited.push(false)
         }
+        console.log("<> ------- this.roads: ", this.roads)
+
         //for every road segment check for all possible connections
         while(currentSegment < this.roads.length){
-            stack.push(currentSegment)
+            console.log("start for segment ---- " + currentSegment + " ------")
+            // Copy roads to new array
+            const roads = [];
+            this.roads.forEach(r => {
+                roads.push({to: {x: r.to.x, y: r.to.y}, from: {x: r.from.x, y: r.from.y}, player: r.player, visited: false});
+            })
+            console.log("roads: ", roads)
+
+            // Push a road to the stack as a starting point
+            stack.push(roads[currentSegment])
             //check all connections
             while(stack.length !== 0){
-                let node = stack.pop();
-                if(visited[node] === false){
-                    visited[node] = true;
-                    for(let j = 0; j < this.roads.length; j++){
-                        if(this.roads[node].player === this.roads[j].player ){
-                            let exists = stack.includes(j);
-                            if((JSON.stringify(this.roads[node].from) === JSON.stringify(this.roads[j].to) ||
-                                JSON.stringify(this.roads[node].to) === JSON.stringify(this.roads[j].from) ||
-                                JSON.stringify(this.roads[node].to) === JSON.stringify(this.roads[j].to) ||
-                                JSON.stringify(this.roads[node].from) === JSON.stringify(this.roads[j].from)) && !exists){
-                                stack.push(j);
-                                //node = j;
+                // Explore
+                console.log("explore ----")
+                let currNode = stack[stack.length - 1];
+                // let currNode = stack.pop();
+                console.log(currNode)
+                let matchFound = false
+                roads.forEach(road => {
+                    if (!matchFound) {
+                        // Check for a match that is not visited
+                        if (JSON.stringify(road.from) === JSON.stringify(currNode.to) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            console.log("--match11 ----")
+                            console.log("road", road)
+                            console.log("currNode", currNode)
+
+                            console.log(("visited" in road.to || "visited" in road.from))
+                            console.log(("visited" in currNode.to || "visited" in currNode.from))
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                
+                                console.log("match1 ----")
+                                console.log("road", road)
+                                console.log("currNode", currNode)
+                                Object.assign(road.from, {visited: true})
+                                matchFound = true;
                             }
                         }
+                        if (JSON.stringify(road.to) === JSON.stringify(currNode.from) && 
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                                console.log("--match22 ----")
+                                console.log("road", road)
+                                console.log("currNode", currNode)
+
+                                console.log(("visited" in road.to || "visited" in road.from))
+                                console.log(("visited" in currNode.to || "visited" in currNode.from))
+                                if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                
+                                console.log("match2 ----")
+                                console.log("road", road)
+                                console.log("currNode", currNode)
+                                Object.assign(road.to, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        if (JSON.stringify(road.to) === JSON.stringify(currNode.to) && 
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            console.log("--match33 ----")
+                            console.log("road", road)
+                            console.log("currNode", currNode)
+
+                            console.log(("visited" in road.to || "visited" in road.from))
+                            console.log(("visited" in currNode.to || "visited" in currNode.from))
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                
+                                console.log("match3 ----")
+                                console.log("road", road)
+                                console.log("currNode", currNode)
+                                Object.assign(road.to, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        if (JSON.stringify(road.from) === JSON.stringify(currNode.from) && 
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                                console.log("--match44 ----")
+                                console.log("road", road)
+                                console.log("currNode", currNode)
+
+                                console.log(("visited" in road.to || "visited" in road.from))
+                                console.log(("visited" in currNode.to || "visited" in currNode.from))
+                                if (!(("visited" in road.to || "visited" in road.from) &&
+                                    ("visited" in currNode.to || "visited" in currNode.from))) {
+                                    road.visited = true
+                                    stack.push(road)
+                                    
+                                    console.log("match4 ----")
+                                    console.log("road", road)
+                                    console.log("currNode", currNode)
+                                    Object.assign(road.from, {visited: true})
+                                    matchFound = true;
+                                }
+                        }
                     }
-                }
+                })
+
                 if(stack.length > maxSize){
                     maxSize = stack.length;
                     currentLeader = this.roads[currentSegment].player;
                 }
+
+                if (matchFound === false) {
+                    stack.pop();
+                }
+                
+
+
+
+                // let node = stack.pop();
+                // console.log("node: ", node)
+                // if(visited[node] === false){
+                //     visited[node] = true;
+                //     for(let j = 0; j < this.roads.length; j++){
+                //         if(this.roads[node].player === this.roads[j].player ){
+                //             let exists = stack.includes(j);
+                //             if((JSON.stringify(this.roads[node].from) === JSON.stringify(this.roads[j].to) ||
+                //                 JSON.stringify(this.roads[node].to) === JSON.stringify(this.roads[j].from) ||
+                //                 JSON.stringify(this.roads[node].to) === JSON.stringify(this.roads[j].to) ||
+                //                 JSON.stringify(this.roads[node].from) === JSON.stringify(this.roads[j].from)) && !exists){
+                //                 stack.push(j);
+                //                 //node = j;
+                //             }
+                //         }
+                //     }
+                // }
+                // if(stack.length > maxSize){
+                //     maxSize = stack.length;
+                //     currentLeader = this.roads[currentSegment].player;
+                // }
             }
 
             //reset visited array
             for (let i = 0; i < visited.length; i++) {
                 visited[i] = false;
             }
+            console.log("maxsize: ", maxSize)
             currentSegment++;
         }
-        if(maxSize >= 5 && maxSize > this.longestRoadLength){
-            if(this.longestRoadOwner === null){
-                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
-                newLongestRoad.victoryPoints += 2;
-                this.longestRoadOwner = currentLeader;
-            }
-            else if(currentLeader !== this.longestRoadOwner){
-                const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
-                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
-                oldLongestRoad.victoryPoints -= 2;
-                newLongestRoad.victoryPoints += 2;
-                this.longestRoadOwner = currentLeader;
-            }
-            this.longestRoadLength = maxSize;
-        }
+        // if(maxSize >= 5 && maxSize > this.longestRoadLength){
+        //     if(this.longestRoadOwner === null){
+        //         const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+        //         newLongestRoad.victoryPoints += 2;
+        //         this.longestRoadOwner = currentLeader;
+        //     }
+        //     else if(currentLeader !== this.longestRoadOwner){
+        //         const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
+        //         const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+        //         oldLongestRoad.victoryPoints -= 2;
+        //         newLongestRoad.victoryPoints += 2;
+        //         this.longestRoadOwner = currentLeader;
+        //     }
+        //     this.longestRoadLength = maxSize;
+        // }
+        // console.log(maxSize)
         //return currentLeader;
     }
 
