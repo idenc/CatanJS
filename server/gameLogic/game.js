@@ -620,13 +620,13 @@ class Game {
 
             const playerIdx = this.turnNumber % this.players.length;
 
-            if (this.players[playerIdx].ore === 0 || this.players[playerIdx].lumber === 0 || this.players[playerIdx].grain === 0) return;
+            if (this.players[playerIdx].ore === 0 || this.players[playerIdx].wool === 0 || this.players[playerIdx].grain === 0) return;
 
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
             this.players[playerIdx].ore--;
-            this.players[playerIdx].lumber--;
+            this.players[playerIdx].wool--;
             this.players[playerIdx].grain--;
             this.availableResources.ore++;
             this.availableResources.lumber++;
@@ -637,6 +637,7 @@ class Game {
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
             io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length); //Send info to all players to update overall dev card count
+            socket.emit('update_resources', this.players);
         });
 
         //Play Development Card
