@@ -185,7 +185,7 @@ export default {
         };
         //console.log(gameRequest);
 
-        this.$socket.emit("create_game", gameRequest);
+        this.$socket.emit("lobby_create_game", gameRequest);
       } else {
         document.getElementById("toggleModal").click();
         this.errorTitle = "Error Creating Game"

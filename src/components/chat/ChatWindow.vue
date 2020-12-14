@@ -67,6 +67,7 @@ export default {
       }
       this.$socket.emit('chat_message', this.message);
       this.message = '';
+      console.log("ChatWindow.vue : sendMessage()")
     }
   },
   sockets: {

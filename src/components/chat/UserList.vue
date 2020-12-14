@@ -77,6 +77,7 @@ export default {
   sockets: {
     chat_info: function (chatInfo) {
       console.log(`chat info: ${chatInfo}`)
+      this.users = [];
       this.users.push(...chatInfo.current_users);
     },
     user_joined: function (user) {
