@@ -55,6 +55,7 @@ export default {
       users: [],
       colour: '',
       chat_messages: [],
+      mute_list: [],
     }
   },
   mounted: function () {
@@ -85,6 +86,83 @@ export default {
     chat_info: function (info) {
       console.log(`chat info: ${info}`)
       this.chat_messages.push(...info.messages);
+    },
+  },
+  mounted: function () {
+
+
+    this.sockets.subscribe('command error', (err) => {
+      err.color = 'red';
+      this.chat_messages.push(err);
+    });
+
+    this.sockets.subscribe('color change', (color_info) => {
+      for (let i = 0; i < this.chat_messages.length; i++) {
+        if (this.chat_messages[i].user === color_info.username) {
+          this.chat_messages[i].color = color_info.new_color;
+        }
+      }
+    });
+
+    this.sockets.subscribe('mute player', (user) => {
+      // console.log(user.username);
+      // console.log(this.username);
+      // console.log(this.username === user.username);
+      if (this.mute_list.includes(user.username)) {
+        if (this.username === user.username) {
+          this.muteAlert(user, false);
+        }
+        this.mute_list = this.mute_list.filter(u => u !== user.username);
+      } else {
+        
+        if (this.username === user.username) {
+          this.muteAlert(user, true);
+        }
+        this.mute_list.push(user.username);
+      }
+      
+    });
+
+    this.sockets.subscribe('user changed', (info) => {
+      for (let i = 0; i < this.chat_messages.length; i++) {
+        if (this.chat_messages[i].user === info.old_name) {
+          this.chat_messages[i].user = info.new_name;
+        }
+      }
+    });
+
+  },
+  methods: {
+    sendMessage() {
+      if (this.message === '') {
+        return;
+      }
+      if (!this.mute_list.includes(this.username)) {
+        this.$socket.emit('chat message', this.message);
+      }
+      this.message = '';
+    },
+
+    muteAlert(user, check) {
+      var docStr = '';
+      var msgStr = '';
+      if (check) {
+        msgStr = user.username + " has been muted!";
+
+        docStr = "#overlayin.mute";
+      } else {
+        msgStr = user.username + " has been unmuted!";
+        docStr = "#overlayin.unmute";
+      }
+      this.$socket.emit('alert message', msgStr);
+
+      document.querySelector("#overlay.main").classList.add("active");
+      document.querySelector(docStr).classList.add("active");
+      document.querySelector("#overlay.main").addEventListener("click", () => {
+        document.querySelector("#overlay.main").classList.remove("active");
+        document.querySelector(docStr).classList.remove("active");
+      });
+      
     }
   }
 }

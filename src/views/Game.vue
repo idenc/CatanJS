@@ -16,6 +16,7 @@
         @updateTurnNumber="updateTurnNumber"
         @updateRobberEvent="updateRobberEvent"
       />
+      <Overlay ref="overlay" />
       <DiceButton
         :has-rolled="player.hasRolled"
         :turn-number="turnNumber"
@@ -63,8 +64,15 @@
           :is-turn="player.isTurn"
           @buildStarted="startBuild"
         />
-        <button class="btn btn-primary btn-block sidebar-main-button">
+
+      
+        <button 
+          id="tradeButton"
+          class="btn btn-primary btn-block"
+          @click="attemptTrade"
+        >
           Trade
+          
         </button>
         <button
           class="btn btn-primary btn-block sidebar-main-button"
@@ -77,6 +85,7 @@
         <Resources :player="player" />
       </div>
     </div>
+    
   </div>
 </template>
 
@@ -92,11 +101,14 @@ import DiceButton from "@/components/DiceButton";
 import ResizeText from 'vue-resize-text';
 import {maxBuildings} from "@/assets/js/constants";
 import axios from "axios";
+import Overlay from "@/components/Overlay";
+
+
 
 export default {
 
   name: "Game",
-  components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal},
+  components: {DiceButton, BuildButton, ChatWindow, UserList, GameBoard, Resources, DevCardModal, Overlay},
   directives: {
     ResizeText
   },
@@ -169,7 +181,12 @@ export default {
       this.robberEvent = eventUpdate;
       console.log(`Updating Robber Event in Game.vue  ${this.robberEvent}`);
     },
+    attemptTrade() {
+      this.$refs.overlay.attemptTrade();
+     
+    },
   },
+
 }
 </script>
 
@@ -178,6 +195,32 @@ export default {
   display: flex;
   flex-direction: row;
 }
+
+#user-row {
+  width: 100%;
+  display: flex;
+  /* height: 100%; */
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: space-between;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1%;
+
+  
+}
+
+#user-row div { 
+  width: 30%;
+
+}
+
+/* #user-row button {
+  width: 50%;
+
+}  */
+
+
 
 #board-container {
   flex-grow: 1;
