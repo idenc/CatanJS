@@ -275,4 +275,28 @@ export default {
   width: fit-content;
 }
 
+@media (max-width: 768px) {
+  #building-info {
+    bottom: auto;
+    top: 0;
+    padding: 2px;
+    /* width: 15% !important; */
+  }
+}
+
+.overlay {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #394954;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  opacity: 0.9;
+}
+
 </style>
