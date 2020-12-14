@@ -57,6 +57,7 @@
       <div id="sidebar-buttons-container">
         <BuildButton
           id="build-button"
+          ref="buildButton"
           class="button-component"
           style="width: 30%;"
           :is-turn="player.isTurn"
@@ -160,6 +161,7 @@ export default {
     },
     endTurn() {
       this.turnNumber++;
+      this.$refs.buildButton.closeBuildButton();
       console.log('emitting end turn');
       this.$socket.emit('end_turn');
     },

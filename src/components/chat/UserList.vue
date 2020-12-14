@@ -30,7 +30,7 @@
               </div>
 
               <div id="vic-points">
-                # VP:<br> {{ player.victoryPoints }}
+                # VP:<br> {{ user.victoryPoints }}
                 <!-- here is where we put victory points *********************-->
               </div>
               <div id="num-roads">
@@ -39,7 +39,7 @@
                 <!-- here is where we put num of roads *********************-->
               </div>
               <div id="num-cards">
-                # Cards: <br> {{ player.devCards.length }}
+                # Cards: <br> {{ user.numDevCards }}
                 <!-- here is where we put num of cards *********************-->
               </div>
               <div id="admin-buttons">
@@ -78,6 +78,9 @@ export default {
     chat_info: function (chatInfo) {
       console.log(`chat info: ${chatInfo}`)
       this.users.push(...chatInfo.current_users);
+    },
+    update_players: function(users) {
+      this.users = users;
     },
     user_joined: function (user) {
       console.log(`user joined: ${user}`)
