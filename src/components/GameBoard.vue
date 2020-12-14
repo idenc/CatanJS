@@ -213,6 +213,11 @@ export default {
       let maxHexSize = this.determineMaxHexSize(gameboardContainer);
 
       // Create svg container that fits the maximum gameboard size and store svg in draw variable
+      const board = document.getElementById("board");
+      while (board.childNodes.length > 1) {
+        board.removeChild(board.childNodes[1]);
+      }
+      
       this.draw = SVG().addTo('#board')
       this.draw.width(`${(maxHexSize.width) * (2 * this.gameboardRadius + 2)}px`)
       this.draw.height(`${(maxHexSize.height) + 2 * (this.gameboardRadius * (maxHexSize.height * 0.75))}px`);

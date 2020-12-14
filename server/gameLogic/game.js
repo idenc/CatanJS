@@ -426,6 +426,12 @@ class Game {
             socket.emit('user_joined', {username: newPlayer.name, colour: socket.colour})
         });
 
+        //socket.on('leave_game', () => {
+        //    const playerIdx = this.turnNumber % this.players.length;
+        //    this.players.splice(playerIdx, 1);
+        //    socket.leave(this.socketRoom);
+        //});
+
         //Prototype for creating game
         //initialize tiles, players, and socketRoom
         socket.on('new_game', () => {

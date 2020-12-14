@@ -8,6 +8,15 @@
         v-if="devModal === true"
         :player="player"
       />
+      <div
+        id="leave-button"
+        ref="leaveButton"
+        v-resize-text="{minFontSize: '0px'}"
+        class="dice-button btn btn-primary btn-block"
+        @click="handleLeaveGame()"
+      >
+        EXIT
+      </div>
       <GameBoard
         ref="gameBoard"
         :turn-number="turnNumber"
@@ -168,6 +177,11 @@ export default {
       this.robberEvent = eventUpdate;
       console.log(`Updating Robber Event in Game.vue  ${this.robberEvent}`);
     },
+    handleLeaveGame() {
+      this.$socket.emit('leave_game');
+      this.$socket.emit('lobby_leave_game');
+      this.$router.push({name: 'Lobby'});
+    }
   },
 }
 </script>
@@ -283,6 +297,14 @@ export default {
     padding: 2px;
     /* width: 15% !important; */
   }
+}
+
+#leave-button {
+  margin: auto;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: fit-content;
 }
 
 .overlay {

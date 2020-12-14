@@ -85,7 +85,7 @@ module.exports = app => {
     configureUserRegistration(app);
 
     app.get('/user', ensureAuthenticated, (req, res) => {
-
+        //console.log([req.user, req.session])
 
         res.send({user: req.user})
     });

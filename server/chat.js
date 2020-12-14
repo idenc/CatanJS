@@ -29,6 +29,16 @@ class ChatRoom {
                 io.to(this.socketRoom).emit('user_left', socket.player.name);
             }
         });
+
+        socket.on('leave_game', () => {
+            console.log(`${socket.player.name} left`)
+            socket.numSessions--;
+            if (socket.numSessions <= 0) {
+                this.users = this.users.filter(u => u.username !== socket.player.name);
+                io.to(this.socketRoom).emit('user_left', socket.player.name);
+            }
+        });
+
         socket.on('chat_message', (msg) => {
             // Keep 200 most recent messages
             if (this.messages.length >= 200) {
@@ -70,8 +80,10 @@ class ChatRoom {
             console.log('found user')
             socket.numSessions++;
         }
-        console.log('a user connected with username ' + socket.player.name);
-        console.log(this.users);
+
+        console.log('a user connected with username ' + socket.username);
+        //console.log(this.users);
+        
         socket.emit('chat_info', {
             current_users: this.users,
             messages: this.messages
