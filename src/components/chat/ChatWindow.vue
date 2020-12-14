@@ -113,19 +113,21 @@ export default {
   },
   sockets: {
     chat_message: function (msg) {
-      if (!this.mute_list.includes(this.username)) {
-        this.$socket.emit('chat message', this.message);
-        this.chat_messages.push(msg);
+      // if (!this.mute_list.includes(this.username)) {
+      //   this.$socket.emit('chat message', this.message);
+      //   this.chat_messages.push(msg);
         
-      }
-      else {
-        document.querySelector("#overlayin.mute").classList.add("active");
-        document.querySelector("#overlay.main").addEventListener("click", () => {
-          document.querySelector("#overlay.main").classList.remove("active");
-          document.querySelector("#overlayin.mute").classList.remove("active");
-        });
-      }
+      // }
+      // else {
+      //   document.querySelector("#overlayin.mute").classList.add("active");
+      //   document.querySelector("#overlay.main").addEventListener("click", () => {
+      //     document.querySelector("#overlay.main").classList.remove("active");
+      //     document.querySelector("#overlayin.mute").classList.remove("active");
+      //   });
+      // }
 
+      this.$socket.emit('chat message', this.message);
+      this.chat_messages.push(msg);
       const messageBox = this.$refs.message_box;
       
 
