@@ -147,6 +147,11 @@ export default {
           });
         })
   },
+  sockets: {
+    ready_to_leave: function() {
+      this.$router.push({name: 'Lobby'});
+    }
+  },
   methods: {
     startBuild(type) {
       this.$refs.gameBoard.startBuild(type);
@@ -180,7 +185,6 @@ export default {
     handleLeaveGame() {
       this.$socket.emit('leave_game');
       this.$socket.emit('lobby_leave_game');
-      this.$router.push({name: 'Lobby'});
     }
   },
 }
