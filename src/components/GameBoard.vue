@@ -159,6 +159,7 @@ export default {
       draw: SVG(),
       settlements: [],
       roads: [],
+      gameBoardInitialized: false,
       player: {
         name: '',
         brick: 0,
@@ -354,6 +355,8 @@ export default {
         this.robber.gridIndex = robberIndex;
         this.moveRobberToken(this.draw, grid, Number(fomerRobber), Number(robberIndex));
       });
+
+      this.gameBoardInitialized = true;
     },
     updateGraphicsPropertiesByWindowSize(grid) {
       // Set the road gap based on the window size
@@ -736,7 +739,9 @@ export default {
       this.roads = boardInfo.roads;
       this.$emit('updateTurnNumber', boardInfo.turnNumber);
       this.player = boardInfo.player;
-      this.initializeBoard();
+      if (!this.gameBoardInitialized) {
+        this.initializeBoard();
+      }
     },
     update_roads: function (newRoads) {
       if (newRoads.player) {
