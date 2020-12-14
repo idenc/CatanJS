@@ -11,7 +11,6 @@
       <div
         id="leave-button"
         ref="leaveButton"
-        v-resize-text="{minFontSize: '0px'}"
         class="dice-button btn btn-primary btn-block"
         @click="handleLeaveGame()"
       >
@@ -38,7 +37,6 @@
       <div
         id="building-info"
         ref="buildingInfo"
-        v-resize-text="{minFontSize: '0px'}"
         class="dice-button btn btn-primary btn-block disabled"
       >
         <div>
@@ -339,7 +337,7 @@ export default {
 
   #building-info {
     padding: 2px;
-    width: 15% !important;
+    /* width: 15% !important; */
   }
 }
 
@@ -353,10 +351,12 @@ export default {
 
 @media (max-width: 768px) {
   #building-info {
-    bottom: auto;
-    top: 0;
-    padding: 2px;
-    /* width: 15% !important; */
+      font-size: 0.5rem;
+      padding: 6px;
+  }
+
+  #leave-button {
+      font-size: 0.5rem;
   }
 }
 
