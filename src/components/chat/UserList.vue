@@ -164,7 +164,7 @@ li {
   color: white;
 }
 
-@media (max-width: 768px) {
+@media (max-height: 600px) {
   h1 {
     font-size: 1rem;
     margin: 0.25rem;
