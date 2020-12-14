@@ -20,7 +20,13 @@
       Move The Robber
     </button>
     <button
-      v-else-if="hasRolled && !robberEvent"
+      v-else-if="roadEvent"
+      class="dice-button btn btn-primary btn-block disabled"
+    >
+      Place Two Roads
+    </button>
+    <button
+      v-else-if="hasRolled && !robberEvent && !roadEvent"
       class="dice-button btn btn-primary btn-block end-turn"
       @click="$emit('endTurn')"
     >
@@ -48,6 +54,7 @@ export default {
     hasRolled: Boolean(false),
     isTurn: Boolean(false),
     robberEvent: Boolean(false),
+    roadEvent: Boolean(false),
   }
 }
 </script>

@@ -24,12 +24,14 @@
         @displayEndTurnBtn="displayEndTurnBtn"
         @updateTurnNumber="updateTurnNumber"
         @updateRobberEvent="updateRobberEvent"
+        @updateRoadBuildingEvent="updateRoadBuildingEvent"
       />
       <DiceButton
         :has-rolled="player.hasRolled"
         :turn-number="turnNumber"
         :is-turn="player.isTurn"
         :robber-event="robberEvent"
+        :road-event="roadEvent"
         @rollDice="rollDice"
         @endTurn="endTurn"
       />
@@ -127,7 +129,8 @@ export default {
         isTurn: false,
       },
       robberEvent: false,
-      showPage: false
+      showPage: false,
+      roadEvent: false,
     }
   },
   mounted: function () {
@@ -182,10 +185,16 @@ export default {
       this.robberEvent = eventUpdate;
       console.log(`Updating Robber Event in Game.vue  ${this.robberEvent}`);
     },
+
+    updateRoadBuildingEvent(eventUpdate){
+      this.roadEvent = eventUpdate;
+    },
+
     handleLeaveGame() {
       this.$socket.emit('leave_game');
       this.$socket.emit('lobby_leave_game');
     }
+
   },
 }
 </script>

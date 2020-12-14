@@ -32,6 +32,7 @@ class Game {
     largestArmy = null;
     players = [];
     availableDevCards = [];
+    availableResources = {};
     socketRoom = 'room';
     grid;
     turnNumber = 0;
@@ -59,8 +60,18 @@ class Game {
         this.generateTiles();
         this.generateSettlements();
         this.generateDevCards();
-
+        this.generateResources();
         this.chatRoom = new ChatRoom(socketRoom);
+    }
+
+    generateResources(){
+        this.availableResources = {
+            brick: 19,
+            ore: 19,
+            wool: 19,
+            grain: 19,
+            lumber: 19
+        }
     }
 
     generateTiles() {
@@ -245,8 +256,10 @@ class Game {
                         if (player) {
                             if (settlement.state === 'city') {
                                 player[tile.resource] += 2;
+                                this.availableResources[tile.resource] -= 2;
                             } else {
                                 player[tile.resource]++;
+                                this.availableResources[tile.resource]--;
                             }
                         }
                     }
@@ -269,6 +282,7 @@ class Game {
                     let index = Math.floor(Math.random() * removalArray.length);
                     if (player[removalArray[index]] > 0) {
                         player[removalArray[index]]--;
+                        this.availableResources[removalArray[index]]++;
                         removed++;
                     } else {
                         removalArray.splice(index, 1);
@@ -503,16 +517,21 @@ class Game {
                     player.lumber--;
                     player.wool--;
                     player.grain--;
+                    this.availableResources.brick++;
+                    this.availableResources.lumber++;
+                    this.availableResources.wool++;
+                    this.availableResources.grain++;
                 }
 
                 // Get tiles adjacent to this settlement
                 const adjacentTiles = this.tiles.filter((t) =>
                     t.settlements.some((s) => s.x === settlement.x && s.y === settlement.y));
 
-                // Give the player one resource for each adjacent tile
-                adjacentTiles.forEach((tile) => {
-                    player[tile.resource]++;
-                });
+            // Give the player one resource for each adjacent tile
+            adjacentTiles.forEach((tile) => {
+                player[tile.resource]++;
+                this.availableResources[tile.resource]--;
+            });
 
                 const jsonSettlements = JSON.stringify(Array.from(this.settlements.entries()));
 
@@ -540,6 +559,8 @@ class Game {
                 player.victoryPoints++;
                 player.ore -= 3;
                 player.grain -= 2;
+                this.availableResources.ore += 3;
+                this.availableResources.grain += 2;
 
                 const settlement = this.settlements.get(JSON.stringify(settlementCoord));
                 settlement.state = 'city';
@@ -558,17 +579,22 @@ class Game {
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
+            let roadBuildingPlayed = newRoad.roadBuildingPlayed;
+            delete newRoad.roadBuildingPlayed;
             const player = this.players[this.turnNumber % this.players.length];
+            console.log(roadBuildingPlayed);
             if (player.isTurn
                 && player.numRoads > 0
                 && (player.brick >= 1 && player.lumber >= 1)
-                || this.turnNumber < (this.players.length * 2)) {
+                || this.turnNumber < (this.players.length * 2) || roadBuildingPlayed) {
                 player.numRoads--;
                 newRoad.colour = player.colour;
 
-                if (this.turnNumber >= (this.players.length * 2)) {
+                if (this.turnNumber >= (this.players.length * 2) && !roadBuildingPlayed) {
                     player.brick--;
                     player.lumber--;
+                    this.availableResources.brick++;
+                    this.availableResources.lumber++;
                 } else {
                     console.log('updating end turn');
                     player.hasRolled = true;
@@ -594,11 +620,19 @@ class Game {
 
             const playerIdx = this.turnNumber % this.players.length;
 
+            if (this.players[playerIdx].ore === 0 || this.players[playerIdx].lumber === 0 || this.players[playerIdx].grain === 0) return;
+
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
+            this.players[playerIdx].ore--;
+            this.players[playerIdx].lumber--;
+            this.players[playerIdx].grain--;
+            this.availableResources.ore++;
+            this.availableResources.lumber++;
+            this.availableResources.grain++;
 
-            //io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
+            io.to(this.socketRoom).emit('update_players', this.generateUsers());
 
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
@@ -607,10 +641,51 @@ class Game {
 
         //Play Development Card
         socket.on('dev_card_played', (cardPlayed) => {
-
+            const playerIdx = this.turnNumber % this.players.length;
+            console.log(`Played ${cardPlayed}`);
+            let toRemove = this.players[playerIdx].devCards.findIndex((c) => c === cardPlayed);
+            this.players[playerIdx].devCards.splice(toRemove, 1);
+            if(cardPlayed === 'knight'){
+                this.robberEvent();
+                socket.emit('handle_robber_event');
+            }
+            else if(cardPlayed === 'roadBuilding'){
+                socket.emit('road_building_card');
+            }
+            else if(cardPlayed === 'yearOfPlenty'){
+                socket.emit('yearOfPlentyPlayed');
+            }
+            else if(cardPlayed === 'monopoly'){
+                socket.emit('monopoly_played');
+            }
+            else if(cardPlayed === 'victoryPoint'){
+                this.players[playerIdx].victoryPoints++;
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            }
         });
 
-        //Fill out devCardCounts in DevCardModel.vue when the vue is created
+        socket.on('monopoly_selected', (resource) => {
+            const playerIdx = this.turnNumber % this.players.length;
+            for(let i = 0; i < this.players.length; i++){
+                if(playerIdx != i){
+                    this.players[playerIdx][resource] = this.players[i][resource];
+                    this.players[i][resource] = 0;
+                }
+            }
+            //io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            io.to(this.socketRoom).emit('update_resources', this.players);
+        });
+
+        socket.on('yearOfPlenty_selected', (resource) => {
+            const playerIdx = this.turnNumber % this.players.length;
+            console.log(`${this.players[playerIdx].name} is selecting ${resource}`);
+            this.availableResources[resource]--;
+            this.players[playerIdx][resource] ++;
+            //io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            io.to(this.socketRoom).emit('update_resources', this.players);
+        });
+
+        // Fill out devCardCounts in DevCardModel.vue when the vue is created
         socket.on('dev_card_info', (playerName) => {
             const player = this.players.find(p => p.name === playerName);
             let devCards = player.devCards;
