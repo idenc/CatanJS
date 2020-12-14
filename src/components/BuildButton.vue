@@ -32,7 +32,7 @@ export default {
   },
   mounted: function () {
     document.addEventListener('click', (e) => {
-      if (e.target.id !== 'build-button') {
+      if (this.$route.name === 'Game' && e.target.id !== 'build-button') {
         this.closeBuildButton();
       }
     });

@@ -55,10 +55,29 @@ export default {
       users: [],
       colour: '',
       chat_messages: [],
+      mute_list: [],
     }
   },
   mounted: function () {
     this.$socket.emit("get_chat_info");
+    this.sockets.subscribe('mute player', (user) => {
+      // console.log(user.username);
+      // console.log(this.username);
+      // console.log(this.username === user.username);
+      if (this.mute_list.includes(user.username)) {
+        if (this.username === user.username) {
+          this.muteAlert(user, false);
+        }
+        this.mute_list = this.mute_list.filter(u => u !== user.username);
+      } else {
+
+        if (this.username === user.username) {
+          this.muteAlert(user, true);
+        }
+        this.mute_list.push(user.username);
+      }
+
+    });
   },
   methods: {
     sendMessage() {
@@ -67,11 +86,43 @@ export default {
       }
       this.$socket.emit('chat_message', this.message);
       this.message = '';
-      console.log("ChatWindow.vue : sendMessage()")
+    },
+    muteAlert(user, check) {
+      let docStr = '';
+      let msgStr = '';
+      if (check) {
+        msgStr = user.username + " has been muted!";
+
+        docStr = "#overlayin.mute";
+      } else {
+        msgStr = user.username + " has been unmuted!";
+        docStr = "#overlayin.unmute";
+      }
+      console.log(this.$socket);
+      this.$socket.emit('alert_message', msgStr);
+
+      document.querySelector("#overlay.main").classList.add("active");
+      document.querySelector(docStr).classList.add("active");
+      document.querySelector("#overlay.main").addEventListener("click", () => {
+        document.querySelector("#overlay.main").classList.remove("active");
+        document.querySelector(docStr).classList.remove("active");
+      });
+
     }
   },
   sockets: {
     chat_message: function (msg) {
+      if (!this.mute_list.includes(this.username)) {
+        this.$socket.emit('chat message', this.message);
+        document.querySelector("#overlayin.mute").classList.add("active");
+        document.querySelector("#overlay.main").addEventListener("click", () => {
+          document.querySelector("#overlay.main").classList.remove("active");
+          document.querySelector("#overlayin.mute").classList.remove("active");
+      });
+      }
+      else {
+        document.querySelector("#overlay.main").classList.add("active");
+      }
       const messageBox = this.$refs.message_box;
       this.chat_messages.push(msg);
 

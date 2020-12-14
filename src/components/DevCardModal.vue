@@ -11,8 +11,8 @@
               <span class="resource-count">1</span>
             </div>
           </div>
-          <div class='requires' resource='wood'>
-            <img class='requires-icon' src="..\assets\svg\wood.svg"/>
+          <div class='requires' resource='sheep'>
+            <img class='requires-icon' src="..\assets\svg\sheep.svg"/>
             <div>
               <span class="resource-count">1</span>
             </div>
@@ -207,8 +207,8 @@ export default {
     background: #4d4d4d;
   }
 
-  .requires[resource='wood']{
-    background: green;
+  .requires[resource='sheep']{
+    background: #bababa;
   }
 
   .requires[resource='wheat']{

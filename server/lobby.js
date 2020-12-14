@@ -133,13 +133,13 @@ module.exports = socket => {
             if (ind != -1) {
                 const game = games[key];
                 game.players.splice(ind, 1);
+                socket.leave(game.socketRoom);
 
                 lobby["players"].splice(ind, 1); // remove socket from playerlist
                 lobby["numPlayers"] -= 1;
 
+                // remove unused event listeners
                 const events = socket.eventNames();
-                socket.leave(game.socketRoom);
-
                 for (const eventName of events) {
                     if (!eventName.startsWith("lobby_")) {
                         socket.removeAllListeners([eventName]);
@@ -148,12 +148,43 @@ module.exports = socket => {
                     //console.log(eventName + " : " + socket.listenerCount(eventName));
                 }
 
+                // Delete room if there are no more players
                 if (lobby["numPlayers"] == 0) {
                     delete lobbies[key];
                     delete games[key];
+                } else {
+                    const name = socket.player.name;
+
+                    for (let i = 0; i < game.roads.length; i++) {
+                        if (game.roads[i].player == name) {
+                            game.roads.splice(i, 1);
+                            i -= 1;
+                        }
+                    }
+
+                    socket.to(game.socketRoom).emit('update_roads', {
+                        roads: game.roads
+                    });
+
+                    game.settlements.forEach(function(value, key, map) {
+                        if (value.player == name) {
+                            value.player = "";
+                            value.state = "empty";
+                        }
+                    });
+
+                    const jsonSettlements = JSON.stringify(Array.from(game.settlements.entries()));
+
+                    // Send the updated settlement to all players
+                    // Send the updated settlements and player info to player who built
+                    socket.to(game.socketRoom).emit('update_settlements', {
+                        settlements: jsonSettlements
+                    });
                 }
 
                 //console.log(games);
+            
+                socket.emit('ready_to_leave');
             }
         }
 
