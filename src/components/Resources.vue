@@ -3,6 +3,7 @@
     <div
       class="resource"
       resource="clay"
+      @click="select('brick')"
     >
       <img
         class="resource-icon"
@@ -15,6 +16,7 @@
     <div
       class="resource"
       resource="wood"
+      @click="select('lumber')"
     >
       <img
         class="resource-icon"
@@ -27,6 +29,7 @@
     <div
       class="resource"
       resource="sheep"
+      @click="select('wool')"
     >
       <img
         class="resource-icon"
@@ -39,6 +42,7 @@
     <div
       class="resource"
       resource="wheat"
+      @click="select('grain')"
     >
       <img
         class="resource-icon"
@@ -51,6 +55,7 @@
     <div
       class="resource"
       resource="ore"
+      @click="select('ore')"
     >
       <img
         class="resource-icon"
@@ -72,9 +77,41 @@ export default {
   props: {
     player: Object()
   },
+  data(){
+    return {
+      monopolySelect: false,
+      yearOfPlentySelect: false,
+      yearOfPlentySelected: 0
+    }
+  },
   mounted: function () {
   },
-  methods: {}
+  sockets: {
+    monopoly_played() {
+      this.monopolySelect = true;
+    },
+    yearOfPlentyPlayed() {
+      this.yearOfPlentySelect = true;
+    }
+  },
+  methods: {
+    select (resource){
+      if(this.monopolySelect){
+        this.$socket.emit('monopoly_selected', resource);
+        this.monopolySelect = false;
+      }
+      else if(this.yearOfPlentySelect){
+        this.yearOfPlentySelected++;
+        if(this.yearOfPlentySelected === 2){
+          this.$socket.emit('yearOfPlenty_selected', resource);
+          this.yearOfPlentySelected = 0;
+          this.yearOfPlentySelect = false;
+          return;
+        }
+        this.$socket.emit('yearOfPlenty_selected', resource);
+      }
+    }
+  }
 }
 </script>
 
@@ -99,22 +136,27 @@ export default {
 
 .resource[resource="clay"] {
   background: #e03838;
+  cursor: pointer;
 }
 
 .resource[resource="wood"] {
   background: green;
+  cursor: pointer;
 }
 
 .resource[resource="sheep"] {
   background: #bababa;
+  cursor: pointer;
 }
 
 .resource[resource="wheat"] {
   background: #cf9800;
+  cursor: pointer;
 }
 
 .resource[resource="ore"] {
   background: #4d4d4d;
+  cursor: pointer;
 }
 
 .resource-icon {

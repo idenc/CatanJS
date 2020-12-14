@@ -32,6 +32,7 @@ class Game {
     largestArmy = null;
     players = [];
     availableDevCards = [];
+    availableResources = {};
     socketRoom = 'room';
     grid;
     turnNumber = 0;
@@ -59,8 +60,18 @@ class Game {
         this.generateTiles();
         this.generateSettlements();
         this.generateDevCards();
-
+        this.generateResources();
         this.chatRoom = new ChatRoom(socketRoom);
+    }
+
+    generateResources(){
+        this.availableResources = {
+            brick: 19,
+            ore: 19,
+            wool: 19,
+            grain: 19,
+            lumber: 19
+        }
     }
 
     generateTiles() {
@@ -245,8 +256,10 @@ class Game {
                         if (player) {
                             if (settlement.state === 'city') {
                                 player[tile.resource] += 2;
+                                this.availableResources[tile.resource] -= 2;
                             } else {
                                 player[tile.resource]++;
+                                this.availableResources[tile.resource]--;
                             }
                         }
                     }
@@ -269,6 +282,7 @@ class Game {
                     let index = Math.floor(Math.random() * removalArray.length);
                     if (player[removalArray[index]] > 0) {
                         player[removalArray[index]]--;
+                        this.availableResources[removalArray[index]]++;
                         removed++;
                     } else {
                         removalArray.splice(index, 1);
@@ -278,66 +292,125 @@ class Game {
         }
     }
 
-    checkLongestRoad() {
-        /*Road = {to, from, player} */
-        //construct roads
-        let currentLeader = '';
+    checkLongestRoad(){
+        let currentLeader = null;
         let maxSize = 0;
-        let currentSize = 1;
         let currentSegment = 0;
-        let end = 0;
-        let road = [];
+        let stack = [];
         let visited = [];
         for (let i = 0; i < this.roads.length; i++) {
             visited.push(false)
         }
+
         //for every road segment check for all possible connections
-        while (currentSegment < this.roads.length) {
-            let tempMax = 0;
-            let index = 0;
-            let safeGuard = 0;
-            road.push(currentSegment)
+        while(currentSegment < this.roads.length){
+            // Copy roads to new array
+            const roads = [];
+            this.roads.forEach(r => {
+                roads.push({to: {x: r.to.x, y: r.to.y}, from: {x: r.from.x, y: r.from.y}, player: r.player, visited: false});
+            })
+
+            // Push a road to the stack as a starting point
+            stack.push(roads[currentSegment])
             //check all connections
-            while (road.length === 0) {
-                if (this.roads[currentSegment].player === this.roads[index].player && !visited[index]) {
-                    if (JSON.stringify(this.roads[end].to) === JSON.stringify(this.roads[index].from)) {
-                        road.push(end);
-                        end = index;
-                        index = 0;
-                        currentSize++;
+            while(stack.length !== 0){
+                // Explore
+                let currNode = stack[stack.length - 1];
+                let matchFound = false
+                roads.forEach(road => {
+                    if (!matchFound) {
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.from) === JSON.stringify(currNode.to) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.from, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.to) === JSON.stringify(currNode.from) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.to, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.to) === JSON.stringify(currNode.to) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.to, {visited: true})
+                                matchFound = true;
+                            }
+                        }
+                        // Check for connected a match that is not a visited road
+                        if (JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            !(JSON.stringify(road.from) === JSON.stringify(currNode.from) &&
+                            JSON.stringify(road.to) === JSON.stringify(currNode.to)) &&
+                            !road.visited) {
+                            // Don't check for new roads from the backwards node
+                            if (!(("visited" in road.to || "visited" in road.from) &&
+                                ("visited" in currNode.to || "visited" in currNode.from))) {
+                                road.visited = true
+                                stack.push(road)
+                                Object.assign(road.from, {visited: true})
+                                matchFound = true;
+                            }
+                        }
                     }
+                })
+
+                // Determine if there is a new leader
+                if(stack.length > maxSize){
+                    maxSize = stack.length;
+                    currentLeader = this.roads[currentSegment].player;
                 }
 
-                index++;
-                if (index === this.roads.length) {
-                    if (currentSize > tempMax) {
-                        tempMax = currentSize;
-                    }
-                    visited[end] = true;
-                    currentSize--;
-                    end = road.pop();
+                // Pop node and search backwards if no new connected nodes
+                if (matchFound === false) {
+                    stack.pop();
                 }
-
-                safeGuard++;
-                if (safeGuard >= 200) {
-                    break;
-                }
-            }
-
-            if (tempMax >= 5 && tempMax > maxSize) {
-                maxSize = tempMax;
-                currentLeader = this.roads[currentSegment].player;
             }
 
             //reset visited array
             for (let i = 0; i < visited.length; i++) {
                 visited[i] = false;
             }
+            console.log("maxsize: ", maxSize)
+            currentSegment++;
         }
-
-        if (maxSize >= 5 && maxSize >= this.longestRoadLength) {
+        if(maxSize >= 5 && maxSize > this.longestRoadLength){
+            if(this.longestRoadOwner === null){
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
+            else if(currentLeader !== this.longestRoadOwner){
+                const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                oldLongestRoad.victoryPoints -= 2;
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
             this.longestRoadLength = maxSize;
-            this.longestRoadOwner = currentLeader;
         }
     }
 
@@ -531,16 +604,21 @@ class Game {
                     player.lumber--;
                     player.wool--;
                     player.grain--;
+                    this.availableResources.brick++;
+                    this.availableResources.lumber++;
+                    this.availableResources.wool++;
+                    this.availableResources.grain++;
                 }
 
                 // Get tiles adjacent to this settlement
                 const adjacentTiles = this.tiles.filter((t) =>
                     t.settlements.some((s) => s.x === settlement.x && s.y === settlement.y));
 
-                // Give the player one resource for each adjacent tile
-                adjacentTiles.forEach((tile) => {
-                    player[tile.resource]++;
-                });
+            // Give the player one resource for each adjacent tile
+            adjacentTiles.forEach((tile) => {
+                player[tile.resource]++;
+                this.availableResources[tile.resource]--;
+            });
 
                 const jsonSettlements = JSON.stringify(Array.from(this.settlements.entries()));
 
@@ -568,6 +646,8 @@ class Game {
                 player.victoryPoints++;
                 player.ore -= 3;
                 player.grain -= 2;
+                this.availableResources.ore += 3;
+                this.availableResources.grain += 2;
 
                 const settlement = this.settlements.get(JSON.stringify(settlementCoord));
                 settlement.state = 'city';
@@ -586,24 +666,30 @@ class Game {
         //Build Road
         socket.on('build_road', (newRoad) => {
             console.log('road received');
+            let roadBuildingPlayed = newRoad.roadBuildingPlayed;
+            delete newRoad.roadBuildingPlayed;
             const player = this.players[this.turnNumber % this.players.length];
+            console.log(roadBuildingPlayed);
             if (player.isTurn
                 && player.numRoads > 0
                 && (player.brick >= 1 && player.lumber >= 1)
-                || this.turnNumber < (this.players.length * 2)) {
-                player.numRoads--;
-                newRoad.colour = player.colour;
+                || this.turnNumber < (this.players.length * 2) || roadBuildingPlayed) {
+                    player.numRoads--;
+                    newRoad.colour = player.colour;
 
-                if (this.turnNumber >= (this.players.length * 2)) {
-                    player.brick--;
-                    player.lumber--;
-                } else {
-                    console.log('updating end turn');
-                    player.hasRolled = true;
-                }
+                    if (this.turnNumber >= (this.players.length * 2) && !roadBuildingPlayed) {
+                        player.brick--;
+                        player.lumber--;
+                        this.availableResources.brick++;
+                        this.availableResources.lumber++;
+                    } else {
+                        console.log('updating end turn');
+                        player.hasRolled = true;
+                    }
 
                 this.roads.push(newRoad);
-                //this.checkLongestRoad();
+                this.checkLongestRoad();
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
                 socket.to(this.socketRoom).emit('update_roads', {
                     roads: this.roads
                 });
@@ -625,20 +711,68 @@ class Game {
             const index = Math.floor(Math.random() * this.availableDevCards.length);
             const card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
+            this.players[playerIdx].ore--;
+            this.players[playerIdx].wool--;
+            this.players[playerIdx].grain--;
+            this.availableResources.ore++;
+            this.availableResources.lumber++;
+            this.availableResources.grain++;
 
-            //io.to(socket).emit('dev_card_selected', card); //Dont know where we would want to handle this
+            io.to(this.socketRoom).emit('update_players', this.generateUsers());
 
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
             io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length); //Send info to all players to update overall dev card count
+            socket.emit('update_resources', this.players);
         });
 
         //Play Development Card
         socket.on('dev_card_played', (cardPlayed) => {
-
+            const playerIdx = this.turnNumber % this.players.length;
+            console.log(`Played ${cardPlayed}`);
+            let toRemove = this.players[playerIdx].devCards.findIndex((c) => c === cardPlayed);
+            this.players[playerIdx].devCards.splice(toRemove, 1);
+            if(cardPlayed === 'knight'){
+                this.robberEvent();
+                socket.emit('handle_robber_event');
+            }
+            else if(cardPlayed === 'roadBuilding'){
+                socket.emit('road_building_card');
+            }
+            else if(cardPlayed === 'yearOfPlenty'){
+                socket.emit('yearOfPlentyPlayed');
+            }
+            else if(cardPlayed === 'monopoly'){
+                socket.emit('monopoly_played');
+            }
+            else if(cardPlayed === 'victoryPoint'){
+                this.players[playerIdx].victoryPoints++;
+                io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            }
         });
 
-        //Fill out devCardCounts in DevCardModel.vue when the vue is created
+        socket.on('monopoly_selected', (resource) => {
+            const playerIdx = this.turnNumber % this.players.length;
+            for(let i = 0; i < this.players.length; i++){
+                if(playerIdx != i){
+                    this.players[playerIdx][resource] = this.players[i][resource];
+                    this.players[i][resource] = 0;
+                }
+            }
+            //io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            io.to(this.socketRoom).emit('update_resources', this.players);
+        });
+
+        socket.on('yearOfPlenty_selected', (resource) => {
+            const playerIdx = this.turnNumber % this.players.length;
+            console.log(`${this.players[playerIdx].name} is selecting ${resource}`);
+            this.availableResources[resource]--;
+            this.players[playerIdx][resource] ++;
+            //io.to(this.socketRoom).emit('update_players', this.generateUsers());
+            io.to(this.socketRoom).emit('update_resources', this.players);
+        });
+
+        // Fill out devCardCounts in DevCardModel.vue when the vue is created
         socket.on('dev_card_info', (playerName) => {
             const player = this.players.find(p => p.name === playerName);
             let devCards = player.devCards;

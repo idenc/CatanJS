@@ -191,6 +191,8 @@ export default {
         token: null,
         gridIndex: null
       },
+      roadBuildingEvent: false,
+      roadsBuilt: 0,
     }
   },
   watch: {
@@ -752,6 +754,15 @@ export default {
       if (newRoads.player) {
         this.player = newRoads.player;
       }
+      if(this.roadBuildingEvent){
+        this.roadsBuilt++;
+      }
+      if(this.roadsBuilt === 2){
+        this.roadBuildingEvent = false;
+        this.roadsBuilt = 0
+        this.$emit('updateRoadBuildingEvent');
+      }
+      console.log(`Roads Built: ${this.roadsBuilt}`);
       this.roads = newRoads.roads;
       renderRoads(this);
     },
@@ -786,17 +797,20 @@ export default {
         this.$bvToast.show('game-toast');
       }
     },
-    /*update_robber_location: function(robberIndex){
-      let fomerRobber = this.tiles.findIndex((t) => t.isRobber === true);
-
-      this.tiles[fomerRobber].isRobber = false;
-      this.tiles[robberIndex].isRobber = true;
-      const oldCoordinates = [this.tiles[fomerRobber].x, this.tiles[fomerRobber].y];
-      const newCoordinates = [this.tiles[robberIndex].x, this.tiles[robberIndex].y];
-      //console.log(`Old robber coordinates X:${oldCoordinates[0]}, Y:${oldCoordinates[1]}`);
-      //console.log(`New robber coordinates X:${newCoordinates[0]}, Y:${newCoordinates[1]}`);
-      this.redrawRobberToken(this.draw, oldCoordinates, newCoordinates);
-    },*/
+    road_building_card: function(){
+      this.roadBuildingEvent = true;
+      this.$emit('updateRoadBuildingEvent', this.roadBuildingEvent);
+    },
+    update_resources: function(players){
+      const newPlayer = players.find(p => p.name === this.player.name);
+      if (newPlayer) {
+        this.player = newPlayer;
+      }
+    },
+    handle_robber_event: function(){
+      this.robberEvent = true;
+      this.$emit('updateRobberEvent', this.robberEvent);
+    }
   }
 }
 

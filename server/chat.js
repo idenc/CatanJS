@@ -115,7 +115,7 @@ class ChatRoom {
             socket.numSessions++;
         }
 
-        console.log('a user connected with username ' + socket.username);
+        console.log('a user connected with username ' + socket.player.name);
         //console.log(this.users);
         
         socket.emit('chat_info', {

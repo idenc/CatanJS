@@ -24,12 +24,14 @@
         @displayEndTurnBtn="displayEndTurnBtn"
         @updateTurnNumber="updateTurnNumber"
         @updateRobberEvent="updateRobberEvent"
+        @updateRoadBuildingEvent="updateRoadBuildingEvent"
       />
       <DiceButton
         :has-rolled="player.hasRolled"
         :turn-number="turnNumber"
         :is-turn="player.isTurn"
         :robber-event="robberEvent"
+        :road-event="roadEvent"
         @rollDice="rollDice"
         @endTurn="endTurn"
       />
@@ -143,6 +145,7 @@ export default {
       robberEvent: false,
       showPage: false,
       users: [],
+      roadEvent: false,
     }
   },
   mounted: function () {
@@ -161,6 +164,11 @@ export default {
             params: {statusMessage: error.response.data, alertType: 'alert-danger'}
           });
         })
+  },
+  sockets: {
+    ready_to_leave: function() {
+      this.$router.push({name: 'Lobby'});
+    }
   },
   methods: {
     startBuild(type) {
@@ -199,12 +207,18 @@ export default {
       console.log('updating game user list');
       this.users = newUserList;
     },
+
+    updateRoadBuildingEvent(eventUpdate){
+      this.roadEvent = eventUpdate;
+    },
+
     handleLeaveGame() {
       this.$socket.emit('leave_game');
       this.$socket.emit('lobby_leave_game');
-      this.$router.push({name: 'Lobby'});
     }
-  }
+  },
+
+
 }
 </script>
 
