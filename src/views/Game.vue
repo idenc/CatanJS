@@ -8,6 +8,15 @@
         v-if="devModal === true"
         :player="player"
       />
+      <div
+        id="leave-button"
+        ref="leaveButton"
+        v-resize-text="{minFontSize: '0px'}"
+        class="dice-button btn btn-primary btn-block"
+        @click="handleLeaveGame()"
+      >
+        EXIT
+      </div>
       <GameBoard
         ref="gameBoard"
         :turn-number="turnNumber"
@@ -131,7 +140,6 @@ export default {
           this.$nextTick(() => {
             this.passUsername(response.data.user.name);
           })
-
         })
         .catch((error) => {
           console.log(error)
@@ -172,9 +180,17 @@ export default {
       this.robberEvent = eventUpdate;
       console.log(`Updating Robber Event in Game.vue  ${this.robberEvent}`);
     },
+
     updateRoadBuildingEvent(eventUpdate){
       this.roadEvent = eventUpdate;
     },
+
+    handleLeaveGame() {
+      this.$socket.emit('leave_game');
+      this.$socket.emit('lobby_leave_game');
+      this.$router.push({name: 'Lobby'});
+    }
+
   },
 }
 </script>
@@ -245,7 +261,7 @@ export default {
   width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (max-height: 600px) {
   ::v-deep .sidebar-main-button {
     margin: 0;
     padding: 0.25rem 0.25rem;
@@ -281,6 +297,38 @@ export default {
   left: 0;
   bottom: 0;
   width: fit-content;
+}
+
+@media (max-width: 768px) {
+  #building-info {
+    bottom: auto;
+    top: 0;
+    padding: 2px;
+    /* width: 15% !important; */
+  }
+}
+
+#leave-button {
+  margin: auto;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: fit-content;
+}
+
+.overlay {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #394954;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  opacity: 0.9;
 }
 
 </style>

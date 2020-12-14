@@ -100,19 +100,20 @@ const settlementAvailable = (gameBoard, settlement) => {
 const startBuildSettlements = (gameBoard) => {
     // Need to check if player is eligible to build any settlements/cities
     const player = gameBoard.player;
-    console.log(maxBuildings);
-    const canBuildSettlement = player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
-    const canUpgrade = player.ore >= 3 && player.grain >= 2;
+    const canBuildSettlement = player.numSettlements > 0 && player.brick >= 1 && player.lumber >= 1 && player.wool >= 1 && player.grain >= 1;
+    const canUpgrade = player.numCities > 0 && player.ore >= 3 && player.grain >= 2;
+    const firstTwoTurn = player.numSettlements === maxBuildings.settlements && gameBoard.turnNumber === 0
+        || player.numSettlements === maxBuildings.settlements - 1 && gameBoard.turnNumber === 1;
+
     // All players get 2 settlements and 2 roads to begin
-    if (!(player.numSettlements === maxBuildings.settlements && gameBoard.turnNumber === 0
-        || player.numSettlements === maxBuildings.settlements - 1 && gameBoard.turnNumber === 1)) {
+    if (!firstTwoTurn) {
         if (!canBuildSettlement && !canUpgrade) {
             return;
         }
     }
 
     for (const [, settlement] of gameBoard.settlements.entries()) {
-        if (settlementAvailable(gameBoard, settlement)) {
+        if ((firstTwoTurn || canBuildSettlement) && settlementAvailable(gameBoard, settlement)) {
             settlement.svg = addSettlementSelector(gameBoard, settlement);
         } else if (canUpgrade && settlement.state === 'settlement') {
             addUpgradeSelector(gameBoard, settlement);
@@ -213,7 +214,7 @@ const addUpgradeSelector = (gameBoard, settlement) => {
 
     const settlementGroup = settlement.svg.node;
     settlementGroup.addEventListener('click', () => {
-        settlement.svg.find('.settlement-upgrade').remove();
+        gameBoard.draw.find('.settlement-upgrade').remove();
 
         upgradeSettlement(settlement);
 

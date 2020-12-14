@@ -8,24 +8,30 @@
     >
       Welcome {{ username }}
     </h2>
-    <div class="row mt-5">
+    <div
+      id="body-container"
+      class="row mt-5"
+    >
       <div class="col-2">
         <button
-          class="btn btn-secondary mb-2"
-          @click="showCreateScreen = true; showAdmin = false;"
+          class="btn mb-2"
+          :class="{ 'btn-primary' : pageNumber == 0, 'btn-secondary' : pageNumber != 0 }"
+          @click="pageNumber = 0;"
         >
           Create Game
         </button>
         <button
-          class="btn btn-secondary"
-          @click="showCreateScreen = false; showAdmin = false; getGames();"
+          class="btn"
+          :class="{ 'btn-primary' : pageNumber == 1, 'btn-secondary' : pageNumber != 1 }"
+          @click="pageNumber = 1; getGames();"
         >
           Join Game
         </button>
         <button
           v-if="isAdmin"
-          class="btn btn-secondary"
-          @click="showAdmin = true;"
+          class="btn"
+          :class="{ 'btn-primary' : pageNumber == 2, 'btn-secondary' : pageNumber != 2 }"
+          @click="pageNumber = 2;"
         >
           Admin Panel
         </button>
@@ -37,9 +43,9 @@
         </button>
       </div>
       <div class="col">
-        <CreateGame v-show="showCreateScreen && !showAdmin" />
-        <JoinGame v-show="!showCreateScreen && !showAdmin" />
-        <AdminPanel v-show="showAdmin" />
+        <CreateGame v-show="pageNumber == 0" />
+        <JoinGame v-show="pageNumber == 1" />
+        <AdminPanel v-show="pageNumber == 2" />
       </div>
     </div>
   </div>
@@ -57,10 +63,9 @@ export default {
 
   data() {
     return {
-      showCreateScreen: true,
+      pageNumber: 0,
       showPage: false,
       username: '',
-      showAdmin: false,
       isAdmin: false // Super Secure Setting™
     }
   },
@@ -69,7 +74,7 @@ export default {
   },
   methods: {
     getGames() {
-      this.$socket.emit("get_games", "");
+      this.$socket.emit("lobby_get_games", "");
     },
     logout() {
       axios.get("/logout")
@@ -83,22 +88,33 @@ export default {
     getUser() {
       axios.get("/user")
           .then((response) => {
-            console.log(response)
+            this.$socket.emit('request_game');
             this.username = response.data.user.name;
             this.showPage = true;
             this.isAdmin = response.data.user.isAdmin;
           })
           .catch((error) => {
-            console.log(error.response);
+            //console.log(error.response);
             this.$router.push({
               name: 'Login',
               params: {statusMessage: error.response.data, alertType: 'alert-danger'}
             });
           })
+    },
+  },
+  sockets: {
+    is_in_game: function () {
+      this.$router.push({name: 'Game'});
     }
   }
 }
 </script>
 
 
-<style></style>
+<style>
+@media (max-height: 500px) {
+  #body-container {
+    margin-top: 0.75rem !important;
+  }
+}
+</style>

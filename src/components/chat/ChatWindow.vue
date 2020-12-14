@@ -67,6 +67,7 @@ export default {
       }
       this.$socket.emit('chat_message', this.message);
       this.message = '';
+      console.log("ChatWindow.vue : sendMessage()")
     }
   },
   sockets: {
@@ -135,7 +136,7 @@ form {
   flex: 1;
 }
 
-@media (max-width: 768px) {
+@media (max-height: 768px) {
   #message_box {
     font-size: 0.75rem;
   }
