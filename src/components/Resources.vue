@@ -7,7 +7,7 @@
     >
       <img
         class="resource-icon"
-        src="..\assets\svg\clay.svg"
+        src="../assets/svg/clay.svg"
       >
       <div>
         <span class="resource-count">{{ player.brick }}</span>
@@ -20,7 +20,7 @@
     >
       <img
         class="resource-icon"
-        src="..\assets\svg\wood.svg"
+        src="../assets/svg/wood.svg"
       >
       <div>
         <span class="resource-count">{{ player.lumber }}</span>
@@ -33,7 +33,7 @@
     >
       <img
         class="resource-icon"
-        src="..\assets\svg\sheep.svg"
+        src="../assets/svg/sheep.svg"
       >
       <div>
         <span class="resource-count">{{ player.wool }}</span>
@@ -46,7 +46,7 @@
     >
       <img
         class="resource-icon"
-        src="..\assets\svg\wheat.svg"
+        src="../assets/svg/wheat.svg"
       >
       <div>
         <span class="resource-count">{{ player.grain }}</span>
@@ -59,7 +59,7 @@
     >
       <img
         class="resource-icon"
-        src="..\assets\svg\ore.svg"
+        src="../assets/svg/ore.svg"
       >
       <div>
         <span class="resource-count">{{ player.ore }}</span>
