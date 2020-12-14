@@ -383,23 +383,21 @@ class Game {
             console.log("maxsize: ", maxSize)
             currentSegment++;
         }
-        // if(maxSize >= 5 && maxSize > this.longestRoadLength){
-        //     if(this.longestRoadOwner === null){
-        //         const newLongestRoad = this.players.find((p) => p.name === currentLeader);
-        //         newLongestRoad.victoryPoints += 2;
-        //         this.longestRoadOwner = currentLeader;
-        //     }
-        //     else if(currentLeader !== this.longestRoadOwner){
-        //         const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
-        //         const newLongestRoad = this.players.find((p) => p.name === currentLeader);
-        //         oldLongestRoad.victoryPoints -= 2;
-        //         newLongestRoad.victoryPoints += 2;
-        //         this.longestRoadOwner = currentLeader;
-        //     }
-        //     this.longestRoadLength = maxSize;
-        // }
-        // console.log(maxSize)
-        //return currentLeader;
+        if(maxSize >= 5 && maxSize > this.longestRoadLength){
+            if(this.longestRoadOwner === null){
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
+            else if(currentLeader !== this.longestRoadOwner){
+                const oldLongestRoad = this.players.find((p) => p.name === this.longestRoadOwner);
+                const newLongestRoad = this.players.find((p) => p.name === currentLeader);
+                oldLongestRoad.victoryPoints -= 2;
+                newLongestRoad.victoryPoints += 2;
+                this.longestRoadOwner = currentLeader;
+            }
+            this.longestRoadLength = maxSize;
+        }
     }
 
     /**
