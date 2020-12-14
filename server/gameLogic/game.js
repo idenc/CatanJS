@@ -620,13 +620,13 @@ class Game {
 
             const playerIdx = this.turnNumber % this.players.length;
 
-            if (this.players[playerIdx].ore === 0 || this.players[playerIdx].lumber === 0 || this.players[playerIdx].grain === 0) return;
+            if (this.players[playerIdx].ore === 0 || this.players[playerIdx].wool === 0 || this.players[playerIdx].grain === 0) return;
 
             var index = Math.floor(Math.random() * this.availableDevCards.length);
             var card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
             this.players[playerIdx].ore--;
-            this.players[playerIdx].lumber--;
+            this.players[playerIdx].wool--;
             this.players[playerIdx].grain--;
             this.availableResources.ore++;
             this.availableResources.lumber++;
