@@ -66,17 +66,23 @@ export default {
   left: 0;
   bottom: 0;
   right: 0;
-  width: 25%;
+    width: fit-content;
+    padding: 16px;
 }
 
 .end-turn {
   background: red;
 }
 
+@media (max-width: 950px) {
+  .dice-button {
+    padding: 8px;
+  }
+}
+
 @media (max-width: 768px) {
   .dice-button {
-    padding: 2px;
-    width: fit-content;
+    padding: 4px;
   }
 }
 </style>

@@ -300,6 +300,7 @@ export default {
 @media (max-width: 768px) {
   #building-info {
       font-size: 0.5rem;
+      padding: 6px;
   }
 
   #leave-button {
