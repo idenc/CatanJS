@@ -125,7 +125,7 @@
                   id="clay"
                   type="text"
                   class="receive"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType2">
@@ -141,7 +141,7 @@
                   id="wood"
                   type="text"
                   class="receive"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType2">
@@ -157,7 +157,7 @@
                   id="sheep"
                   type="text"
                   class="receive"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType2">
@@ -173,7 +173,7 @@
                   id="wheat"
                   type="text"
                   class="receive"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType2">
@@ -189,7 +189,7 @@
                   id="ore"
                   type="text"
                   class="receive"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType2">
@@ -208,7 +208,7 @@
                   id="clay"
                   type="text"
                   class="offer"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType1">
@@ -224,7 +224,7 @@
                   id="wood"
                   type="text"
                   class="offer"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType1">
@@ -240,7 +240,7 @@
                   id="sheep"
                   type="text"
                   class="offer"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType1">
@@ -256,7 +256,7 @@
                   id="wheat"
                   type="text"
                   class="offer"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType1">
@@ -272,7 +272,7 @@
                   id="ore"
                   type="text"
                   class="offer"
-                  :value='0'
+                  :value="0"
                 >
               </div>
               <p id="clayTradeType1">
@@ -317,7 +317,9 @@
           <p class="big">
             All trades are 4:1 unless you own a harbour that allows better rates.
           </p>
-          <p class="big"> Harbours Owned:</p>
+          <p class="big">
+            Harbours Owned:
+          </p>
           <ul id="harboursOwned">
             <li id="genericHarbour">
               Generic Harbour: 3:1 for every resource
@@ -355,12 +357,12 @@
           </ul>
         </div>
         <div id="column4">
-            <p 
-                id='offerMsg' 
-                class='big'
-            >
-                Invalid trade, you do not have enough resources
-            </p>
+          <p
+            id="offerMsg"
+            class="big"
+          >
+            Invalid trade, you do not have enough resources
+          </p>
         </div>
       </div>
     </div>
@@ -453,11 +455,11 @@ export default {
     return {
         tradePlayer: '',
       resources: [
-        ('clay', "..\\assets\\svg\\clay.svg"),
-        ['lumber', '..\\assets\\svg\\wood.svg'],
-        ['wool', '..\\assets\\svg\\sheep.svg'],
-        ['grain', '..\\assets\\svg\\wheat.svg'],
-        ['ore', '..\\assets\\svg\\ore.svg']
+        ('clay', "../assets/svg/clay.svg"),
+        ['lumber', '../assets/svg/wood.svg'],
+        ['wool', '../assets/svg/sheep.svg'],
+        ['grain', '../assets/svg/wheat.svg'],
+        ['ore', '../assets/svg/ore.svg']
       ]
     }
   },
@@ -493,9 +495,9 @@ export default {
         if (document.querySelector("#overlayin.trade").classList.contains('active')) {
           document.getElementById("cancelButton").disabled = false;
           document.querySelector("#overlayin.trade").classList.remove("active");
-          
+
           document.querySelector("#overlayin.tradeCancel").classList.add("active");
-          
+
           document.querySelector("#overlay.main").addEventListener("click", () => {
             document.querySelector("#overlay.main").classList.remove("active");
             document.querySelector("#overlayin.tradeCancel").classList.remove("active");
@@ -660,7 +662,7 @@ export default {
             document.querySelector("#overlayin.tradeMenu").classList.add("active");
           });
         } else {
-  
+
             for (let i =0; i<this.users.length; i++) {
                 if (this.users[i].username == this.username) {
                     console.log(this.users[i]);
@@ -682,7 +684,7 @@ export default {
             }
         }
       }
-      
+
 
 
     },
