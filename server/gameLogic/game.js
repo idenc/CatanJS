@@ -637,6 +637,7 @@ class Game {
             //Add dev card to players dev card array
             socket.emit('dev_card_update', card); //Send dev card to player that drew the card
             io.to(this.socketRoom).emit('dev_card_count', this.availableDevCards.length); //Send info to all players to update overall dev card count
+            socket.emit('update_resources', this.players);
         });
 
         //Play Development Card
