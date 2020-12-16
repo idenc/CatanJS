@@ -713,6 +713,8 @@ class Game {
 
             const playerIdx = this.turnNumber % this.players.length;
 
+            if(this.players[playerIdx].ore < 1 || this.players[playerIdx].wool < 1 || this.players[playerIdx].grain < 1) return;
+
             const index = Math.floor(Math.random() * this.availableDevCards.length);
             const card = this.availableDevCards.splice(index, 1);
             this.players[playerIdx].devCards.push(card);
